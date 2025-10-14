@@ -1,0 +1,9 @@
+syntax = "proto3";
+option go_package = "github.com/SuperTapood/Flint";
+
+message Pod {
+    string name = 1;
+    // todo add repeated container
+    string image = 2;
+    repeated int32 ports = 3;
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+option go_package = "github.com/SuperTapood/Flint";
+
+import "k8s/pod.proto";
+
+message K8STypes {
+    oneof type {
+        Pod pod = 1;
+    }
+}
+
+message K8SStack {
+    repeated K8STypes objects = 1;
+}
