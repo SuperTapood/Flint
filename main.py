@@ -1,6 +1,10 @@
-from pyflint.generated.thing import Person
+from pyflint import *
 
-a = Person(name="bob", id=1234, email="bob@example.com")
+pod = Pod(name="nginx", image="nginx:latest", ports=[80, ])
+stack = K8SStack()
+stack.add_objects(pod)
 
-with open("bob.bin", "wb") as f:
-    f.write(a.SerializeToString())
+# with open("bob.bin", "wb") as file:
+#     file.write(pod.SerializeToString())
+stack.synth()
+print(len(open("bob.bin", "rb").read()))
