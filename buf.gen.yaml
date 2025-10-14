@@ -1,0 +1,18 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/bufbuild/buf-examples/gen
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: flint/generated
+    opt: paths=source_relative
+  - remote: buf.build/community/danielgtaylor-betterproto:v1.2.5
+    out: pyflint/generated
+  - remote: buf.build/connectrpc/gosimple
+    out: gen
+    opt:
+      - simple
+inputs:
+  - directory: protobuf

@@ -1,0 +1,9 @@
+syntax = "proto3";
+option go_package = "flint/protobuf";
+
+enum PhoneType {
+    PHONE_TYPE_UNSPECIFIED = 0;
+    PHONE_TYPE_MOBILE = 1;
+    PHONE_TYPE_HOME = 2;
+    PHONE_TYPE_WORK = 3;
+  }

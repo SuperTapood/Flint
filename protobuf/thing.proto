@@ -1,0 +1,24 @@
+syntax = "proto3";
+option go_package = "flint/protobuf";
+
+import "phone_type.proto";
+
+message PhoneNumber {
+  // Unique identifier for the user
+  string number = 1;
+  // Unique type for the user
+  PhoneType type = 2;
+}
+
+message Person {
+  // Unique type for the user
+  string name = 1;
+  int32 id = 2;
+  string email = 3;
+
+  repeated PhoneNumber phones = 4;
+}
+
+message AddressBook {
+  repeated Person people = 1;
+}
