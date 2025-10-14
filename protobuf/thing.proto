@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "flint/protobuf";
+option go_package = "github.com/SuperTapood/Flint";
 
 import "phone_type.proto";
 

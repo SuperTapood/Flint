@@ -1,4 +1,4 @@
-module flint
+module github.com/SuperTapood/Flint
 
 go 1.25.3
 
