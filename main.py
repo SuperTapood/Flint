@@ -1,6 +1,12 @@
 from pyflint import *
 
-pod = Pod(name="nginx", image="nginx:latest", ports=[80, ])
+pod = Pod(
+    name="nginx",
+    image="nginx:latest",
+    ports=[
+        80,
+    ],
+)
 stack = K8SStack()
 stack.add_objects(pod)
 
