@@ -21,16 +21,82 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type K8STypes struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Type:
+	//
+	//	*K8STypes_Pod
+	Type          isK8STypes_Type `protobuf_oneof:"type"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *K8STypes) Reset() {
+	*x = K8STypes{}
+	mi := &file_k8s_k8s_stack_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *K8STypes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*K8STypes) ProtoMessage() {}
+
+func (x *K8STypes) ProtoReflect() protoreflect.Message {
+	mi := &file_k8s_k8s_stack_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use K8STypes.ProtoReflect.Descriptor instead.
+func (*K8STypes) Descriptor() ([]byte, []int) {
+	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *K8STypes) GetType() isK8STypes_Type {
+	if x != nil {
+		return x.Type
+	}
+	return nil
+}
+
+func (x *K8STypes) GetPod() *Pod {
+	if x != nil {
+		if x, ok := x.Type.(*K8STypes_Pod); ok {
+			return x.Pod
+		}
+	}
+	return nil
+}
+
+type isK8STypes_Type interface {
+	isK8STypes_Type()
+}
+
+type K8STypes_Pod struct {
+	Pod *Pod `protobuf:"bytes,1,opt,name=pod,proto3,oneof"`
+}
+
+func (*K8STypes_Pod) isK8STypes_Type() {}
+
 type XK8SStack struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Objects       []*XK8SStack_K8STypes  `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
+	Objects       []*K8STypes            `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *XK8SStack) Reset() {
 	*x = XK8SStack{}
-	mi := &file_k8s_k8s_stack_proto_msgTypes[0]
+	mi := &file_k8s_k8s_stack_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +108,7 @@ func (x *XK8SStack) String() string {
 func (*XK8SStack) ProtoMessage() {}
 
 func (x *XK8SStack) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack_proto_msgTypes[0]
+	mi := &file_k8s_k8s_stack_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,92 +121,26 @@ func (x *XK8SStack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use XK8SStack.ProtoReflect.Descriptor instead.
 func (*XK8SStack) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{0}
+	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *XK8SStack) GetObjects() []*XK8SStack_K8STypes {
+func (x *XK8SStack) GetObjects() []*K8STypes {
 	if x != nil {
 		return x.Objects
 	}
 	return nil
 }
 
-type XK8SStack_K8STypes struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Type:
-	//
-	//	*XK8SStack_K8STypes_Pod
-	Type          isXK8SStack_K8STypes_Type `protobuf_oneof:"type"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *XK8SStack_K8STypes) Reset() {
-	*x = XK8SStack_K8STypes{}
-	mi := &file_k8s_k8s_stack_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *XK8SStack_K8STypes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*XK8SStack_K8STypes) ProtoMessage() {}
-
-func (x *XK8SStack_K8STypes) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use XK8SStack_K8STypes.ProtoReflect.Descriptor instead.
-func (*XK8SStack_K8STypes) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{0, 0}
-}
-
-func (x *XK8SStack_K8STypes) GetType() isXK8SStack_K8STypes_Type {
-	if x != nil {
-		return x.Type
-	}
-	return nil
-}
-
-func (x *XK8SStack_K8STypes) GetPod() *Pod {
-	if x != nil {
-		if x, ok := x.Type.(*XK8SStack_K8STypes_Pod); ok {
-			return x.Pod
-		}
-	}
-	return nil
-}
-
-type isXK8SStack_K8STypes_Type interface {
-	isXK8SStack_K8STypes_Type()
-}
-
-type XK8SStack_K8STypes_Pod struct {
-	Pod *Pod `protobuf:"bytes,8,opt,name=pod,proto3,oneof"`
-}
-
-func (*XK8SStack_K8STypes_Pod) isXK8SStack_K8STypes_Type() {}
-
 var File_k8s_k8s_stack_proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_stack_proto_rawDesc = "" +
 	"\n" +
-	"\x13k8s/k8s_stack.proto\x1a\rk8s/pod.proto\"h\n" +
-	"\t_K8SStack\x12-\n" +
-	"\aobjects\x18\x01 \x03(\v2\x13._K8SStack.K8STypesR\aobjects\x1a,\n" +
+	"\x13k8s/k8s_stack.proto\x1a\rk8s/pod.proto\",\n" +
 	"\bK8STypes\x12\x18\n" +
-	"\x03pod\x18\b \x01(\v2\x04.PodH\x00R\x03podB\x06\n" +
-	"\x04typeB;B\rK8sStackProtoP\x01Z(github.com/bufbuild/buf-examples/gen/k8sb\x06proto3"
+	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03podB\x06\n" +
+	"\x04type\"0\n" +
+	"\t_K8SStack\x12#\n" +
+	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjectsB;B\rK8sStackProtoP\x01Z(github.com/bufbuild/buf-examples/gen/k8sb\x06proto3"
 
 var (
 	file_k8s_k8s_stack_proto_rawDescOnce sync.Once
@@ -156,13 +156,13 @@ func file_k8s_k8s_stack_proto_rawDescGZIP() []byte {
 
 var file_k8s_k8s_stack_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_k8s_k8s_stack_proto_goTypes = []any{
-	(*XK8SStack)(nil),          // 0: _K8SStack
-	(*XK8SStack_K8STypes)(nil), // 1: _K8SStack.K8STypes
-	(*Pod)(nil),                // 2: Pod
+	(*K8STypes)(nil),  // 0: K8STypes
+	(*XK8SStack)(nil), // 1: _K8SStack
+	(*Pod)(nil),       // 2: Pod
 }
 var file_k8s_k8s_stack_proto_depIdxs = []int32{
-	1, // 0: _K8SStack.objects:type_name -> _K8SStack.K8STypes
-	2, // 1: _K8SStack.K8STypes.pod:type_name -> Pod
+	2, // 0: K8STypes.pod:type_name -> Pod
+	0, // 1: _K8SStack.objects:type_name -> K8STypes
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -176,8 +176,8 @@ func file_k8s_k8s_stack_proto_init() {
 		return
 	}
 	file_k8s_pod_proto_init()
-	file_k8s_k8s_stack_proto_msgTypes[1].OneofWrappers = []any{
-		(*XK8SStack_K8STypes_Pod)(nil),
+	file_k8s_k8s_stack_proto_msgTypes[0].OneofWrappers = []any{
+		(*K8STypes_Pod)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

@@ -1,7 +1,7 @@
 syntax = "proto3";
 option go_package = "github.com/SuperTapood/Flint/k8s";
 
-import "protobuf/k8s/pod.proto";
+import "k8s/pod.proto";
 
 message K8STypes {
     oneof type {

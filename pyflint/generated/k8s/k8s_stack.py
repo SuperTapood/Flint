@@ -5,13 +5,14 @@ from dataclasses import dataclass
 from typing import List
 
 import betterproto
+from .pod import Pod
+
+
+@dataclass
+class K8STypes(betterproto.Message):
+    pod: "Pod" = betterproto.message_field(1, group="type")
 
 
 @dataclass
 class _K8SStack(betterproto.Message):
-    objects: List["_K8SStackK8STypes"] = betterproto.message_field(1)
-
-
-@dataclass
-class _K8SStackK8STypes(betterproto.Message):
-    pod: "Pod" = betterproto.message_field(8, group="type")
+    objects: List["K8STypes"] = betterproto.message_field(1)
