@@ -21,7 +21,7 @@ func StackFromBinary(data []byte) Stack {
 }
 
 func (stack *Stack) GetStack() StackType {
-	if out := stack.Stack_.Stack.GetK8SStack(); out != nil {
+	if out := stack.Stack_.Stack[0].GetK8SStack(); out != nil {
 		return out
 	}
 	panic("got bad stack")

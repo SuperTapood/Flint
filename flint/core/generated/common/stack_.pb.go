@@ -90,7 +90,7 @@ func (*StackTypes_K8SStack) isStackTypes_Type() {}
 
 type Stack_ struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Stack         *StackTypes            `protobuf:"bytes,1,opt,name=stack,proto3" json:"stack,omitempty"`
+	Stack         []*StackTypes          `protobuf:"bytes,1,rep,name=stack,proto3" json:"stack,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -125,7 +125,7 @@ func (*Stack_) Descriptor() ([]byte, []int) {
 	return file_common_stack__proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Stack_) GetStack() *StackTypes {
+func (x *Stack_) GetStack() []*StackTypes {
 	if x != nil {
 		return x.Stack
 	}
@@ -142,7 +142,7 @@ const file_common_stack__proto_rawDesc = "" +
 	"\tk8s_stack\x18\x01 \x01(\v2\v.K8S_Stack_H\x00R\bk8sStackB\x06\n" +
 	"\x04type\"+\n" +
 	"\x06Stack_\x12!\n" +
-	"\x05stack\x18\x01 \x01(\v2\v.StackTypesR\x05stackBBB\n" +
+	"\x05stack\x18\x01 \x03(\v2\v.StackTypesR\x05stackBBB\n" +
 	"StackProtoP\x01Z2github.com/SuperTapood/Flint/core/generated/commonb\x06proto3"
 
 var (
