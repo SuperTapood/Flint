@@ -17,7 +17,6 @@ func main() {
 	var stack common.Stack_
 
 	if err := proto.Unmarshal(data, &stack); err != nil {
-		log.Printf("Loaded user: %+v\n", stack)
 		log.Fatal("failed to unmarshal:", err)
 	}
 
