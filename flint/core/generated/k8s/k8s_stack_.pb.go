@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        (unknown)
-// source: k8s/k8s_stack.proto
+// source: k8s/k8s_stack_.proto
 
 package k8s
 
@@ -33,7 +33,7 @@ type K8STypes struct {
 
 func (x *K8STypes) Reset() {
 	*x = K8STypes{}
-	mi := &file_k8s_k8s_stack_proto_msgTypes[0]
+	mi := &file_k8s_k8s_stack__proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +45,7 @@ func (x *K8STypes) String() string {
 func (*K8STypes) ProtoMessage() {}
 
 func (x *K8STypes) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack_proto_msgTypes[0]
+	mi := &file_k8s_k8s_stack__proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +58,7 @@ func (x *K8STypes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use K8STypes.ProtoReflect.Descriptor instead.
 func (*K8STypes) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{0}
+	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{0}
 }
 
 func (x *K8STypes) GetType() isK8STypes_Type {
@@ -87,28 +87,28 @@ type K8STypes_Pod struct {
 
 func (*K8STypes_Pod) isK8STypes_Type() {}
 
-type XK8SStack struct {
+type K8S_Stack_ struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Objects       []*K8STypes            `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *XK8SStack) Reset() {
-	*x = XK8SStack{}
-	mi := &file_k8s_k8s_stack_proto_msgTypes[1]
+func (x *K8S_Stack_) Reset() {
+	*x = K8S_Stack_{}
+	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *XK8SStack) String() string {
+func (x *K8S_Stack_) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*XK8SStack) ProtoMessage() {}
+func (*K8S_Stack_) ProtoMessage() {}
 
-func (x *XK8SStack) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack_proto_msgTypes[1]
+func (x *K8S_Stack_) ProtoReflect() protoreflect.Message {
+	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -119,50 +119,51 @@ func (x *XK8SStack) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use XK8SStack.ProtoReflect.Descriptor instead.
-func (*XK8SStack) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use K8S_Stack_.ProtoReflect.Descriptor instead.
+func (*K8S_Stack_) Descriptor() ([]byte, []int) {
+	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{1}
 }
 
-func (x *XK8SStack) GetObjects() []*K8STypes {
+func (x *K8S_Stack_) GetObjects() []*K8STypes {
 	if x != nil {
 		return x.Objects
 	}
 	return nil
 }
 
-var File_k8s_k8s_stack_proto protoreflect.FileDescriptor
+var File_k8s_k8s_stack__proto protoreflect.FileDescriptor
 
-const file_k8s_k8s_stack_proto_rawDesc = "" +
+const file_k8s_k8s_stack__proto_rawDesc = "" +
 	"\n" +
-	"\x13k8s/k8s_stack.proto\x1a\rk8s/pod.proto\",\n" +
+	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\",\n" +
 	"\bK8STypes\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03podB\x06\n" +
-	"\x04type\"0\n" +
-	"\t_K8SStack\x12#\n" +
-	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjectsB;B\rK8sStackProtoP\x01Z(github.com/bufbuild/buf-examples/gen/k8sb\x06proto3"
+	"\x04type\"1\n" +
+	"\n" +
+	"K8S_Stack_\x12#\n" +
+	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjectsBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
-	file_k8s_k8s_stack_proto_rawDescOnce sync.Once
-	file_k8s_k8s_stack_proto_rawDescData []byte
+	file_k8s_k8s_stack__proto_rawDescOnce sync.Once
+	file_k8s_k8s_stack__proto_rawDescData []byte
 )
 
-func file_k8s_k8s_stack_proto_rawDescGZIP() []byte {
-	file_k8s_k8s_stack_proto_rawDescOnce.Do(func() {
-		file_k8s_k8s_stack_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_k8s_k8s_stack_proto_rawDesc), len(file_k8s_k8s_stack_proto_rawDesc)))
+func file_k8s_k8s_stack__proto_rawDescGZIP() []byte {
+	file_k8s_k8s_stack__proto_rawDescOnce.Do(func() {
+		file_k8s_k8s_stack__proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_k8s_k8s_stack__proto_rawDesc), len(file_k8s_k8s_stack__proto_rawDesc)))
 	})
-	return file_k8s_k8s_stack_proto_rawDescData
+	return file_k8s_k8s_stack__proto_rawDescData
 }
 
-var file_k8s_k8s_stack_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_k8s_k8s_stack_proto_goTypes = []any{
-	(*K8STypes)(nil),  // 0: K8STypes
-	(*XK8SStack)(nil), // 1: _K8SStack
-	(*Pod)(nil),       // 2: Pod
+var file_k8s_k8s_stack__proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_k8s_k8s_stack__proto_goTypes = []any{
+	(*K8STypes)(nil),   // 0: K8STypes
+	(*K8S_Stack_)(nil), // 1: K8S_Stack_
+	(*Pod)(nil),        // 2: Pod
 }
-var file_k8s_k8s_stack_proto_depIdxs = []int32{
+var file_k8s_k8s_stack__proto_depIdxs = []int32{
 	2, // 0: K8STypes.pod:type_name -> Pod
-	0, // 1: _K8SStack.objects:type_name -> K8STypes
+	0, // 1: K8S_Stack_.objects:type_name -> K8STypes
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -170,30 +171,30 @@ var file_k8s_k8s_stack_proto_depIdxs = []int32{
 	0, // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_k8s_k8s_stack_proto_init() }
-func file_k8s_k8s_stack_proto_init() {
-	if File_k8s_k8s_stack_proto != nil {
+func init() { file_k8s_k8s_stack__proto_init() }
+func file_k8s_k8s_stack__proto_init() {
+	if File_k8s_k8s_stack__proto != nil {
 		return
 	}
 	file_k8s_pod_proto_init()
-	file_k8s_k8s_stack_proto_msgTypes[0].OneofWrappers = []any{
+	file_k8s_k8s_stack__proto_msgTypes[0].OneofWrappers = []any{
 		(*K8STypes_Pod)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_k8s_k8s_stack_proto_rawDesc), len(file_k8s_k8s_stack_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_k8s_k8s_stack__proto_rawDesc), len(file_k8s_k8s_stack__proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_k8s_k8s_stack_proto_goTypes,
-		DependencyIndexes: file_k8s_k8s_stack_proto_depIdxs,
-		MessageInfos:      file_k8s_k8s_stack_proto_msgTypes,
+		GoTypes:           file_k8s_k8s_stack__proto_goTypes,
+		DependencyIndexes: file_k8s_k8s_stack__proto_depIdxs,
+		MessageInfos:      file_k8s_k8s_stack__proto_msgTypes,
 	}.Build()
-	File_k8s_k8s_stack_proto = out.File
-	file_k8s_k8s_stack_proto_goTypes = nil
-	file_k8s_k8s_stack_proto_depIdxs = nil
+	File_k8s_k8s_stack__proto = out.File
+	file_k8s_k8s_stack__proto_goTypes = nil
+	file_k8s_k8s_stack__proto_depIdxs = nil
 }

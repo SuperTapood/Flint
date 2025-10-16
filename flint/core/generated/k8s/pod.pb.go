@@ -90,7 +90,7 @@ const file_k8s_pod_proto_rawDesc = "" +
 	"\x03Pod\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05image\x18\x02 \x01(\tR\x05image\x12\x14\n" +
-	"\x05ports\x18\x03 \x03(\x05R\x05portsB6B\bPodProtoP\x01Z(github.com/bufbuild/buf-examples/gen/k8sb\x06proto3"
+	"\x05ports\x18\x03 \x03(\x05R\x05portsB=B\bPodProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
 	file_k8s_pod_proto_rawDescOnce sync.Once

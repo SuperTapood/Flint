@@ -1,0 +1,14 @@
+syntax = "proto3";
+option go_package = "github.com/SuperTapood/Flint/core/generated/common";
+
+import "k8s/k8s_stack_.proto";
+
+message StackTypes {
+    oneof type {
+        K8S_Stack_ k8s_stack = 1;
+    }
+}
+
+message Stack_ {
+    repeated StackTypes stacks = 1;
+}

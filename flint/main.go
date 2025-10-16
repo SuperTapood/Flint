@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/SuperTapood/Flint/generated/k8s"
+	"github.com/SuperTapood/Flint/core/generated/common"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -14,7 +14,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var stack k8s.XK8SStack
+	var stack common.Stack_
 
 	if err := proto.Unmarshal(data, &stack); err != nil {
 		log.Printf("Loaded user: %+v\n", stack)
