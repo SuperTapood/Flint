@@ -4,8 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/SuperTapood/Flint/core/generated/common"
-	"google.golang.org/protobuf/proto"
+	"github.com/SuperTapood/Flint/core"
 )
 
 func main() {
@@ -14,13 +13,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var stack common.Stack_
-
-	if err := proto.Unmarshal(data, &stack); err != nil {
-		log.Fatal("failed to unmarshal:", err)
-	}
-
-	log.Printf("Loaded user: %+v\n", stack)
+	var stack = core.StackFromBinary(data)
+	log.Printf("Loaded user: %+v\n", stack.Stack_.String())
+	log.Printf(stack.GetStack().String())
 
 	// http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	// resp, err := http.Get("https://192.168.49.2:8443/api/v1/namespaces/default/pods")

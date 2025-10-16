@@ -3,7 +3,6 @@ from ..k8s.k8s_stack_ import K8S_Stack_
 # sources: common/stack_.proto
 # plugin: python-betterproto
 from dataclasses import dataclass
-from typing import List
 
 import betterproto
 
@@ -15,4 +14,4 @@ class StackTypes(betterproto.Message):
 
 @dataclass
 class Stack_(betterproto.Message):
-    stacks: List["StackTypes"] = betterproto.message_field(1)
+    stack: "StackTypes" = betterproto.message_field(1)

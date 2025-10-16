@@ -10,5 +10,5 @@ message StackTypes {
 }
 
 message Stack_ {
-    repeated StackTypes stacks = 1;
+    StackTypes stack = 1;
 }
