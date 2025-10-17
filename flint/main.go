@@ -15,6 +15,9 @@ func main() {
 
 	var stack = core.StackFromBinary(data)
 	log.Printf(stack.String())
+	var dag, obj_map = stack.Synth()
+	log.Printf("%v", &dag)
+	log.Print("%v", obj_map)
 
 	// http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	// resp, err := http.Get("https://192.168.49.2:8443/api/v1/namespaces/default/pods")

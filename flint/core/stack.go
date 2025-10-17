@@ -1,7 +1,10 @@
 package core
 
 import (
+	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/google/uuid"
+	"github.com/heimdalr/dag"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -20,7 +23,7 @@ func StackFromBinary(data []byte) Stack {
 	}
 }
 
-func (stack *Stack) GetStack() StackType {
+func (stack *Stack) GetStack() base.StackType {
 	if out := stack.Stack_.Stack[0].GetK8SStack(); out != nil {
 		return out
 	}
@@ -29,4 +32,8 @@ func (stack *Stack) GetStack() StackType {
 
 func (stack *Stack) String() string {
 	return stack.GetStack().String()
+}
+
+func (stack *Stack) Synth() (dag.DAG, map[uuid.UUID]base.ResourceType) {
+	return stack.GetStack().Synth()
 }
