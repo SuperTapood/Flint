@@ -8,6 +8,7 @@ func (pod *Pod) Synth() (uuid.UUID, map[string]any) {
 	var uuid = uuid.New()
 
 	obj_map := map[string]any{
+		"location":   "/api/v1/namespaces/default/pods",
 		"apiVersion": "v1",
 		"kind":       "Pod",
 		"metadata": map[string]any{

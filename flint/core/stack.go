@@ -37,3 +37,7 @@ func (stack *Stack) String() string {
 func (stack *Stack) Synth() (*dag.DAG, map[uuid.UUID]map[string]any) {
 	return stack.ActualStack().Synth()
 }
+
+func (stack *Stack) Deploy() {
+	stack.ActualStack().Deploy()
+}
