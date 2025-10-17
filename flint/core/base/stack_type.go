@@ -7,5 +7,5 @@ import (
 
 type StackType interface {
 	String() string
-	Synth() (dag.DAG, map[uuid.UUID]ResourceType)
+	Synth() (*dag.DAG, map[uuid.UUID]map[string]any)
 }

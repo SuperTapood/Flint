@@ -23,7 +23,7 @@ func StackFromBinary(data []byte) Stack {
 	}
 }
 
-func (stack *Stack) GetStack() base.StackType {
+func (stack *Stack) ActualStack() base.StackType {
 	if out := stack.Stack_.Stack[0].GetK8SStack(); out != nil {
 		return out
 	}
@@ -31,9 +31,9 @@ func (stack *Stack) GetStack() base.StackType {
 }
 
 func (stack *Stack) String() string {
-	return stack.GetStack().String()
+	return stack.ActualStack().String()
 }
 
-func (stack *Stack) Synth() (dag.DAG, map[uuid.UUID]base.ResourceType) {
-	return stack.GetStack().Synth()
+func (stack *Stack) Synth() (*dag.DAG, map[uuid.UUID]map[string]any) {
+	return stack.ActualStack().Synth()
 }
