@@ -3,7 +3,16 @@ from .generated.common.stack_ import Stack_, StackTypes
 
 
 class K8SStack:
-    def __init__(self):
+    def __init__(self,
+         api: str,
+         token: str,
+        ):
+        """
+        :param api: the api url for the kubernetes environment
+        :param token: the token to use to authenticate against kubernetes
+        """
+        self.api = api
+        self.token = token
         self.objects = []
 
     def add_objects(self, *objects):
@@ -12,7 +21,7 @@ class K8SStack:
             self.objects.append(K8STypes(**{class_name: obj}))
 
     def synth(self):
-        k_stack = K8S_Stack_(self.objects)
+        k_stack = K8S_Stack_(self.objects, self.api, self.token)
         stack = Stack_(StackTypes(k8s_stack=k_stack))
         with open("bob.bin", "wb") as file:
             file.write(stack.SerializeToString())

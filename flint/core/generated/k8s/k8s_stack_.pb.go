@@ -90,6 +90,8 @@ func (*K8STypes_Pod) isK8STypes_Type() {}
 type K8S_Stack_ struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Objects       []*K8STypes            `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
+	Api           string                 `protobuf:"bytes,2,opt,name=api,proto3" json:"api,omitempty"`
+	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -131,6 +133,20 @@ func (x *K8S_Stack_) GetObjects() []*K8STypes {
 	return nil
 }
 
+func (x *K8S_Stack_) GetApi() string {
+	if x != nil {
+		return x.Api
+	}
+	return ""
+}
+
+func (x *K8S_Stack_) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
 var File_k8s_k8s_stack__proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_stack__proto_rawDesc = "" +
@@ -138,10 +154,12 @@ const file_k8s_k8s_stack__proto_rawDesc = "" +
 	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\",\n" +
 	"\bK8STypes\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03podB\x06\n" +
-	"\x04type\"1\n" +
+	"\x04type\"Y\n" +
 	"\n" +
 	"K8S_Stack_\x12#\n" +
-	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjectsBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
+	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x10\n" +
+	"\x03api\x18\x02 \x01(\tR\x03api\x12\x14\n" +
+	"\x05token\x18\x03 \x01(\tR\x05tokenBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
 	file_k8s_k8s_stack__proto_rawDescOnce sync.Once
