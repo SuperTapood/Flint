@@ -1,11 +1,12 @@
 package k8s
 
-import (
-	"github.com/google/uuid"
-)
+import "github.com/heimdalr/dag"
 
-func (pod *Pod) Synth() (uuid.UUID, map[string]any) {
-	var uuid = uuid.New()
+func (pod *Pod) GetID() string {
+	return pod.GetName()
+}
+
+func (pod *Pod) Synth(dag *dag.DAG) map[string]any {
 
 	obj_map := map[string]any{
 		"location":   "/api/v1/namespaces/default/pods",
@@ -26,6 +27,8 @@ func (pod *Pod) Synth() (uuid.UUID, map[string]any) {
 		},
 	}
 
+	dag.AddVertexByID(pod.GetID(), pod.GetID())
+
 	// Navigate to the container map
 	spec := obj_map["spec"].(map[string]any)
 	containers := spec["containers"].([]any)
@@ -39,5 +42,5 @@ func (pod *Pod) Synth() (uuid.UUID, map[string]any) {
 		container["ports"] = append(container["ports"].([]any), port_map)
 	}
 
-	return uuid, obj_map
+	return obj_map
 }

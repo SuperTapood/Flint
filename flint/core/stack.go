@@ -3,7 +3,6 @@ package core
 import (
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/generated/common"
-	"github.com/google/uuid"
 	"github.com/heimdalr/dag"
 	"google.golang.org/protobuf/proto"
 )
@@ -34,7 +33,7 @@ func (stack *Stack) String() string {
 	return stack.ActualStack().String()
 }
 
-func (stack *Stack) Synth() (*dag.DAG, map[uuid.UUID]map[string]any) {
+func (stack *Stack) Synth() (*dag.DAG, map[string]map[string]any) {
 	return stack.ActualStack().Synth()
 }
 
