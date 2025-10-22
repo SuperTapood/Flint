@@ -1,13 +1,7 @@
 package k8s
 
 import (
-	"bytes"
-	"crypto/tls"
-	"encoding/json"
-	"fmt"
-	"io"
 	"log"
-	"net/http"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/heimdalr/dag"
@@ -24,6 +18,13 @@ func (types *K8STypes) Synth(dag *dag.DAG) map[string]any {
 	return types.ActualType().Synth(dag)
 }
 
+func (stack *K8S_Stack_) GetConnection() base.Connection {
+	return &base.K8SConnection{
+		Api:   stack.GetApi(),
+		Token: stack.GetToken(),
+	}
+}
+
 func (stack *K8S_Stack_) Synth() (*dag.DAG, map[string]map[string]any) {
 	objs_map := map[string]map[string]any{}
 	var obj_dag = dag.NewDAG()
@@ -36,30 +37,81 @@ func (stack *K8S_Stack_) Synth() (*dag.DAG, map[string]map[string]any) {
 	return obj_dag, objs_map
 }
 
+// SimpleVisitor collects nodes in topological order.
+type SimpleVisitor struct {
+	Order []string
+}
+
+func (v *SimpleVisitor) Visit(vertexer dag.Vertexer) {
+	id, _ := vertexer.Vertex()
+	v.Order = append(v.Order, id)
+}
+
+func process(id string) {
+
+}
+
 func (stack *K8S_Stack_) Deploy() {
 	var dag, obj_map = stack.Synth()
 
 	log.Print(dag.String())
 	log.Print(obj_map)
 
-	for _, v := range obj_map {
-		data, _ := json.Marshal(v)
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	// for _, v := range obj_map {
+	// 	stack.GetConnection().Deploy(v)
+	// }
 
-		var location = fmt.Sprint(v["location"])
-		req, err := http.NewRequest("POST", stack.GetApi()+location, bytes.NewReader(data))
-		req.Header.Add("Authorization", "Bearer "+stack.GetToken())
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Println("Error on response.\n[ERROR] -", err)
-		}
-		defer resp.Body.Close()
+	visitor := &SimpleVisitor{}
+	dag.OrderedWalk(visitor)
 
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Println("Error while reading the response bytes:", err)
-		}
-		log.Println(string([]byte(body)))
+	// Iterate over sorted nodes
+	var connection = stack.GetConnection()
+	for _, node := range visitor.Order {
+		var obj = obj_map[node]
+		log.Print(obj)
+		connection.Deploy(obj)
 	}
+
+	// // Prepare for parallel processing: compute indegrees atomically
+	// indegree := make(map[string]*int32)
+	// vertices := dag.GetVertices()
+	// for id := range vertices {
+	// 	parents, _ := dag.GetParents(id) // Ignore error for example
+	// 	deg := int32(len(parents))
+	// 	indegree[id] = &deg
+	// }
+
+	// // Define the process function (runs your node logic, then notifies children)
+	// var wg sync.WaitGroup
+	// process := func(id string) {
+	// 	// Your node processing here (e.g., simulate work)
+	// 	fmt.Printf("Processing %s\n", id)
+
+	// 	// Get children (thread-safe)
+	// 	children, _ := dag.GetChildren(id) // Ignore error for example
+
+	// 	// Notify children: decrement their indegree
+	// 	for childID := range children {
+	// 		if atomic.AddInt32(indegree[childID], -1) == 0 {
+	// 			// Child is ready (all parents done), spawn its goroutine
+	// 			wg.Add(1)
+	// 			go process(childID)
+	// 		}
+	// 	}
+
+	// 	wg.Done()
+	// }
+
+	// // Start from roots (indegree 0)
+	// roots := dag.GetRoots()
+	// for rootID := range roots {
+	// 	wg.Add(1)
+	// 	go process(rootID)
+	// }
+
+	// // Wait for all nodes to finish
+	// wg.Wait()
+
+	// fmt.Println("All processing complete")
+	// // Possible output order: A, then B and C (parallel), then D
 }
