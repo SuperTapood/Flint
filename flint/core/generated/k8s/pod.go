@@ -14,6 +14,9 @@ func (pod *Pod) Synth(dag *dag.DAG) map[string]any {
 		"kind":       "Pod",
 		"metadata": map[string]any{
 			"name": pod.GetName(),
+			"labels": map[string]any {
+				"name": pod.GetName(),
+			},
 			// "namespace": "default",
 		},
 		"spec": map[string]any{

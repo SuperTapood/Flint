@@ -10,6 +10,8 @@ import (
 func (types *K8STypes) ActualType() base.ResourceType {
 	if out := types.GetPod(); out != nil {
 		return out
+	} else if out := types.GetService(); out != nil {
+		return out
 	}
 	panic("got bad type")
 }
@@ -28,11 +30,16 @@ func (stack *K8S_Stack_) GetConnection() base.Connection {
 func (stack *K8S_Stack_) Synth() (*dag.DAG, map[string]map[string]any) {
 	objs_map := map[string]map[string]any{}
 	var obj_dag = dag.NewDAG()
-	for _, obj := range stack.Objects {
+	for i, obj := range stack.Objects {
 		var obj_map = obj.Synth(obj_dag)
-		// log.Printf("%d: %s", i, uuid)
+		log.Printf("%d: %s", i, obj)
+		if _, ok := objs_map[obj.ActualType().GetID()]; ok {
+			panic("already have resource named " + obj.ActualType().GetID())
+		}
 		objs_map[obj.ActualType().GetID()] = obj_map
 	}
+
+	log.Print(objs_map)
 
 	return obj_dag, objs_map
 }
@@ -69,7 +76,7 @@ func (stack *K8S_Stack_) Deploy() {
 	for _, node := range visitor.Order {
 		var obj = obj_map[node]
 		log.Print(obj)
-		connection.Deploy(obj)
+		connection.Deploy(obj, node)
 	}
 
 	// // Prepare for parallel processing: compute indegrees atomically

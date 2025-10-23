@@ -23,5 +23,5 @@ class K8SStack:
     def synth(self):
         k_stack = K8S_Stack_(self.objects, self.api, self.token)
         stack = Stack_(StackTypes(k8s_stack=k_stack))
-        with open("bob.bin", "wb") as file:
+        with open("flintcore/bib.bin", "wb") as file:
             file.write(stack.SerializeToString())

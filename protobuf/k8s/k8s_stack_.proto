@@ -2,10 +2,12 @@ syntax = "proto3";
 option go_package = "github.com/SuperTapood/Flint/core/generated/k8s";
 
 import "k8s/pod.proto";
+import "k8s/service.proto";
 
 message K8STypes {
     oneof type {
         Pod pod = 1;
+        Service service = 2;
     }
 }
 

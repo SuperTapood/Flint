@@ -1,5 +1,5 @@
 package base
 
 type Connection interface {
-	Deploy(map[string]any)
+	Deploy(map[string]any, string)
 }

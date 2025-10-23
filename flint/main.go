@@ -8,16 +8,16 @@ import (
 )
 
 func main() {
-	data, err := os.ReadFile("../bob.bin")
+	data, err := os.ReadFile("bib.bin")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var stack = core.StackFromBinary(data)
-	// log.Printf(stack.String())
-	// var dag, obj_map = stack.Synth()
-	// log.Printf("%v", dag)
-	// log.Printf("%v", obj_map)
+	log.Print(stack.String())
+	var dag, obj_map = stack.Synth()
+	log.Printf("%v", dag)
+	log.Printf("%v", obj_map)
 
 	stack.Deploy()
 
