@@ -31,9 +31,3 @@ class K8SStack:
             with os.fdopen(fd, "wb") as file:
                 file.write(stack.SerializeToString())
                 file.flush()
-            # print(str(stack.SerializeToString())[1:-2])
-            # with os.fdopen(1, "wb", closefd=False) as stdout:
-            #     stdout.write(stack.SerializeToString())
-            #     stdout.flush()
-        # with open("flintcore/bib.bin", "wb") as file:
-        #     file.write(stack.SerializeToString())
