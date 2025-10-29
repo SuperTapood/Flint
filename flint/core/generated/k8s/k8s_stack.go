@@ -13,12 +13,14 @@ func (types *K8STypes) ActualType() base.ResourceType {
 		return out
 	} else if out := types.GetService(); out != nil {
 		return out
+	} else if out := types.GetDeployment(); out != nil {
+		return out
 	}
 	panic("got bad type")
 }
 
-func (types *K8STypes) Synth(dag *dag.DAG) map[string]any {
-	return types.ActualType().Synth(dag)
+func (types *K8STypes) Synth(stack_name string, namespace string, dag *dag.DAG) map[string]any {
+	return types.ActualType().Synth(stack_name, namespace, dag)
 }
 
 func (stack *K8S_Stack_) GetConnection() base.Connection {
@@ -32,7 +34,7 @@ func (stack *K8S_Stack_) Synth() (*dag.DAG, map[string]map[string]any) {
 	objs_map := map[string]map[string]any{}
 	var obj_dag = dag.NewDAG()
 	for _, obj := range stack.Objects {
-		var obj_map = obj.Synth(obj_dag)
+		var obj_map = obj.Synth(stack.GetName(), stack.GetNamespace(), obj_dag)
 		if _, ok := objs_map[obj.ActualType().GetID()]; ok {
 			panic("already have resource named " + obj.ActualType().GetID())
 		}
@@ -70,7 +72,7 @@ func (stack *K8S_Stack_) Deploy() {
 	var connection = stack.GetConnection()
 	for _, node := range visitor.Order {
 		var obj = obj_map[node]
-		connection.Deploy(obj, node)
+		connection.Deploy(obj)
 	}
 
 	install_number := len(stack.GetConnection().List())
@@ -90,7 +92,7 @@ func (stack *K8S_Stack_) Deploy() {
 
 	secret.Data[0] = &data
 
-	connection.Deploy(secret.Synth(dag), secret.Name)
+	connection.Deploy(secret.Synth(stack.GetName(), stack.GetNamespace(), dag))
 
 	// // Prepare for parallel processing: compute indegrees atomically
 	// indegree := make(map[string]*int32)

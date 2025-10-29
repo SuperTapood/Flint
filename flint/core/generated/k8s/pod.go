@@ -8,10 +8,10 @@ func (pod *Pod) GetID() string {
 	return pod.GetName()
 }
 
-func (pod *Pod) Synth(dag *dag.DAG) map[string]any {
+func (pod *Pod) Synth(stack_name string, namespace string, dag *dag.DAG) map[string]any {
 
 	obj_map := map[string]any{
-		"location":   "/api/v1/namespaces/default/pods",
+		"location":   "/api/v1/namespaces/" + namespace + "/pods",
 		"apiVersion": "v1",
 		"kind":       "Pod",
 		"metadata": map[string]any{
@@ -19,7 +19,7 @@ func (pod *Pod) Synth(dag *dag.DAG) map[string]any {
 			"labels": map[string]any{
 				"name": pod.GetName(),
 			},
-			"namespace": "default",
+			"namespace": namespace,
 		},
 		"spec": map[string]any{
 			"containers": []any{
@@ -32,7 +32,9 @@ func (pod *Pod) Synth(dag *dag.DAG) map[string]any {
 		},
 	}
 
-	dag.AddVertexByID(pod.GetID(), pod.GetID())
+	if dag != nil {
+		dag.AddVertexByID(pod.GetID(), pod.GetID())
+	}
 
 	// Navigate to the container map
 	spec := obj_map["spec"].(map[string]any)

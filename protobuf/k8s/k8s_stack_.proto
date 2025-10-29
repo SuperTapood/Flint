@@ -3,11 +3,13 @@ option go_package = "github.com/SuperTapood/Flint/core/generated/k8s";
 
 import "k8s/pod.proto";
 import "k8s/service.proto";
+import "k8s/deployment.proto";
 
 message K8STypes {
     oneof type {
         Pod pod = 1;
         Service service = 2;
+        Deployment deployment = 3;
     }
 }
 
@@ -15,4 +17,6 @@ message K8S_Stack_ {
     repeated K8STypes objects = 1;
     string api = 2;
     string token = 3;
+    string name = 4;
+    string namespace = 5;
 }

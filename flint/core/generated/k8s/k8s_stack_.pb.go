@@ -27,6 +27,7 @@ type K8STypes struct {
 	//
 	//	*K8STypes_Pod
 	//	*K8STypes_Service
+	//	*K8STypes_Deployment
 	Type          isK8STypes_Type `protobuf_oneof:"type"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -87,6 +88,15 @@ func (x *K8STypes) GetService() *Service {
 	return nil
 }
 
+func (x *K8STypes) GetDeployment() *Deployment {
+	if x != nil {
+		if x, ok := x.Type.(*K8STypes_Deployment); ok {
+			return x.Deployment
+		}
+	}
+	return nil
+}
+
 type isK8STypes_Type interface {
 	isK8STypes_Type()
 }
@@ -99,15 +109,23 @@ type K8STypes_Service struct {
 	Service *Service `protobuf:"bytes,2,opt,name=service,proto3,oneof"`
 }
 
+type K8STypes_Deployment struct {
+	Deployment *Deployment `protobuf:"bytes,3,opt,name=deployment,proto3,oneof"`
+}
+
 func (*K8STypes_Pod) isK8STypes_Type() {}
 
 func (*K8STypes_Service) isK8STypes_Type() {}
+
+func (*K8STypes_Deployment) isK8STypes_Type() {}
 
 type K8S_Stack_ struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Objects       []*K8STypes            `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
 	Api           string                 `protobuf:"bytes,2,opt,name=api,proto3" json:"api,omitempty"`
 	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	Namespace     string                 `protobuf:"bytes,5,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -163,20 +181,39 @@ func (x *K8S_Stack_) GetToken() string {
 	return ""
 }
 
+func (x *K8S_Stack_) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *K8S_Stack_) GetNamespace() string {
+	if x != nil {
+		return x.Namespace
+	}
+	return ""
+}
+
 var File_k8s_k8s_stack__proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_stack__proto_rawDesc = "" +
 	"\n" +
-	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\x1a\x11k8s/service.proto\"R\n" +
+	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\x1a\x11k8s/service.proto\x1a\x14k8s/deployment.proto\"\x81\x01\n" +
 	"\bK8STypes\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12$\n" +
-	"\aservice\x18\x02 \x01(\v2\b.ServiceH\x00R\aserviceB\x06\n" +
-	"\x04type\"Y\n" +
+	"\aservice\x18\x02 \x01(\v2\b.ServiceH\x00R\aservice\x12-\n" +
+	"\n" +
+	"deployment\x18\x03 \x01(\v2\v.DeploymentH\x00R\n" +
+	"deploymentB\x06\n" +
+	"\x04type\"\x8b\x01\n" +
 	"\n" +
 	"K8S_Stack_\x12#\n" +
 	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x10\n" +
 	"\x03api\x18\x02 \x01(\tR\x03api\x12\x14\n" +
-	"\x05token\x18\x03 \x01(\tR\x05tokenBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
+	"\x05token\x18\x03 \x01(\tR\x05token\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1c\n" +
+	"\tnamespace\x18\x05 \x01(\tR\tnamespaceBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
 	file_k8s_k8s_stack__proto_rawDescOnce sync.Once
@@ -196,16 +233,18 @@ var file_k8s_k8s_stack__proto_goTypes = []any{
 	(*K8S_Stack_)(nil), // 1: K8S_Stack_
 	(*Pod)(nil),        // 2: Pod
 	(*Service)(nil),    // 3: Service
+	(*Deployment)(nil), // 4: Deployment
 }
 var file_k8s_k8s_stack__proto_depIdxs = []int32{
 	2, // 0: K8STypes.pod:type_name -> Pod
 	3, // 1: K8STypes.service:type_name -> Service
-	0, // 2: K8S_Stack_.objects:type_name -> K8STypes
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	4, // 2: K8STypes.deployment:type_name -> Deployment
+	0, // 3: K8S_Stack_.objects:type_name -> K8STypes
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_k8s_k8s_stack__proto_init() }
@@ -215,9 +254,11 @@ func file_k8s_k8s_stack__proto_init() {
 	}
 	file_k8s_pod_proto_init()
 	file_k8s_service_proto_init()
+	file_k8s_deployment_proto_init()
 	file_k8s_k8s_stack__proto_msgTypes[0].OneofWrappers = []any{
 		(*K8STypes_Pod)(nil),
 		(*K8STypes_Service)(nil),
+		(*K8STypes_Deployment)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

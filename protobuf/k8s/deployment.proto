@@ -1,0 +1,11 @@
+syntax = "proto3";
+option go_package = "github.com/SuperTapood/Flint/k8s";
+
+import "k8s/pod.proto";
+
+
+message Deployment {
+    string name = 1;
+    int32 replicas = 2;
+    Pod pod = 3;
+}

@@ -10,15 +10,15 @@ func (service *Service) GetID() string {
 	return service.GetName()
 }
 
-func (service *Service) Synth(dag *dag.DAG) map[string]any {
+func (service *Service) Synth(stack_name string, namespace string, dag *dag.DAG) map[string]any {
 
 	obj_map := map[string]any{
-		"location":   "/api/v1/namespaces/default/services",
+		"location":   "/api/v1/namespaces/" + namespace + "/services",
 		"apiVersion": "v1",
 		"kind":       "Service",
 		"metadata": map[string]any{
 			"name":      service.GetName(),
-			"namespace": "default",
+			"namespace": namespace,
 		},
 		"spec": map[string]any{
 			"type": "NodePort",
@@ -41,8 +41,10 @@ func (service *Service) Synth(dag *dag.DAG) map[string]any {
 		spec["ports"] = append(spec["ports"].([]any), port_map)
 	}
 
-	dag.AddVertexByID(service.GetID(), service.GetID())
-	dag.AddEdge(service.GetTarget().GetID(), service.GetID())
+	if dag != nil {
+		dag.AddVertexByID(service.GetID(), service.GetID())
+		dag.AddEdge(service.GetTarget().GetID(), service.GetID())
+	}
 
 	return obj_map
 }

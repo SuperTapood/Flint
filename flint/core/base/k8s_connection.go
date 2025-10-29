@@ -54,7 +54,7 @@ func mergeMaps(dst, src map[string]interface{}) {
 	}
 }
 
-func (connection *K8SConnection) Deploy(obj map[string]any, name string) {
+func (connection *K8SConnection) Deploy(obj map[string]any) {
 	location := obj["location"].(string)
 	delete(obj, "location")
 
@@ -77,6 +77,7 @@ func (connection *K8SConnection) Deploy(obj map[string]any, name string) {
 	}
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		fmt.Println(location)
 		fmt.Println(resp)
 		fmt.Println(string(body))
 		fmt.Println(obj)
