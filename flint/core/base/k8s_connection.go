@@ -17,12 +17,12 @@ type K8SConnection struct {
 	Token string
 }
 
-func (connection *K8SConnection) makeRequest(method string, location string, reader io.Reader, media string) ([]byte, *http.Response) {
+func (connection *K8SConnection) makeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	req, _ := http.NewRequest(method, connection.Api+location, reader)
 
 	req.Header.Add("Authorization", "Bearer "+connection.Token)
-	req.Header.Add("Content-Type", media)
+	req.Header.Add("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -60,15 +60,15 @@ func (connection *K8SConnection) Deploy(obj map[string]any, name string) {
 
 	var resp *http.Response
 
-	_, resp = connection.makeRequest("POST", location, bytes.NewReader(data), "application/json")
+	_, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
 
 	if resp.StatusCode == http.StatusConflict {
-		_, resp = connection.makeRequest("PUT", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(data), "application/json")
+		_, resp = connection.makeRequest("PUT", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(data))
 		if resp.StatusCode == http.StatusUnprocessableEntity {
-			_, resp = connection.makeRequest("DELETE", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(make([]byte, 0)), "application/json")
+			_, resp = connection.makeRequest("DELETE", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(make([]byte, 0)))
 			if resp.StatusCode == http.StatusOK {
 				time.Sleep(2 * time.Second)
-				_, resp = connection.makeRequest("POST", location, bytes.NewReader(data), "application/json")
+				_, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
 			}
 		}
 	}
@@ -79,7 +79,7 @@ func (connection *K8SConnection) Deploy(obj map[string]any, name string) {
 }
 
 func (connection *K8SConnection) List() {
-	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)), "application/json")
+	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
 	var result map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
 		panic(err)
