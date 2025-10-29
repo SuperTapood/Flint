@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/heimdalr/dag"
@@ -38,23 +39,6 @@ func (stack *K8S_Stack_) Synth() (*dag.DAG, map[string]map[string]any) {
 		objs_map[obj.ActualType().GetID()] = obj_map
 	}
 
-	marshalled, _ := json.Marshal(objs_map)
-
-	data := SecretData{
-		Key:   "data",
-		Value: string(marshalled),
-	}
-
-	secret := Secret{
-		Name: "aaa",
-		Type: "Opaque",
-		Data: make([]*SecretData, 1),
-	}
-
-	secret.Data[0] = &data
-
-	// objs_map[secret.GetID()] = secret.Synth(obj_dag)
-
 	return obj_dag, objs_map
 }
 
@@ -88,6 +72,25 @@ func (stack *K8S_Stack_) Deploy() {
 		var obj = obj_map[node]
 		connection.Deploy(obj, node)
 	}
+
+	install_number := len(stack.GetConnection().List())
+
+	secret := Secret{
+		Name: "flint-" + strconv.Itoa(install_number),
+		Type: "v1.flint.io",
+		Data: make([]*SecretData, 1),
+	}
+
+	marshalled, _ := json.Marshal(obj_map)
+
+	data := SecretData{
+		Key:   "data",
+		Value: string(marshalled),
+	}
+
+	secret.Data[0] = &data
+
+	connection.Deploy(secret.Synth(dag), secret.Name)
 
 	// // Prepare for parallel processing: compute indegrees atomically
 	// indegree := make(map[string]*int32)

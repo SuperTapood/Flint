@@ -17,7 +17,7 @@ func (service *Service) Synth(dag *dag.DAG) map[string]any {
 		"apiVersion": "v1",
 		"kind":       "Service",
 		"metadata": map[string]any{
-			"name": service.GetName(),
+			"name":      service.GetName(),
 			"namespace": "default",
 		},
 		"spec": map[string]any{

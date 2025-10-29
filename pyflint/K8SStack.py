@@ -3,11 +3,13 @@ from .generated.common.stack_ import Stack_, StackTypes
 import sys
 import os
 
+
 class K8SStack:
-    def __init__(self,
-         api: str,
-         token: str,
-        ):
+    def __init__(
+        self,
+        api: str,
+        token: str,
+    ):
         """
         :param api: the api url for the kubernetes environment
         :param token: the token to use to authenticate against kubernetes

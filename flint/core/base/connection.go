@@ -1,6 +1,6 @@
 package base
 
 type Connection interface {
-	List()
+	List() map[string]any
 	Deploy(map[string]any, string)
 }

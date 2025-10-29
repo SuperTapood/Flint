@@ -20,7 +20,6 @@ func (secret *Secret) Synth(dag *dag.DAG) map[string]any {
 			"labels": map[string]any{
 				"name": secret.GetName(),
 			},
-			"resourceVersion": "1",
 		},
 		"data": map[string]string{},
 		"type": secret.GetType(),
@@ -29,7 +28,7 @@ func (secret *Secret) Synth(dag *dag.DAG) map[string]any {
 	data := obj_map["data"].(map[string]string)
 
 	for _, d := range secret.GetData() {
-		data[d.Key] = base64.RawStdEncoding.EncodeToString([]byte(d.Value))
+		data[d.Key] = base64.StdEncoding.EncodeToString([]byte(d.Value))
 	}
 
 	dag.AddVertexByID(secret.GetID(), secret.GetID())

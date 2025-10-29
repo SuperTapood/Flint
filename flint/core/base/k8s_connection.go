@@ -35,6 +35,8 @@ func (connection *K8SConnection) makeRequest(method string, location string, rea
 		log.Println("Error while reading the response bytes:", err)
 	}
 
+	// fmt.Println(string(body))
+
 	return body, resp
 }
 
@@ -59,26 +61,29 @@ func (connection *K8SConnection) Deploy(obj map[string]any, name string) {
 	data, _ := json.Marshal(obj)
 
 	var resp *http.Response
+	var body []byte
 
-	_, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
+	body, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
 
 	if resp.StatusCode == http.StatusConflict {
-		_, resp = connection.makeRequest("PUT", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(data))
+		body, resp = connection.makeRequest("PUT", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(data))
 		if resp.StatusCode == http.StatusUnprocessableEntity {
-			_, resp = connection.makeRequest("DELETE", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(make([]byte, 0)))
+			body, resp = connection.makeRequest("DELETE", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(make([]byte, 0)))
 			if resp.StatusCode == http.StatusOK {
 				time.Sleep(2 * time.Second)
-				_, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
+				body, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
 			}
 		}
 	}
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		fmt.Println(resp)
+		fmt.Println(string(body))
+		fmt.Println(obj)
 	}
 }
 
-func (connection *K8SConnection) List() {
+func (connection *K8SConnection) List() map[string]any {
 	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
 	var result map[string]interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
@@ -87,12 +92,14 @@ func (connection *K8SConnection) List() {
 
 	secrets := make(map[string]any, 0)
 
-	for i, secret := range result["items"].([]any) {
-		fmt.Println(i)
-		fmt.Println(secret.(map[string]any)["metadata"].(map[string]any)["name"])
-		fmt.Println(secret.(map[string]any)["type"])
-		if secret.(map[string]any)["type"] == "Opaque" {
+	for _, secret := range result["items"].([]any) {
+		if secret.(map[string]any)["type"] == "v1.flint.io" {
 			secrets[secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)] = secret
 		}
 	}
+
+	// fmt.Println(secrets)
+	// fmt.Println(len(secrets))
+
+	return secrets
 }
