@@ -18,7 +18,7 @@ func (service *Service) Synth(dag *dag.DAG) map[string]any {
 		"kind":       "Service",
 		"metadata": map[string]any{
 			"name": service.GetName(),
-			// "namespace": "default",
+			"namespace": "default",
 		},
 		"spec": map[string]any{
 			"type": "NodePort",

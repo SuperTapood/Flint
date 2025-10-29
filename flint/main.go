@@ -1,3 +1,16 @@
+// /*
+// Copyright © 2025 NAME HERE <EMAIL ADDRESS>
+
+// */
+// package main
+
+// import "github.com/SuperTapood/Flint/cmd"
+
+// func main() {
+// 	cmd.Execute()
+// }
+
+
 package main
 
 import (
@@ -14,10 +27,6 @@ func main() {
 	}
 
 	var stack = core.StackFromBinary(data)
-	log.Print(stack.String())
-	var dag, obj_map = stack.Synth()
-	log.Printf("%v", dag)
-	log.Printf("%v", obj_map)
 
 	stack.Deploy()
 

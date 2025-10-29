@@ -1,7 +1,7 @@
 package k8s
 
 import (
-	"log"
+	"encoding/json"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/heimdalr/dag"
@@ -30,16 +30,30 @@ func (stack *K8S_Stack_) GetConnection() base.Connection {
 func (stack *K8S_Stack_) Synth() (*dag.DAG, map[string]map[string]any) {
 	objs_map := map[string]map[string]any{}
 	var obj_dag = dag.NewDAG()
-	for i, obj := range stack.Objects {
+	for _, obj := range stack.Objects {
 		var obj_map = obj.Synth(obj_dag)
-		log.Printf("%d: %s", i, obj)
 		if _, ok := objs_map[obj.ActualType().GetID()]; ok {
 			panic("already have resource named " + obj.ActualType().GetID())
 		}
 		objs_map[obj.ActualType().GetID()] = obj_map
 	}
 
-	log.Print(objs_map)
+	marshalled, _ := json.Marshal(objs_map)
+
+	data := SecretData{
+		Key:   "data",
+		Value: string(marshalled),
+	}
+
+	secret := Secret{
+		Name: "aaa",
+		Type: "Opaque",
+		Data: make([]*SecretData, 1),
+	}
+
+	secret.Data[0] = &data
+
+	// objs_map[secret.GetID()] = secret.Synth(obj_dag)
 
 	return obj_dag, objs_map
 }
@@ -61,9 +75,6 @@ func process(id string) {
 func (stack *K8S_Stack_) Deploy() {
 	var dag, obj_map = stack.Synth()
 
-	log.Print(dag.String())
-	log.Print(obj_map)
-
 	// for _, v := range obj_map {
 	// 	stack.GetConnection().Deploy(v)
 	// }
@@ -75,7 +86,6 @@ func (stack *K8S_Stack_) Deploy() {
 	var connection = stack.GetConnection()
 	for _, node := range visitor.Order {
 		var obj = obj_map[node]
-		log.Print(obj)
 		connection.Deploy(obj, node)
 	}
 

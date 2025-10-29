@@ -1,6 +1,8 @@
 package k8s
 
-import "github.com/heimdalr/dag"
+import (
+	"github.com/heimdalr/dag"
+)
 
 func (pod *Pod) GetID() string {
 	return pod.GetName()
@@ -14,10 +16,11 @@ func (pod *Pod) Synth(dag *dag.DAG) map[string]any {
 		"kind":       "Pod",
 		"metadata": map[string]any{
 			"name": pod.GetName(),
-			"labels": map[string]any {
-				"name": pod.GetName(),
+			"labels": map[string]any{
+				"nam": pod.GetName() + "i",
 			},
-			// "namespace": "default",
+			"namespace": "default",
+			// "resourceVersion": "21932",
 		},
 		"spec": map[string]any{
 			"containers": []any{
