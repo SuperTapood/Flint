@@ -1,6 +1,7 @@
 from .generated.k8s.k8s_stack_ import K8STypes, K8S_Stack_
 from .generated.common.stack_ import Stack_, StackTypes
-
+import sys
+import os
 
 class K8SStack:
     def __init__(self,
@@ -23,5 +24,14 @@ class K8SStack:
     def synth(self):
         k_stack = K8S_Stack_(self.objects, self.api, self.token)
         stack = Stack_(StackTypes(k8s_stack=k_stack))
-        with open("flintcore/bib.bin", "wb") as file:
-            file.write(stack.SerializeToString())
+        if len(sys.argv) > 1 and sys.argv[1].isdigit():
+            fd = int(sys.argv[1])
+            with os.fdopen(fd, "wb") as file:
+                file.write(stack.SerializeToString())
+                file.flush()
+            # print(str(stack.SerializeToString())[1:-2])
+            # with os.fdopen(1, "wb", closefd=False) as stdout:
+            #     stdout.write(stack.SerializeToString())
+            #     stdout.flush()
+        # with open("flintcore/bib.bin", "wb") as file:
+        #     file.write(stack.SerializeToString())

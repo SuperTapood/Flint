@@ -17,10 +17,9 @@ func (pod *Pod) Synth(dag *dag.DAG) map[string]any {
 		"metadata": map[string]any{
 			"name": pod.GetName(),
 			"labels": map[string]any{
-				"nam": pod.GetName() + "i",
+				"name": pod.GetName(),
 			},
 			"namespace": "default",
-			// "resourceVersion": "21932",
 		},
 		"spec": map[string]any{
 			"containers": []any{
