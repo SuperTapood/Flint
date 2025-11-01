@@ -6,6 +6,8 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"text/tabwriter"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/spf13/cobra"
@@ -44,21 +46,18 @@ func init() {
 	listK8SCmd.Flags().StringVarP(&token, "token", "t", "", "the token for the kubernetes cluster")
 	// listK8SCmd.MarkFlagRequired("token")
 	listK8SCmd.Flags().StringVarP(&api, "api", "a", "", "the api url of the kubernetes cluster")
-	// listK8SCmd.MarkFlagRequired("api")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func printList(conn base.Connection) {
-	conn.List()
+	deployments := conn.List()
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
+
+	fmt.Fprintln(w, "Name\tdeployed\tstatus\trevision")
+
+	for _, deployment := range deployments {
+		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Duration.String()+" ago\t"+deployment.Status+"\t"+strconv.Itoa(deployment.Revision))
+	}
+	w.Flush()
 }
 
 func listK8s(cmd *cobra.Command, args []string) {

@@ -75,12 +75,12 @@ func (stack *K8S_Stack_) Deploy() {
 		connection.Deploy(obj)
 	}
 
-	install_number := len(stack.GetConnection().List())
+	install_number := stack.GetConnection().GetCurrentRevision(stack.GetName())
 
 	secret := Secret{
-		Name: "flint-" + strconv.Itoa(install_number),
+		Name: stack.GetName() + "-" + strconv.Itoa(install_number),
 		Type: "v1.flint.io",
-		Data: make([]*SecretData, 1),
+		Data: make([]*SecretData, 2),
 	}
 
 	marshalled, _ := json.Marshal(obj_map)
@@ -90,7 +90,13 @@ func (stack *K8S_Stack_) Deploy() {
 		Value: string(marshalled),
 	}
 
+	status := SecretData{
+		Key:   "status",
+		Value: "success",
+	}
+
 	secret.Data[0] = &data
+	secret.Data[1] = &status
 
 	connection.Deploy(secret.Synth(stack.GetName(), stack.GetNamespace(), dag))
 

@@ -8,13 +8,56 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
+	"slices"
+	"strconv"
 	"time"
-	// Add this for pointer.Bool
 )
 
 type K8SConnection struct {
 	Api   string
 	Token string
+}
+
+func (connection *K8SConnection) getSecrets() map[string]any {
+	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
+func (connection *K8SConnection) getLatestSecret(stack_name string) (map[string]any, int) {
+	result := connection.getSecrets()
+	latest_version := -1
+	var latest_secret map[string]any
+
+	for _, secret := range result["items"].([]any) {
+		if secret.(map[string]any)["type"] == "v1.flint.io" {
+			secret_name := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
+			re := regexp.MustCompile(stack_name + `-[0-9]+`)
+			if re.FindString(secret_name) != "" {
+				version_re := regexp.MustCompile(`[0-9]+`)
+				version, err := strconv.Atoi(version_re.FindString(secret_name))
+				if err != nil {
+					panic(err)
+				}
+				if version > latest_version {
+					latest_secret = secret.(map[string]any)
+					latest_version = version
+				}
+			}
+		}
+	}
+
+	return latest_secret, latest_version
+}
+
+func (connection *K8SConnection) GetCurrentRevision(stack_name string) int {
+	_, latest_version := connection.getLatestSecret(stack_name)
+	return latest_version + 1
 }
 
 func (connection *K8SConnection) makeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response) {
@@ -84,23 +127,37 @@ func (connection *K8SConnection) Deploy(obj map[string]any) {
 	}
 }
 
-func (connection *K8SConnection) List() map[string]any {
-	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
-	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
-		panic(err)
-	}
-
-	secrets := make(map[string]any, 0)
-
-	for _, secret := range result["items"].([]any) {
+func (connection *K8SConnection) List() []Deployment {
+	secrets := connection.getSecrets()["items"].([]any)
+	deployments := []Deployment{}
+	visited := []string{}
+	for _, secret := range secrets {
 		if secret.(map[string]any)["type"] == "v1.flint.io" {
-			secrets[secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)] = secret
+			secret_name := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
+			deployment_re := regexp.MustCompile("([-a-z0-9]*[a-z0-9]?)-[0-9]+")
+			results := deployment_re.FindStringSubmatch(secret_name)
+			deployment_name := results[1]
+			if slices.Contains(visited, deployment_name) {
+				continue
+			}
+			secret, version := connection.getLatestSecret(deployment_name)
+			status := "failed"
+			if secret["data"].(map[string]any)["status"].(string) == "c3VjY2Vzcw==" {
+				status = "success"
+			}
+			date, err := time.Parse(time.RFC3339, secret["metadata"].(map[string]any)["creationTimestamp"].(string))
+			if err != nil {
+				panic(err)
+			}
+			deployments = append(deployments, Deployment{
+				Name:     deployment_name,
+				Duration: time.Since(date).Truncate(time.Second),
+				Status:   status,
+				Revision: version,
+			})
+			visited = append(visited, deployment_name)
 		}
+
 	}
-
-	// fmt.Println(secrets)
-	// fmt.Println(len(secrets))
-
-	return secrets
+	return deployments
 }
