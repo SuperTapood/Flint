@@ -3,6 +3,7 @@ package k8s
 import (
 	"encoding/json"
 	"strconv"
+	sync "sync"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/heimdalr/dag"
@@ -11,16 +12,16 @@ import (
 func (types *K8STypes) ActualType() base.ResourceType {
 	if out := types.GetPod(); out != nil {
 		return out
-	} else if out := types.GetService(); out != nil {
+	} else if out := types.GetService_(); out != nil {
 		return out
 	} else if out := types.GetDeployment(); out != nil {
 		return out
 	}
-	panic("got bad type")
+	panic("got bad resource type")
 }
 
-func (types *K8STypes) Synth(stack_name string, namespace string, dag *dag.DAG) map[string]any {
-	return types.ActualType().Synth(stack_name, namespace, dag)
+func (types *K8STypes) Synth(stack_name string, namespace string, dag *dag.DAG, obj_map map[string]map[string]any) {
+	types.ActualType().Synth(stack_name, namespace, dag, obj_map)
 }
 
 func (stack *K8S_Stack_) GetConnection() base.Connection {
@@ -34,11 +35,7 @@ func (stack *K8S_Stack_) Synth() (*dag.DAG, map[string]map[string]any) {
 	objs_map := map[string]map[string]any{}
 	var obj_dag = dag.NewDAG()
 	for _, obj := range stack.Objects {
-		var obj_map = obj.Synth(stack.GetName(), stack.GetNamespace(), obj_dag)
-		if _, ok := objs_map[obj.ActualType().GetID()]; ok {
-			panic("already have resource named " + obj.ActualType().GetID())
-		}
-		objs_map[obj.ActualType().GetID()] = obj_map
+		obj.Synth(stack.GetName(), stack.GetNamespace(), obj_dag, objs_map)
 	}
 
 	return obj_dag, objs_map
@@ -54,26 +51,96 @@ func (v *SimpleVisitor) Visit(vertexer dag.Vertexer) {
 	v.Order = append(v.Order, id)
 }
 
-func process(id string) {
+func (stack *K8S_Stack_) process(obj map[string]any) {
+	stack.GetConnection().Deploy(obj)
+}
 
+// ProcessDAGParallel processes a DAG in parallel, respecting dependencies
+func ProcessDAGParallel(d *dag.DAG, workFunc func(id string, vertex interface{}) error) error {
+	// Get all vertices
+	vertices := d.GetVertices()
+
+	completed := make(map[string]bool)
+	var mu sync.Mutex
+
+	for len(completed) < len(vertices) {
+		// Find nodes ready to process (all dependencies completed)
+		var ready []string
+		for id := range vertices {
+			mu.Lock()
+			if completed[id] {
+				mu.Unlock()
+				continue
+			}
+
+			// Get descendants (dependencies)
+			descendants, err := d.GetDescendants(id)
+			if err != nil {
+				mu.Unlock()
+				return err
+			}
+
+			// Check if all dependencies are completed
+			allDepsComplete := true
+			for depID := range descendants {
+				if !completed[depID] {
+					allDepsComplete = false
+					break
+				}
+			}
+			mu.Unlock()
+
+			if allDepsComplete {
+				ready = append(ready, id)
+			}
+		}
+
+		if len(ready) == 0 {
+			break // No more nodes to process
+		}
+
+		// Process ready nodes in parallel
+		var wg sync.WaitGroup
+		errChan := make(chan error, len(ready))
+
+		for _, id := range ready {
+			wg.Add(1)
+			go func(nodeID string) {
+				defer wg.Done()
+
+				vertex, err := d.GetVertex(nodeID)
+				if err != nil {
+					errChan <- err
+					return
+				}
+
+				if err := workFunc(nodeID, vertex); err != nil {
+					errChan <- err
+					return
+				}
+
+				mu.Lock()
+				completed[nodeID] = true
+				mu.Unlock()
+			}(id)
+		}
+
+		wg.Wait()
+		close(errChan)
+
+		// Check for errors
+		for err := range errChan {
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (stack *K8S_Stack_) Deploy() {
 	var dag, obj_map = stack.Synth()
-
-	// for _, v := range obj_map {
-	// 	stack.GetConnection().Deploy(v)
-	// }
-
-	visitor := &SimpleVisitor{}
-	dag.OrderedWalk(visitor)
-
-	// Iterate over sorted nodes
-	var connection = stack.GetConnection()
-	for _, node := range visitor.Order {
-		var obj = obj_map[node]
-		connection.Deploy(obj)
-	}
 
 	install_number := stack.GetConnection().GetCurrentRevision(stack.GetName())
 
@@ -98,48 +165,15 @@ func (stack *K8S_Stack_) Deploy() {
 	secret.Data[0] = &data
 	secret.Data[1] = &status
 
-	connection.Deploy(secret.Synth(stack.GetName(), stack.GetNamespace(), dag))
+	secret.Synth(stack.GetName(), stack.GetNamespace(), dag, obj_map)
+	conn := stack.GetConnection()
 
-	// // Prepare for parallel processing: compute indegrees atomically
-	// indegree := make(map[string]*int32)
-	// vertices := dag.GetVertices()
-	// for id := range vertices {
-	// 	parents, _ := dag.GetParents(id) // Ignore error for example
-	// 	deg := int32(len(parents))
-	// 	indegree[id] = &deg
-	// }
+	err := ProcessDAGParallel(dag, func(id string, vertex interface{}) error {
+		conn.Deploy(obj_map[id])
+		return nil
+	})
 
-	// // Define the process function (runs your node logic, then notifies children)
-	// var wg sync.WaitGroup
-	// process := func(id string) {
-	// 	// Your node processing here (e.g., simulate work)
-	// 	fmt.Printf("Processing %s\n", id)
-
-	// 	// Get children (thread-safe)
-	// 	children, _ := dag.GetChildren(id) // Ignore error for example
-
-	// 	// Notify children: decrement their indegree
-	// 	for childID := range children {
-	// 		if atomic.AddInt32(indegree[childID], -1) == 0 {
-	// 			// Child is ready (all parents done), spawn its goroutine
-	// 			wg.Add(1)
-	// 			go process(childID)
-	// 		}
-	// 	}
-
-	// 	wg.Done()
-	// }
-
-	// // Start from roots (indegree 0)
-	// roots := dag.GetRoots()
-	// for rootID := range roots {
-	// 	wg.Add(1)
-	// 	go process(rootID)
-	// }
-
-	// // Wait for all nodes to finish
-	// wg.Wait()
-
-	// fmt.Println("All processing complete")
-	// // Possible output order: A, then B and C (parallel), then D
+	if err != nil {
+		panic(err)
+	}
 }

@@ -111,8 +111,7 @@ def fix_python_pyi():
                     doc += '        """'
                     init += "        ):\n"
                     init += doc
-                    pyi = f"""
-{imports}
+                    pyi = f"""{imports}
 class {class_name}:
     {init}
     ...

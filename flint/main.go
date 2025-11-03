@@ -4,10 +4,16 @@
 // */
 package main
 
-import "github.com/SuperTapood/Flint/cmd"
+import (
+	"time"
+
+	"github.com/SuperTapood/Flint/cmd"
+)
 
 func main() {
+	start := time.Now()
 	cmd.Execute()
+	println("done in " + (time.Since(start).String()))
 }
 
 // import (

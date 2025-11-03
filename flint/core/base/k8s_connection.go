@@ -151,7 +151,7 @@ func (connection *K8SConnection) List() []Deployment {
 			}
 			deployments = append(deployments, Deployment{
 				Name:     deployment_name,
-				Duration: time.Since(date).Truncate(time.Second),
+				Age:      time.Since(date).Truncate(time.Second),
 				Status:   status,
 				Revision: version,
 			})

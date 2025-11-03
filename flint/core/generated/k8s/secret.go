@@ -10,7 +10,7 @@ func (secret *Secret) GetID() string {
 	return secret.GetName()
 }
 
-func (secret *Secret) Synth(stack_name string, namespace string, dag *dag.DAG) map[string]any {
+func (secret *Secret) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
 	obj_map := map[string]any{
 		"location":   "/api/v1/namespaces/" + namespace + "/secrets",
 		"apiVersion": "v1",
@@ -37,5 +37,5 @@ func (secret *Secret) Synth(stack_name string, namespace string, dag *dag.DAG) m
 		dag.AddVertexByID(secret.GetID(), secret.GetID())
 	}
 
-	return obj_map
+	objs_map[secret.GetID()] = obj_map
 }

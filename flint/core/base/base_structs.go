@@ -4,7 +4,7 @@ import "time"
 
 type Deployment struct {
 	Name     string
-	Duration time.Duration
+	Age      time.Duration
 	Status   string
 	Revision int
 }

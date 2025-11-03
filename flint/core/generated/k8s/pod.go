@@ -8,7 +8,7 @@ func (pod *Pod) GetID() string {
 	return pod.GetName()
 }
 
-func (pod *Pod) Synth(stack_name string, namespace string, dag *dag.DAG) map[string]any {
+func (pod *Pod) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
 
 	obj_map := map[string]any{
 		"location":   "/api/v1/namespaces/" + namespace + "/pods",
@@ -49,5 +49,5 @@ func (pod *Pod) Synth(stack_name string, namespace string, dag *dag.DAG) map[str
 		container["ports"] = append(container["ports"].([]any), port_map)
 	}
 
-	return obj_map
+	objs_map[pod.GetID()] = obj_map
 }

@@ -6,12 +6,20 @@ import (
 	"github.com/heimdalr/dag"
 )
 
-func (service *Service) GetID() string {
+func (service *Service_) GetID() string {
 	return service.GetName()
 }
 
-func (service *Service) Synth(stack_name string, namespace string, dag *dag.DAG) map[string]any {
+func (service *Service_) GetTargetID() string {
+	if pod := service.GetTarget().GetPod(); pod != nil {
+		return pod.GetID()
+	} else if deployment := service.GetTarget().GetDeployment(); deployment != nil {
+		return deployment.GetID()
+	}
+	panic("got bad service target")
+}
 
+func (service *Service_) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
 	obj_map := map[string]any{
 		"location":   "/api/v1/namespaces/" + namespace + "/services",
 		"apiVersion": "v1",
@@ -23,7 +31,7 @@ func (service *Service) Synth(stack_name string, namespace string, dag *dag.DAG)
 		"spec": map[string]any{
 			"type": "NodePort",
 			"selector": map[string]any{
-				"name": service.GetTarget().GetID(),
+				"name": service.GetTargetID(),
 			},
 			"ports": []any{},
 		},
@@ -42,9 +50,15 @@ func (service *Service) Synth(stack_name string, namespace string, dag *dag.DAG)
 	}
 
 	if dag != nil {
-		dag.AddVertexByID(service.GetID(), service.GetID())
-		dag.AddEdge(service.GetTarget().GetID(), service.GetID())
+		err := dag.AddVertexByID(service.GetID(), service.GetID())
+		if err != nil {
+			panic(err)
+		}
+		err = dag.AddEdge(service.GetID(), service.GetTargetID())
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	return obj_map
+	objs_map[service.GetID()] = obj_map
 }

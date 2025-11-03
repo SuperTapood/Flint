@@ -52,10 +52,10 @@ func printList(conn base.Connection) {
 	deployments := conn.List()
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
 
-	fmt.Fprintln(w, "Name\tdeployed\tstatus\trevision")
+	fmt.Fprintln(w, "Name\tAge\tStatus\tRevision")
 
 	for _, deployment := range deployments {
-		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Duration.String()+" ago\t"+deployment.Status+"\t"+strconv.Itoa(deployment.Revision))
+		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age.String()+"\t"+deployment.Status+"\t"+strconv.Itoa(deployment.Revision))
 	}
 	w.Flush()
 }
