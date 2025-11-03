@@ -44,20 +44,7 @@ func init() {
 
 	listK8SCmd.Flags().SortFlags = false
 	listK8SCmd.Flags().StringVarP(&token, "token", "t", "", "the token for the kubernetes cluster")
-	// listK8SCmd.MarkFlagRequired("token")
 	listK8SCmd.Flags().StringVarP(&api, "api", "a", "", "the api url of the kubernetes cluster")
-}
-
-func printList(conn base.Connection) {
-	deployments := conn.List()
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
-
-	fmt.Fprintln(w, "Name\tAge\tStatus\tRevision")
-
-	for _, deployment := range deployments {
-		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age.String()+"\t"+deployment.Status+"\t"+strconv.Itoa(deployment.Revision))
-	}
-	w.Flush()
 }
 
 func listK8s(cmd *cobra.Command, args []string) {
@@ -83,6 +70,14 @@ func listK8s(cmd *cobra.Command, args []string) {
 		Token: token,
 	}
 
-	printList(&conn)
+	deployments := conn.List()
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
+
+	fmt.Fprintln(w, "Name\tAge\tStatus\tRevision")
+
+	for _, deployment := range deployments {
+		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age.String()+"\t"+deployment.Status+"\t"+strconv.Itoa(deployment.Revision))
+	}
+	w.Flush()
 
 }

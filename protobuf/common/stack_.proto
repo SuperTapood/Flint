@@ -9,6 +9,6 @@ message StackTypes {
     }
 }
 
-message Stack_ {
+message Stack {
     repeated StackTypes stack = 1;
 }

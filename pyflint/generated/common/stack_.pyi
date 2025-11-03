@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from typing import List
 
 
-class Stack_:
+class Stack:
     def __init__(self, 
          stack: List['StackTypes'],
         ):

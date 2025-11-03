@@ -14,5 +14,5 @@ class StackTypes(betterproto.Message):
 
 
 @dataclass
-class Stack_(betterproto.Message):
+class Stack(betterproto.Message):
     stack: List["StackTypes"] = betterproto.message_field(1)

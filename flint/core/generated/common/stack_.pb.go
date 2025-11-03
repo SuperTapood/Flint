@@ -7,12 +7,13 @@
 package common
 
 import (
-	k8s "github.com/SuperTapood/Flint/core/generated/k8s"
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	k8s "github.com/SuperTapood/Flint/core/generated/k8s"
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -88,27 +89,27 @@ type StackTypes_K8SStack struct {
 
 func (*StackTypes_K8SStack) isStackTypes_Type() {}
 
-type Stack_ struct {
+type Stack struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Stack         []*StackTypes          `protobuf:"bytes,1,rep,name=stack,proto3" json:"stack,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Stack_) Reset() {
-	*x = Stack_{}
+func (x *Stack) Reset() {
+	*x = Stack{}
 	mi := &file_common_stack__proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Stack_) String() string {
+func (x *Stack) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Stack_) ProtoMessage() {}
+func (*Stack) ProtoMessage() {}
 
-func (x *Stack_) ProtoReflect() protoreflect.Message {
+func (x *Stack) ProtoReflect() protoreflect.Message {
 	mi := &file_common_stack__proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -120,12 +121,12 @@ func (x *Stack_) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Stack_.ProtoReflect.Descriptor instead.
-func (*Stack_) Descriptor() ([]byte, []int) {
+// Deprecated: Use Stack.ProtoReflect.Descriptor instead.
+func (*Stack) Descriptor() ([]byte, []int) {
 	return file_common_stack__proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Stack_) GetStack() []*StackTypes {
+func (x *Stack) GetStack() []*StackTypes {
 	if x != nil {
 		return x.Stack
 	}
@@ -140,8 +141,8 @@ const file_common_stack__proto_rawDesc = "" +
 	"\n" +
 	"StackTypes\x12*\n" +
 	"\tk8s_stack\x18\x01 \x01(\v2\v.K8S_Stack_H\x00R\bk8sStackB\x06\n" +
-	"\x04type\"+\n" +
-	"\x06Stack_\x12!\n" +
+	"\x04type\"*\n" +
+	"\x05Stack\x12!\n" +
 	"\x05stack\x18\x01 \x03(\v2\v.StackTypesR\x05stackBBB\n" +
 	"StackProtoP\x01Z2github.com/SuperTapood/Flint/core/generated/commonb\x06proto3"
 
@@ -160,12 +161,12 @@ func file_common_stack__proto_rawDescGZIP() []byte {
 var file_common_stack__proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_common_stack__proto_goTypes = []any{
 	(*StackTypes)(nil),     // 0: StackTypes
-	(*Stack_)(nil),         // 1: Stack_
+	(*Stack)(nil),          // 1: Stack
 	(*k8s.K8S_Stack_)(nil), // 2: K8S_Stack_
 }
 var file_common_stack__proto_depIdxs = []int32{
 	2, // 0: StackTypes.k8s_stack:type_name -> K8S_Stack_
-	0, // 1: Stack_.stack:type_name -> StackTypes
+	0, // 1: Stack.stack:type_name -> StackTypes
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
