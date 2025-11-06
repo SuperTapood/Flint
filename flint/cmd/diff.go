@@ -1,32 +1,31 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
 // diffCmd represents the diff command
 var diffCmd = &cobra.Command{
 	Use:   "diff",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "display the difference between the given stack and the existing one (if exists)",
+	Long:  `display the difference between the given stack and the existing one (if exists)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("diff called")
+		// stack, conn, stack_name := StackConnFromApp()
+		// _, obj_map := stack.GetActual().Synth(stack_name)
+		// conn.Diff(obj_map, stack_name)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(diffCmd)
+	diffCmd.Flags().SortFlags = false
+
+	diffCmd.Flags().StringVarP(&app, "app", "a", "", "the app to synth the ")
+	diffCmd.MarkFlagRequired("app")
+	diffCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
 
 	// Here you will define your flags and configuration settings.
 

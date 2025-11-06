@@ -10,6 +10,15 @@ func (service *Service_) GetID() string {
 	return service.GetName()
 }
 
+func (service *Service_) GetLabelName() string {
+	if pod := service.GetTarget().GetPod(); pod != nil {
+		return pod.GetID()
+	} else if pod := service.GetTarget().GetDeployment().GetPod(); pod != nil {
+		return pod.GetID()
+	}
+	panic("got bad service target for label")
+}
+
 func (service *Service_) GetTargetID() string {
 	if pod := service.GetTarget().GetPod(); pod != nil {
 		return pod.GetID()
@@ -31,7 +40,7 @@ func (service *Service_) Synth(stack_name string, namespace string, dag *dag.DAG
 		"spec": map[string]any{
 			"type": "NodePort",
 			"selector": map[string]any{
-				"name": service.GetTargetID(),
+				"name": service.GetLabelName(),
 			},
 			"ports": []any{},
 		},

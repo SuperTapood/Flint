@@ -13,17 +13,15 @@ var deployCmd = &cobra.Command{
 	Short: "deploy a flint stack to the cloud",
 	Long:  `deploy a flint stack to the cloud`,
 	Run: func(cmd *cobra.Command, args []string) {
-		StackFromApp().Deploy()
+		stack, conn, stack_name := StackConnFromApp()
+		obj_dag, obj_map := stack.GetActual().Synth(stack_name)
+		conn.GetActual().Deploy(obj_dag, obj_map, stack_name)
 	},
 }
 
-var (
-	app string
-	dir string
-)
-
 func init() {
 	rootCmd.AddCommand(deployCmd)
+	deployCmd.Flags().SortFlags = false
 
 	deployCmd.Flags().StringVarP(&app, "app", "a", "", "the app to synth the ")
 	deployCmd.MarkFlagRequired("app")

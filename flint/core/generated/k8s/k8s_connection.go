@@ -1,0 +1,340 @@
+package k8s
+
+import (
+	"bytes"
+	"crypto/tls"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"regexp"
+	"slices"
+	"strconv"
+	"strings"
+	sync "sync"
+	"time"
+
+	"github.com/SuperTapood/Flint/core/generated/gen_base"
+	"github.com/heimdalr/dag"
+)
+
+func process(name string, obj map[string]any) {
+	// stack.GetConnection().Deploy(obj)
+}
+
+func (connection *K8S_Connection) getSecrets() map[string]any {
+	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		panic(err)
+	}
+
+	return result
+}
+
+func (connection *K8S_Connection) getLatestSecret(stack_name string) (map[string]any, int32) {
+	result := connection.getSecrets()
+	latest_version := -1
+	var latest_secret map[string]any
+
+	for _, secret := range result["items"].([]any) {
+		if secret.(map[string]any)["type"] == "v1.flint.io" {
+			secret_name := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
+			re := regexp.MustCompile(stack_name + `-[0-9]+`)
+			if re.FindString(secret_name) != "" {
+				version_re := regexp.MustCompile(`[0-9]+`)
+				version, err := strconv.Atoi(version_re.FindString(secret_name))
+				if err != nil {
+					panic(err)
+				}
+				if version > latest_version {
+					latest_secret = secret.(map[string]any)
+					latest_version = version
+				}
+			}
+		}
+	}
+
+	return latest_secret, int32(latest_version)
+}
+
+func (connection *K8S_Connection) GetCurrentRevision(stack_name string) int {
+	_, latest_version := connection.getLatestSecret(stack_name)
+	return int(latest_version) + 1
+}
+
+func (connection *K8S_Connection) makeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response) {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	req, _ := http.NewRequest(method, connection.Api+location, reader)
+
+	req.Header.Add("Authorization", "Bearer "+connection.Token)
+	req.Header.Add("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, er := io.ReadAll(resp.Body)
+	if er != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	// fmt.Println(string(body))
+
+	return body, resp
+}
+
+// func mergeMaps(dst, src map[string]interface{}) {
+// 	for k, v := range src {
+// 		if dv, ok := dst[k]; ok {
+// 			if dm, ok := dv.(map[string]interface{}); ok {
+// 				if sm, ok := v.(map[string]interface{}); ok {
+// 					mergeMaps(dm, sm)
+// 					continue
+// 				}
+// 			}
+// 		}
+// 		dst[k] = v
+// 	}
+// }
+
+func (connection *K8S_Connection) Apply(obj map[string]any) {
+	location := obj["location"].(string)
+	// delete(obj, "location")
+
+	data, _ := json.Marshal(obj)
+
+	var resp *http.Response
+	var body []byte
+
+	body, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
+
+	if resp.StatusCode == http.StatusConflict {
+		body, resp = connection.makeRequest("PUT", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(data))
+		if resp.StatusCode == http.StatusUnprocessableEntity {
+			body, resp = connection.makeRequest("DELETE", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(make([]byte, 0)))
+			if resp.StatusCode == http.StatusOK {
+				time.Sleep(2 * time.Second)
+				body, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
+			}
+		}
+	}
+
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		fmt.Println(location)
+		fmt.Println(resp)
+		fmt.Println(string(body))
+		fmt.Println(obj)
+		panic("FUCK")
+	}
+}
+
+func (connection *K8S_Connection) List() []gen_base.FlintDeployment {
+	secrets := connection.getSecrets()["items"].([]any)
+	deployments := []gen_base.FlintDeployment{}
+	visited := []string{}
+	for _, secret := range secrets {
+		if secret.(map[string]any)["type"] == "v1.flint.io" {
+			secret_name := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
+			deployment_re := regexp.MustCompile("([-a-z0-9]*[a-z0-9]?)-[0-9]+")
+			results := deployment_re.FindStringSubmatch(secret_name)
+			deployment_name := results[1]
+			if slices.Contains(visited, deployment_name) {
+				continue
+			}
+			secret, version := connection.getLatestSecret(deployment_name)
+			status := "failed"
+			if secret["data"].(map[string]any)["status"].(string) == "c3VjY2Vzcw==" {
+				status = "success"
+			}
+			date, err := time.Parse(time.RFC3339, secret["metadata"].(map[string]any)["creationTimestamp"].(string))
+			if err != nil {
+				panic(err)
+			}
+			deployments = append(deployments, gen_base.FlintDeployment{
+				Name:     deployment_name,
+				Age:      time.Since(date).Truncate(time.Second).String(),
+				Status:   status,
+				Revision: version,
+			})
+			visited = append(visited, deployment_name)
+		}
+
+	}
+	return deployments
+}
+
+func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name string) {
+	secret, _ := connection.getLatestSecret(name)
+	b64_secret := secret["data"].(map[string]any)["data"].(string)
+	current, err := base64.StdEncoding.DecodeString(b64_secret)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var obj_map map[string]map[string]any
+	err = json.Unmarshal(current, &obj_map)
+	if err != nil {
+		panic(err)
+	}
+
+	added := make([]map[string]any, 0)
+	removed := make([]map[string]any, 0)
+	changed := make([][]map[string]any, 0)
+
+	for newName, newObj := range stack {
+		if newObj == nil {
+			continue
+		}
+		found := false
+		var foundObjKey string
+		for name, _ := range obj_map {
+			if name == newName {
+				found = true
+				foundObjKey = name
+				break
+			}
+		}
+
+		if found {
+			bytesNew, err := json.Marshal(newObj)
+			if err != nil {
+				panic(err)
+			}
+			bytesOld, err := json.Marshal(obj_map[foundObjKey])
+			if err != nil {
+				panic(err)
+			}
+			if !strings.EqualFold(string(bytesNew), string(bytesOld)) {
+				objects := make([]map[string]any, 2)
+				objects[0] = newObj
+				objects[1] = obj_map[foundObjKey]
+				changed = append(changed, objects)
+			}
+			delete(obj_map, foundObjKey)
+		} else {
+			added = append(added, newObj)
+		}
+	}
+
+	for _, obj := range obj_map {
+		removed = append(removed, obj)
+	}
+
+	fmt.Println("added")
+	fmt.Println(added)
+	fmt.Println("removed")
+	fmt.Println(removed)
+	fmt.Println("changed")
+	fmt.Println(changed)
+}
+
+func (conn *K8S_Connection) Deploy(dag *dag.DAG, obj_map map[string]map[string]any, name string) {
+	install_number := conn.GetCurrentRevision(name)
+
+	secret := Secret{
+		Name: name + "-" + strconv.Itoa(install_number),
+		Type: "v1.flint.io",
+		Data: make([]*SecretData, 2),
+	}
+
+	marshalled, _ := json.Marshal(obj_map)
+
+	data := SecretData{
+		Key:   "data",
+		Value: string(marshalled),
+	}
+
+	status := SecretData{
+		Key:   "status",
+		Value: "success",
+	}
+
+	secret.Data[0] = &data
+	secret.Data[1] = &status
+
+	fmt.Println(obj_map)
+
+	// secret.Synth(name, namespace, dag, obj_map)
+
+	// Get all vertices
+	vertices := dag.GetVertices()
+
+	completed := make(map[string]bool)
+	var mu sync.Mutex
+
+	for len(completed) < len(vertices) {
+		// Find nodes ready to process (all dependencies completed)
+		var ready []string
+		for id := range vertices {
+			mu.Lock()
+			if completed[id] {
+				mu.Unlock()
+				continue
+			}
+
+			// Get descendants (dependencies)
+			descendants, err := dag.GetDescendants(id)
+			if err != nil {
+				mu.Unlock()
+				panic(err)
+			}
+
+			// Check if all dependencies are completed
+			allDepsComplete := true
+			for depID := range descendants {
+				if !completed[depID] {
+					allDepsComplete = false
+					break
+				}
+			}
+			mu.Unlock()
+
+			if allDepsComplete {
+				ready = append(ready, id)
+			}
+		}
+
+		if len(ready) == 0 {
+			break // No more nodes to process
+		}
+
+		// Process ready nodes in parallel
+		var wg sync.WaitGroup
+		errChan := make(chan error, len(ready))
+
+		for _, id := range ready {
+			wg.Add(1)
+			go func(nodeID string) {
+				defer wg.Done()
+
+				vertex, err := dag.GetVertex(nodeID)
+				if err != nil {
+					errChan <- err
+					return
+				}
+
+				conn.Apply(obj_map[vertex.(string)])
+
+				mu.Lock()
+				completed[nodeID] = true
+				mu.Unlock()
+			}(id)
+		}
+
+		wg.Wait()
+		close(errChan)
+
+		// Check for errors
+		for err := range errChan {
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+}

@@ -138,10 +138,7 @@ func (*K8STypes_Secret) isK8STypes_Type() {}
 type K8S_Stack_ struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Objects       []*K8STypes            `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
-	Api           string                 `protobuf:"bytes,2,opt,name=api,proto3" json:"api,omitempty"`
-	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
-	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Namespace     string                 `protobuf:"bytes,5,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	Namespace     string                 `protobuf:"bytes,2,opt,name=namespace,proto3" json:"namespace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -183,27 +180,6 @@ func (x *K8S_Stack_) GetObjects() []*K8STypes {
 	return nil
 }
 
-func (x *K8S_Stack_) GetApi() string {
-	if x != nil {
-		return x.Api
-	}
-	return ""
-}
-
-func (x *K8S_Stack_) GetToken() string {
-	if x != nil {
-		return x.Token
-	}
-	return ""
-}
-
-func (x *K8S_Stack_) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
 func (x *K8S_Stack_) GetNamespace() string {
 	if x != nil {
 		return x.Namespace
@@ -223,14 +199,11 @@ const file_k8s_k8s_stack__proto_rawDesc = "" +
 	"deployment\x18\x03 \x01(\v2\v.DeploymentH\x00R\n" +
 	"deployment\x12!\n" +
 	"\x06secret\x18\x04 \x01(\v2\a.SecretH\x00R\x06secretB\x06\n" +
-	"\x04type\"\x8b\x01\n" +
+	"\x04type\"O\n" +
 	"\n" +
 	"K8S_Stack_\x12#\n" +
-	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x10\n" +
-	"\x03api\x18\x02 \x01(\tR\x03api\x12\x14\n" +
-	"\x05token\x18\x03 \x01(\tR\x05token\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x1c\n" +
-	"\tnamespace\x18\x05 \x01(\tR\tnamespaceBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
+	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x1c\n" +
+	"\tnamespace\x18\x02 \x01(\tR\tnamespaceBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
 	file_k8s_k8s_stack__proto_rawDescOnce sync.Once

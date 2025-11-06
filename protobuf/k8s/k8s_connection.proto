@@ -1,0 +1,8 @@
+syntax = "proto3";
+option go_package = "github.com/SuperTapood/Flint/core/generated/k8s";
+
+
+message K8S_Connection {
+    string api = 1;
+    string token = 2;
+}

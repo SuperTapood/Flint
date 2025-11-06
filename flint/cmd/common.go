@@ -12,7 +12,12 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func StackFromApp() *common.Stack {
+var (
+	app string
+	dir string
+)
+
+func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 	if _, err := os.Stat(app); err == nil {
 		data, err := os.ReadFile(app)
 		if err != nil {
@@ -23,7 +28,7 @@ func StackFromApp() *common.Stack {
 		if err != nil {
 			panic(err)
 		}
-		return &stack
+		return stack.GetStack(), stack.GetConnection(), stack.GetName()
 	}
 	r, w, err := os.Pipe()
 	if err != nil {
@@ -62,5 +67,13 @@ func StackFromApp() *common.Stack {
 	wg.Wait()
 	r.Close()
 
-	return common.StackFromBinary(data)
+	// return common.StackFromBinary(data)
+
+	var stack common.Stack
+	err = proto.Unmarshal(data, &stack)
+	if err != nil {
+		panic(err)
+	}
+
+	return stack.GetStack(), stack.GetConnection(), stack.GetName()
 }

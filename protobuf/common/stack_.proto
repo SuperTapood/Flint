@@ -2,6 +2,7 @@ syntax = "proto3";
 option go_package = "github.com/SuperTapood/Flint/core/generated/common";
 
 import "k8s/k8s_stack_.proto";
+import "k8s/k8s_connection.proto";
 
 message StackTypes {
     oneof type {
@@ -9,6 +10,14 @@ message StackTypes {
     }
 }
 
+message ConnectionTypes {
+    oneof type {
+        K8S_Connection k8s_connection = 1;
+    }
+}
+
 message Stack {
-    repeated StackTypes stack = 1;
+    string name = 1;
+    StackTypes stack = 2;
+    ConnectionTypes connection = 3;
 }

@@ -7,7 +7,7 @@
 package k8s
 
 import (
-	base "github.com/SuperTapood/Flint/core/generated/base"
+	gen_base "github.com/SuperTapood/Flint/core/generated/gen_base"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -108,8 +108,8 @@ type Service_ struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// the pod to bind the service to
-	Target        *ServiceTarget `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
-	Ports         []*base.Port   `protobuf:"bytes,3,rep,name=ports,proto3" json:"ports,omitempty"`
+	Target        *ServiceTarget   `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
+	Ports         []*gen_base.Port `protobuf:"bytes,3,rep,name=ports,proto3" json:"ports,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -158,7 +158,7 @@ func (x *Service_) GetTarget() *ServiceTarget {
 	return nil
 }
 
-func (x *Service_) GetPorts() []*base.Port {
+func (x *Service_) GetPorts() []*gen_base.Port {
 	if x != nil {
 		return x.Ports
 	}
@@ -169,7 +169,7 @@ var File_k8s_service__proto protoreflect.FileDescriptor
 
 const file_k8s_service__proto_rawDesc = "" +
 	"\n" +
-	"\x12k8s/service_.proto\x1a\rk8s/pod.proto\x1a\x14k8s/deployment.proto\x1a\x0fbase/port.proto\"`\n" +
+	"\x12k8s/service_.proto\x1a\rk8s/pod.proto\x1a\x14k8s/deployment.proto\x1a\x13gen_base/port.proto\"`\n" +
 	"\rServiceTarget\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12-\n" +
 	"\n" +
@@ -199,7 +199,7 @@ var file_k8s_service__proto_goTypes = []any{
 	(*Service_)(nil),      // 1: Service_
 	(*Pod)(nil),           // 2: Pod
 	(*Deployment)(nil),    // 3: Deployment
-	(*base.Port)(nil),     // 4: Port
+	(*gen_base.Port)(nil), // 4: Port
 }
 var file_k8s_service__proto_depIdxs = []int32{
 	2, // 0: ServiceTarget.pod:type_name -> Pod

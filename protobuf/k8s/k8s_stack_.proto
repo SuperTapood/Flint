@@ -17,8 +17,5 @@ message K8STypes {
 
 message K8S_Stack_ {
     repeated K8STypes objects = 1;
-    string api = 2;
-    string token = 3;
-    string name = 4;
-    string namespace = 5;
+    string namespace = 2;
 }

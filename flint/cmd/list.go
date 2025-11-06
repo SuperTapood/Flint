@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/generated/k8s"
 	"github.com/spf13/cobra"
 )
 
@@ -33,8 +33,8 @@ var listK8SCmd = &cobra.Command{
 }
 
 var (
-	token string
-	api   string
+	k8s_token string
+	k8s_api   string
 )
 
 func init() {
@@ -43,19 +43,19 @@ func init() {
 	listCmd.AddCommand(listK8SCmd)
 
 	listK8SCmd.Flags().SortFlags = false
-	listK8SCmd.Flags().StringVarP(&token, "token", "t", "", "the token for the kubernetes cluster")
-	listK8SCmd.Flags().StringVarP(&api, "api", "a", "", "the api url of the kubernetes cluster")
+	listK8SCmd.Flags().StringVarP(&k8s_token, "token", "t", "", "the token for the kubernetes cluster")
+	listK8SCmd.Flags().StringVarP(&k8s_api, "api", "a", "", "the api url of the kubernetes cluster")
 }
 
 func listK8s(cmd *cobra.Command, args []string) {
 	var bad = false
 
-	if api == "" {
+	if k8s_api == "" {
 		bad = true
 		fmt.Println("--api/-a was not specified")
 	}
 
-	if token == "" {
+	if k8s_token == "" {
 		bad = true
 		fmt.Println("--token/-t was not specified")
 	}
@@ -65,9 +65,9 @@ func listK8s(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	conn := base.K8SConnection{
-		Api:   api,
-		Token: token,
+	conn := k8s.K8S_Connection{
+		Api:   k8s_api,
+		Token: k8s_token,
 	}
 
 	deployments := conn.List()
@@ -76,7 +76,7 @@ func listK8s(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w, "Name\tAge\tStatus\tRevision")
 
 	for _, deployment := range deployments {
-		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age.String()+"\t"+deployment.Status+"\t"+strconv.Itoa(deployment.Revision))
+		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age+"\t"+deployment.Status+"\t"+strconv.Itoa(int(deployment.Revision)))
 	}
 	w.Flush()
 

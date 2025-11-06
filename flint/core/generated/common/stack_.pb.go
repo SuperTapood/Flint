@@ -7,13 +7,12 @@
 package common
 
 import (
-	reflect "reflect"
-	sync "sync"
-	unsafe "unsafe"
-
 	k8s "github.com/SuperTapood/Flint/core/generated/k8s"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	reflect "reflect"
+	sync "sync"
+	unsafe "unsafe"
 )
 
 const (
@@ -89,16 +88,84 @@ type StackTypes_K8SStack struct {
 
 func (*StackTypes_K8SStack) isStackTypes_Type() {}
 
+type ConnectionTypes struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Type:
+	//
+	//	*ConnectionTypes_K8SConnection
+	Type          isConnectionTypes_Type `protobuf_oneof:"type"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConnectionTypes) Reset() {
+	*x = ConnectionTypes{}
+	mi := &file_common_stack__proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConnectionTypes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConnectionTypes) ProtoMessage() {}
+
+func (x *ConnectionTypes) ProtoReflect() protoreflect.Message {
+	mi := &file_common_stack__proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConnectionTypes.ProtoReflect.Descriptor instead.
+func (*ConnectionTypes) Descriptor() ([]byte, []int) {
+	return file_common_stack__proto_rawDescGZIP(), []int{1}
+}
+
+func (x *ConnectionTypes) GetType() isConnectionTypes_Type {
+	if x != nil {
+		return x.Type
+	}
+	return nil
+}
+
+func (x *ConnectionTypes) GetK8SConnection() *k8s.K8S_Connection {
+	if x != nil {
+		if x, ok := x.Type.(*ConnectionTypes_K8SConnection); ok {
+			return x.K8SConnection
+		}
+	}
+	return nil
+}
+
+type isConnectionTypes_Type interface {
+	isConnectionTypes_Type()
+}
+
+type ConnectionTypes_K8SConnection struct {
+	K8SConnection *k8s.K8S_Connection `protobuf:"bytes,1,opt,name=k8s_connection,json=k8sConnection,proto3,oneof"`
+}
+
+func (*ConnectionTypes_K8SConnection) isConnectionTypes_Type() {}
+
 type Stack struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Stack         []*StackTypes          `protobuf:"bytes,1,rep,name=stack,proto3" json:"stack,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Stack         *StackTypes            `protobuf:"bytes,2,opt,name=stack,proto3" json:"stack,omitempty"`
+	Connection    *ConnectionTypes       `protobuf:"bytes,3,opt,name=connection,proto3" json:"connection,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Stack) Reset() {
 	*x = Stack{}
-	mi := &file_common_stack__proto_msgTypes[1]
+	mi := &file_common_stack__proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -110,7 +177,7 @@ func (x *Stack) String() string {
 func (*Stack) ProtoMessage() {}
 
 func (x *Stack) ProtoReflect() protoreflect.Message {
-	mi := &file_common_stack__proto_msgTypes[1]
+	mi := &file_common_stack__proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -123,12 +190,26 @@ func (x *Stack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Stack.ProtoReflect.Descriptor instead.
 func (*Stack) Descriptor() ([]byte, []int) {
-	return file_common_stack__proto_rawDescGZIP(), []int{1}
+	return file_common_stack__proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Stack) GetStack() []*StackTypes {
+func (x *Stack) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Stack) GetStack() *StackTypes {
 	if x != nil {
 		return x.Stack
+	}
+	return nil
+}
+
+func (x *Stack) GetConnection() *ConnectionTypes {
+	if x != nil {
+		return x.Connection
 	}
 	return nil
 }
@@ -137,13 +218,20 @@ var File_common_stack__proto protoreflect.FileDescriptor
 
 const file_common_stack__proto_rawDesc = "" +
 	"\n" +
-	"\x13common/stack_.proto\x1a\x14k8s/k8s_stack_.proto\"@\n" +
+	"\x13common/stack_.proto\x1a\x14k8s/k8s_stack_.proto\x1a\x18k8s/k8s_connection.proto\"@\n" +
 	"\n" +
 	"StackTypes\x12*\n" +
 	"\tk8s_stack\x18\x01 \x01(\v2\v.K8S_Stack_H\x00R\bk8sStackB\x06\n" +
-	"\x04type\"*\n" +
-	"\x05Stack\x12!\n" +
-	"\x05stack\x18\x01 \x03(\v2\v.StackTypesR\x05stackBBB\n" +
+	"\x04type\"S\n" +
+	"\x0fConnectionTypes\x128\n" +
+	"\x0ek8s_connection\x18\x01 \x01(\v2\x0f.K8S_ConnectionH\x00R\rk8sConnectionB\x06\n" +
+	"\x04type\"p\n" +
+	"\x05Stack\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
+	"\x05stack\x18\x02 \x01(\v2\v.StackTypesR\x05stack\x120\n" +
+	"\n" +
+	"connection\x18\x03 \x01(\v2\x10.ConnectionTypesR\n" +
+	"connectionBBB\n" +
 	"StackProtoP\x01Z2github.com/SuperTapood/Flint/core/generated/commonb\x06proto3"
 
 var (
@@ -158,20 +246,24 @@ func file_common_stack__proto_rawDescGZIP() []byte {
 	return file_common_stack__proto_rawDescData
 }
 
-var file_common_stack__proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_common_stack__proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_common_stack__proto_goTypes = []any{
-	(*StackTypes)(nil),     // 0: StackTypes
-	(*Stack)(nil),          // 1: Stack
-	(*k8s.K8S_Stack_)(nil), // 2: K8S_Stack_
+	(*StackTypes)(nil),         // 0: StackTypes
+	(*ConnectionTypes)(nil),    // 1: ConnectionTypes
+	(*Stack)(nil),              // 2: Stack
+	(*k8s.K8S_Stack_)(nil),     // 3: K8S_Stack_
+	(*k8s.K8S_Connection)(nil), // 4: K8S_Connection
 }
 var file_common_stack__proto_depIdxs = []int32{
-	2, // 0: StackTypes.k8s_stack:type_name -> K8S_Stack_
-	0, // 1: Stack.stack:type_name -> StackTypes
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	3, // 0: StackTypes.k8s_stack:type_name -> K8S_Stack_
+	4, // 1: ConnectionTypes.k8s_connection:type_name -> K8S_Connection
+	0, // 2: Stack.stack:type_name -> StackTypes
+	1, // 3: Stack.connection:type_name -> ConnectionTypes
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_common_stack__proto_init() }
@@ -182,13 +274,16 @@ func file_common_stack__proto_init() {
 	file_common_stack__proto_msgTypes[0].OneofWrappers = []any{
 		(*StackTypes_K8SStack)(nil),
 	}
+	file_common_stack__proto_msgTypes[1].OneofWrappers = []any{
+		(*ConnectionTypes_K8SConnection)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_stack__proto_rawDesc), len(file_common_stack__proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

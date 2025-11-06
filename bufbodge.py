@@ -36,18 +36,21 @@ def fix_python_imports():
         imports = ""
         for undefined_name in undefined_names:
             for needed_file in files:
-                if os.path.basename(needed_file) == undefined_name.lower() + ".py":
-                    common = os.path.commonpath([file, needed_file])
-                    needed_import = (
-                        "."
-                        if os.path.sep in needed_file.replace(common + os.path.sep, "")
-                        else ""
-                    ) + needed_file.replace(common + os.path.sep, "").replace(
-                        ".py", ""
-                    ).replace(
-                        os.path.sep, "."
-                    )
-                    imports += f"from .{needed_import} import {undefined_name}\n"
+                if needed_file.split(".")[-1] == "py":
+                    with open(needed_file, "r") as maybe_file:
+                        if f"class {undefined_name}" in maybe_file.read():
+                            common = os.path.commonpath([file, needed_file])
+                            needed_import = (
+                                "."
+                                if os.path.sep
+                                in needed_file.replace(common + os.path.sep, "")
+                                else ""
+                            ) + needed_file.replace(common + os.path.sep, "").replace(
+                                ".py", ""
+                            ).replace(os.path.sep, ".")
+                            imports += (
+                                f"from .{needed_import} import {undefined_name}\n"
+                            )
         data = imports + data
         with open(file, "w") as f:
             f.write(data)
@@ -127,7 +130,7 @@ def fix_python():
 
 def run_buf():
     if platform.system() == "Linux":
-        subprocess.run(["npx", "buf", "generate"])
+        subprocess.run(["bunx", "buf", "generate"])
     elif platform.system() == "Windows":
         subprocess.run(["./buf.exe", "generate"])
     else:
