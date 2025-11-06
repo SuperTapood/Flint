@@ -13,9 +13,9 @@ var diffCmd = &cobra.Command{
 	Short: "display the difference between the given stack and the existing one (if exists)",
 	Long:  `display the difference between the given stack and the existing one (if exists)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// stack, conn, stack_name := StackConnFromApp()
-		// _, obj_map := stack.GetActual().Synth(stack_name)
-		// conn.Diff(obj_map, stack_name)
+		stack, conn, stack_name := StackConnFromApp()
+		_, obj_map := stack.GetActual().Synth(stack_name)
+		conn.GetActual().Diff(obj_map, stack_name)
 	},
 }
 

@@ -16,6 +16,7 @@ func (stackType *StackTypes) GetActual() StackType {
 
 type ConnectionType interface {
 	Deploy(*dag.DAG, map[string]map[string]any, string)
+	Diff(map[string]map[string]any, string)
 }
 
 func (connType *ConnectionTypes) GetActual() ConnectionType {

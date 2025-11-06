@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -19,10 +20,6 @@ import (
 	"github.com/SuperTapood/Flint/core/generated/gen_base"
 	"github.com/heimdalr/dag"
 )
-
-func process(name string, obj map[string]any) {
-	// stack.GetConnection().Deploy(obj)
-}
 
 func (connection *K8S_Connection) getSecrets() map[string]any {
 	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
@@ -36,7 +33,7 @@ func (connection *K8S_Connection) getSecrets() map[string]any {
 
 func (connection *K8S_Connection) getLatestSecret(stack_name string) (map[string]any, int32) {
 	result := connection.getSecrets()
-	latest_version := -1
+	latest_version := 0
 	var latest_secret map[string]any
 
 	for _, secret := range result["items"].([]any) {
@@ -258,9 +255,9 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, obj_map map[string]map[string]a
 	secret.Data[0] = &data
 	secret.Data[1] = &status
 
-	fmt.Println(obj_map)
+	namespace := obj_map[reflect.ValueOf(obj_map).MapKeys()[0].String()]["metadata"].(map[string]any)["namespace"].(string)
 
-	// secret.Synth(name, namespace, dag, obj_map)
+	secret.Synth(name, namespace, dag, obj_map)
 
 	// Get all vertices
 	vertices := dag.GetVertices()

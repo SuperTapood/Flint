@@ -75,7 +75,8 @@ func listK8s(cmd *cobra.Command, args []string) {
 
 	fmt.Fprintln(w, "Name\tAge\tStatus\tRevision")
 
-	for _, deployment := range deployments {
+	for i := range deployments {
+		deployment := &deployments[i]
 		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age+"\t"+deployment.Status+"\t"+strconv.Itoa(int(deployment.Revision)))
 	}
 	w.Flush()
