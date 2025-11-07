@@ -3,14 +3,15 @@
 # plugin: python-betterproto
 from dataclasses import dataclass
 
+
 class K8S_Connection:
-    def __init__(
-        self,
-        api: str,
-        token: str,
-    ):
+    def __init__(self, *, 
+         api: str,
+         token: str,
+        ):
         """
         :param api: None
         :param token: None
         """
     ...
+    

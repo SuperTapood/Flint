@@ -4,6 +4,14 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"strconv"
+
+	"github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/pmezard/go-difflib/difflib"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +22,22 @@ var diffCmd = &cobra.Command{
 	Long:  `display the difference between the given stack and the existing one (if exists)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		stack, conn, stack_name := StackConnFromApp()
+		revision := conn.GetK8SConnection().GetCurrentRevision(stack_name)
+		fmt.Println("generating changeset for stack '" + stack_name + "' (" + strconv.Itoa(revision) + " -> " + strconv.Itoa(revision+1) + "):")
 		_, obj_map := stack.GetActual().Synth(stack_name)
-		conn.GetActual().Diff(obj_map, stack_name)
+
+		added, removed, changed := conn.GetActual().Diff(obj_map, stack_name)
+		if len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
+			fmt.Println("empty changeset nothing to do")
+			return
+		}
+		for _, add := range added {
+			fmt.Println("[+] " + add)
+		}
+		for _, rem := range removed {
+			fmt.Println("[-] " + rem)
+		}
+		prettyChangeDiff(conn.GetActual(), changed)
 	},
 }
 
@@ -26,14 +48,90 @@ func init() {
 	diffCmd.Flags().StringVarP(&app, "app", "a", "", "the app to synth the ")
 	diffCmd.MarkFlagRequired("app")
 	diffCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
+}
 
-	// Here you will define your flags and configuration settings.
+func prettyChangeDiff(conn common.ConnectionType, changeset [][]map[string]any) {
+	for _, change := range changeset {
+		new_json := change[0]
+		name := conn.ToFileName(new_json)
+		new_bytes, err := json.MarshalIndent(new_json, " ", "\t")
+		if err != nil {
+			panic(err)
+		}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// diffCmd.PersistentFlags().String("foo", "", "A help for foo")
+		old_json := change[1]
+		old_bytes, err := json.MarshalIndent(old_json, " ", "\t")
+		if err != nil {
+			panic(err)
+		}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// diffCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+		diff := difflib.UnifiedDiff{
+			A:       difflib.SplitLines(string(new_bytes)),
+			B:       difflib.SplitLines(string(old_bytes)),
+			Context: len(difflib.SplitLines(string(new_bytes))),
+		}
+
+		fmt.Println("[~] " + name)
+		PrintCDKDiff(os.Stdout, diff)
+	}
+}
+
+// ANSI color codes
+const (
+	colorReset = "\x1b[0m"  // Reset all attributes
+	colorRed   = "\x1b[31m" // Red text
+	colorGreen = "\x1b[32m" // Green text
+)
+
+// PrintCDKDiff formats and prints a difflib.UnifiedDiff in a style
+// similar to 'cdk diff', complete with ANSI color codes.
+// It writes the formatted output to the provided io.Writer.
+func PrintCDKDiff(w io.Writer, diff difflib.UnifiedDiff) {
+	// Create a matcher to compare the two string slices
+	m := difflib.NewMatcher(diff.A, diff.B)
+
+	// Use a default context if not provided (or negative)
+	context := diff.Context
+	if context < 0 {
+		context = 3 // A common default context
+	}
+
+	// Get the operations grouped by hunks
+	groups := m.GetGroupedOpCodes(context)
+
+	// If there are no diffs, we're done after the headers
+	if len(groups) == 0 {
+		return
+	}
+
+	// Iterate over each group (hunk) of changes
+	for _, group := range groups {
+
+		// Iterate over each operation within the hunk
+		for _, code := range group {
+			switch code.Tag {
+			case 'e': // 'equal' - context line
+				// Lines from A[code.I1:code.I2] are the same in B
+				for _, line := range diff.A[code.I1:code.I2] {
+					fmt.Fprintf(w, "  %s", line) // Indent context lines
+				}
+			case 'd': // 'delete' - line removed from 'A'
+				for _, line := range diff.A[code.I1:code.I2] {
+					fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
+				}
+			case 'i': // 'insert' - line added to 'B'
+				for _, line := range diff.B[code.J1:code.J2] {
+					fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
+				}
+			case 'r': // 'replace' - lines from 'A' replaced by lines in 'B'
+				// Show as a deletion followed by an insertion
+				for _, line := range diff.A[code.I1:code.I2] {
+					fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
+				}
+				for _, line := range diff.B[code.J1:code.J2] {
+					fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
+				}
+			}
+		}
+	}
 }

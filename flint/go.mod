@@ -4,6 +4,7 @@ go 1.25.3
 
 require (
 	github.com/heimdalr/dag v1.5.0
+	github.com/pmezard/go-difflib v1.0.0
 	github.com/spf13/cobra v1.10.1
 	google.golang.org/protobuf v1.36.10
 )

@@ -165,7 +165,11 @@ func (connection *K8S_Connection) List() []gen_base.FlintDeployment {
 	return deployments
 }
 
-func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name string) {
+func (connection *K8S_Connection) ToFileName(obj map[string]any) string {
+	return "Kubernetes::" + obj["kind"].(string) + "::" + obj["metadata"].(map[string]any)["namespace"].(string) + "::" + obj["metadata"].(map[string]any)["name"].(string)
+}
+
+func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name string) ([]string, []string, [][]map[string]any) {
 	secret, _ := connection.getLatestSecret(name)
 	b64_secret := secret["data"].(map[string]any)["data"].(string)
 	current, err := base64.StdEncoding.DecodeString(b64_secret)
@@ -180,8 +184,8 @@ func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name str
 		panic(err)
 	}
 
-	added := make([]map[string]any, 0)
-	removed := make([]map[string]any, 0)
+	added := make([]string, 0)
+	removed := make([]string, 0)
 	changed := make([][]map[string]any, 0)
 
 	for newName, newObj := range stack {
@@ -209,26 +213,23 @@ func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name str
 			}
 			if !strings.EqualFold(string(bytesNew), string(bytesOld)) {
 				objects := make([]map[string]any, 2)
+				delete(newObj, "location")
+				delete(obj_map[foundObjKey], "location")
 				objects[0] = newObj
 				objects[1] = obj_map[foundObjKey]
 				changed = append(changed, objects)
 			}
 			delete(obj_map, foundObjKey)
 		} else {
-			added = append(added, newObj)
+			added = append(added, connection.ToFileName(newObj))
 		}
 	}
 
 	for _, obj := range obj_map {
-		removed = append(removed, obj)
+		removed = append(removed, connection.ToFileName(obj))
 	}
 
-	fmt.Println("added")
-	fmt.Println(added)
-	fmt.Println("removed")
-	fmt.Println(removed)
-	fmt.Println("changed")
-	fmt.Println(changed)
+	return added, removed, changed
 }
 
 func (conn *K8S_Connection) Deploy(dag *dag.DAG, obj_map map[string]map[string]any, name string) {

@@ -3,14 +3,14 @@
 # plugin: python-betterproto
 from dataclasses import dataclass
 
+
 class FlintDeployment:
-    def __init__(
-        self,
-        name: str,
-        age: str,
-        status: str,
-        revision: int,
-    ):
+    def __init__(self, *, 
+         name: str,
+         age: str,
+         status: str,
+         revision: int,
+        ):
         """
         :param name: None
         :param age: None
@@ -18,3 +18,4 @@ class FlintDeployment:
         :param revision: None
         """
     ...
+    

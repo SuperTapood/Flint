@@ -107,7 +107,7 @@ def fix_python_pyi():
 
                 for class_name, params in comments.items():
                     doc = '        """\n'
-                    init = "def __init__(self, \n"
+                    init = "def __init__(self, *, \n"
                     for name, data in params.items():
                         doc += f"        :param {name}: {data['comment']}\n"
                         init += f"         {name}: {data['type']},\n"
