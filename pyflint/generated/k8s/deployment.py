@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Deployment(betterproto.Message):
     name: str = betterproto.string_field(1)
     replicas: int = betterproto.int32_field(2)

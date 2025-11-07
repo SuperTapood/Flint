@@ -7,7 +7,7 @@ from typing import List
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Pod(betterproto.Message):
     name: str = betterproto.string_field(1)
     # todo add repeated container

@@ -7,13 +7,13 @@ from typing import List
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class SecretData(betterproto.Message):
     key: str = betterproto.string_field(1)
     value: str = betterproto.string_field(2)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Secret(betterproto.Message):
     name: str = betterproto.string_field(1)
     data: List["SecretData"] = betterproto.message_field(2)

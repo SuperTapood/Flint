@@ -24,11 +24,11 @@ class K8SStack:
 
     def synth(self):
         k_stack = K8S_Stack_(objects=self.objects, namespace=self.namespace)
-        k_conn = K8S_Connection(self.api, self.token)
+        k_conn = K8S_Connection(api=self.api, token=self.token)
         stack = Stack(
-            self.name,
-            StackTypes(k8s_stack=k_stack),
-            ConnectionTypes(k8s_connection=k_conn),
+            name=self.name,
+            stack=StackTypes(k8s_stack=k_stack),
+            connection=ConnectionTypes(k8s_connection=k_conn),
         )
         if len(sys.argv) > 1 and sys.argv[1].isdigit():
             fd = int(sys.argv[1])

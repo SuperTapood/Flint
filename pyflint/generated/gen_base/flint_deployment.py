@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class FlintDeployment(betterproto.Message):
     name: str = betterproto.string_field(1)
     age: str = betterproto.string_field(2)

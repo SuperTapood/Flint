@@ -8,17 +8,17 @@ from dataclasses import dataclass
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class StackTypes(betterproto.Message):
     k8s_stack: "K8S_Stack_" = betterproto.message_field(1, group="type")
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ConnectionTypes(betterproto.Message):
     k8s_connection: "K8S_Connection" = betterproto.message_field(1, group="type")
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Stack(betterproto.Message):
     name: str = betterproto.string_field(1)
     stack: "StackTypes" = betterproto.message_field(2)

@@ -11,13 +11,13 @@ from typing import List
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class ServiceTarget(betterproto.Message):
     pod: "Pod" = betterproto.message_field(1, group="type")
     deployment: "Deployment" = betterproto.message_field(2, group="type")
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Service_(betterproto.Message):
     name: str = betterproto.string_field(1)
     # the pod to bind the service to

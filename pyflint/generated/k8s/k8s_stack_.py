@@ -11,7 +11,7 @@ from typing import List
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class K8STypes(betterproto.Message):
     pod: "Pod" = betterproto.message_field(1, group="type")
     service_: "Service_" = betterproto.message_field(2, group="type")
@@ -19,7 +19,7 @@ class K8STypes(betterproto.Message):
     secret: "Secret" = betterproto.message_field(4, group="type")
 
 
-@dataclass
+@dataclass(kw_only=True)
 class K8S_Stack_(betterproto.Message):
     objects: List["K8STypes"] = betterproto.message_field(1)
     namespace: str = betterproto.string_field(2)

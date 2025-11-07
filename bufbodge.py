@@ -107,7 +107,7 @@ def fix_python_pyi():
 
                 for class_name, params in comments.items():
                     doc = '        """\n'
-                    init = "def __init__(self, *, \n"
+                    init = "def __init__(self, \n"
                     for name, data in params.items():
                         doc += f"        :param {name}: {data['comment']}\n"
                         init += f"         {name}: {data['type']},\n"
@@ -123,9 +123,28 @@ class {class_name}:
                         file.write(pyi)
 
 
+def force_kwargs():
+    for dirpath, _, filenames in os.walk("pyflint/generated"):
+        for filename in filenames:
+            full_path = os.path.join(dirpath, filename)
+            if os.path.basename(full_path).split(os.path.extsep)[1] == "py":
+                with open(full_path, "r") as file:
+                    data = file.read()
+                if "@dataclass\n" in data:
+                    data = data.replace("@dataclass\n", "@dataclass(kw_only=True)\n")
+                    with open(full_path, "w") as file:
+                        file.write(data)
+            if os.path.basename(full_path).split(os.path.extsep)[1] == "pyi":
+                with open(full_path, "r") as file:
+                    data = file.read()
+                data = data.replace("def __init__(self, \n", "def __init__(self, *, \n")
+                with open(full_path, "w") as file:
+                    file.write(data)
+
 def fix_python():
     fix_python_imports()
     fix_python_pyi()
+    force_kwargs()
 
 
 def run_buf():

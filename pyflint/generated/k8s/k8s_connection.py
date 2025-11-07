@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import betterproto
 
 
-@dataclass
+@dataclass(kw_only=True)
 class K8S_Connection(betterproto.Message):
     api: str = betterproto.string_field(1)
     token: str = betterproto.string_field(2)
