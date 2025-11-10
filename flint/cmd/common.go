@@ -13,8 +13,18 @@ import (
 )
 
 var (
-	app string
-	dir string
+	app     string
+	dir     string
+	noColor bool
+)
+
+// ANSI color codes
+const (
+	colorReset    = "\x1b[0m"  // Reset all attributes
+	colorRed      = "\x1b[31m" // Red text
+	colorGreen    = "\x1b[32m" // Green text
+	colorYellow   = "\x1b[33m"
+	unchagedColor = "\033[38;5;181m"
 )
 
 func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
