@@ -9,6 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	deployMaxSecretNumber int
+)
+
 // deployCmd represents the deploy command
 var deployCmd = &cobra.Command{
 	Use:   "deploy",
@@ -22,7 +26,7 @@ var deployCmd = &cobra.Command{
 			fmt.Println("empty changeset nothing to do")
 			return
 		}
-		conn.GetActual().Deploy(obj_dag, removed, obj_map, stack_name, stack.GetActual().GetMetadata())
+		conn.GetActual().Deploy(obj_dag, removed, obj_map, stack_name, stack.GetActual().GetMetadata(), deployMaxSecretNumber)
 	},
 }
 
@@ -34,4 +38,6 @@ func init() {
 	deployCmd.MarkFlagRequired("app")
 
 	deployCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
+
+	deployCmd.Flags().IntVar(&deployMaxSecretNumber, "history", 5, "the number of flint stacks you want remembered")
 }

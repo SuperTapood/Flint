@@ -16,7 +16,7 @@ func (stackType *StackTypes) GetActual() StackType {
 }
 
 type ConnectionType interface {
-	Deploy(*dag.DAG, []string, map[string]map[string]any, string, map[string]any)
+	Deploy(*dag.DAG, []string, map[string]map[string]any, string, map[string]any, int)
 	Diff(map[string]map[string]any, string) ([]string, []string, [][]map[string]any)
 	ToFileName(map[string]any) string
 }

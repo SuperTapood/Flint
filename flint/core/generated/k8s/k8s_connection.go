@@ -56,6 +56,36 @@ func (connection *K8S_Connection) getLatestSecret(stack_name string) (map[string
 	return latest_secret, int32(latest_version)
 }
 
+func (connection *K8S_Connection) CleanHistory(stack_name string, oldest int, namespace string) {
+	if oldest < 1 {
+		return
+	}
+
+	result := connection.getSecrets()
+
+	for _, secret := range result["items"].([]any) {
+		if secret.(map[string]any)["type"] == "v1.flint.io" {
+			secret_name := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
+			re := regexp.MustCompile(stack_name + `-[0-9]+`)
+			if re.FindString(secret_name) != "" {
+				version_re := regexp.MustCompile(`[0-9]+`)
+				version, err := strconv.Atoi(version_re.FindString(secret_name))
+				if err != nil {
+					panic(err)
+				}
+				if version < oldest {
+					body, resp := connection.makeRequest("DELETE", locationMap["Secret"]["before_namespace"]+namespace+locationMap["Secret"]["after_namespace"]+secret_name, bytes.NewReader(make([]byte, 0)))
+					if resp.StatusCode != http.StatusOK {
+						fmt.Println(string(body))
+						fmt.Println(resp)
+						panic("couldn't delete secret")
+					}
+				}
+			}
+		}
+	}
+}
+
 func (connection *K8S_Connection) GetCurrentRevision(stack_name string) int {
 	_, latest_version := connection.getLatestSecret(stack_name)
 	return int(latest_version)
@@ -83,20 +113,6 @@ func (connection *K8S_Connection) makeRequest(method string, location string, re
 
 	return body, resp
 }
-
-// func mergeMaps(dst, src map[string]interface{}) {
-// 	for k, v := range src {
-// 		if dv, ok := dst[k]; ok {
-// 			if dm, ok := dv.(map[string]interface{}); ok {
-// 				if sm, ok := v.(map[string]interface{}); ok {
-// 					mergeMaps(dm, sm)
-// 					continue
-// 				}
-// 			}
-// 		}
-// 		dst[k] = v
-// 	}
-// }
 
 const (
 	APIS_APP_V1 = "/apis/apps/v1/namespaces/"
@@ -136,14 +152,9 @@ func (connection *K8S_Connection) Apply(obj map[string]any) {
 		namespace := split_name[2]
 		name := split_name[3]
 		connection.makeRequest("DELETE", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 0)))
-		// if resp.StatusCode != http.StatusOK {
-		// 	panic("AAAAAAAAAAAA")
-		// }
 		// fmt.Println(string(body))
 		return
 	}
-	// location := obj["location"].(string)
-	// delete(obj, "location")
 
 	data, _ := json.Marshal(obj)
 	kind := obj["kind"].(string)
@@ -278,8 +289,12 @@ func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name str
 	return added, removed, changed
 }
 
-func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map[string]map[string]any, name string, stack_metadata map[string]any) {
+func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map[string]map[string]any, name string, stack_metadata map[string]any, max_revisions int) {
 	install_number := conn.GetCurrentRevision(name) + 1
+	namespace := stack_metadata["namespace"].(string)
+	lowest_revision := max(install_number-max_revisions, 0) + 1
+
+	conn.CleanHistory(name, lowest_revision, namespace)
 
 	secret := Secret{
 		Name: name + "-" + strconv.Itoa(install_number),
@@ -312,9 +327,6 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 
 	secret.Data[0] = &data
 	secret.Data[1] = &status
-
-	// namespace := obj_map[reflect.ValueOf(obj_map).MapKeys()[0].String()]["metadata"].(map[string]any)["namespace"].(string)
-	namespace := stack_metadata["namespace"].(string)
 
 	secret.Synth(name, namespace, dag, obj_map)
 
