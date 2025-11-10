@@ -12,6 +12,8 @@ func (types *K8STypes) ActualType() base.ResourceType {
 		return out
 	} else if out := types.GetDeployment(); out != nil {
 		return out
+	} else if out := types.GetSecret(); out != nil {
+		return out
 	}
 	panic("got bad resource type")
 }
@@ -19,13 +21,6 @@ func (types *K8STypes) ActualType() base.ResourceType {
 func (types *K8STypes) Synth(stack_name string, namespace string, dag *dag.DAG, obj_map map[string]map[string]any) {
 	types.ActualType().Synth(stack_name, namespace, dag, obj_map)
 }
-
-// func (stack *K8S_Stack_) GetConnection() base.Connection {
-// 	return &base.K8SConnection{
-// 		Api:   stack.GetApi(),
-// 		Token: stack.GetToken(),
-// 	}
-// }
 
 func (stack *K8S_Stack_) Synth(name string) (*dag.DAG, map[string]map[string]any) {
 	objs_map := map[string]map[string]any{}
