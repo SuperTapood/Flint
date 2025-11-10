@@ -3,7 +3,15 @@ from .generated.common.stack_ import Stack, StackTypes, ConnectionTypes
 from .generated.k8s.k8s_connection import K8S_Connection
 import sys
 import os
-
+import grpc
+from concurrent import futures
+import asyncio
+from grpclib.server import Server
+import time
+import betterproto
+from grpclib.client import Channel
+import socket
+from google.protobuf import json_format
 
 class K8SStack:
     def __init__(self, api: str, token: str, name: str, namespace: str):
@@ -30,8 +38,12 @@ class K8SStack:
             stack=StackTypes(k8s_stack=k_stack),
             connection=ConnectionTypes(k8s_connection=k_conn),
         )
-        if len(sys.argv) > 1 and sys.argv[1].isdigit():
-            fd = int(sys.argv[1])
-            with os.fdopen(fd, "wb") as file:
-                file.write(stack.SerializeToString())
-                file.flush()
+        socket_path = sys.argv[1]
+    
+        # Connect to Unix socket
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.connect(socket_path)
+        a = stack.SerializeToString()
+        sock.sendall(a)
+        sock.close()
+

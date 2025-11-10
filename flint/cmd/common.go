@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"io"
+	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/SuperTapood/Flint/core/generated/common"
 	"google.golang.org/protobuf/proto"
@@ -40,44 +40,64 @@ func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 		}
 		return stack.GetStack(), stack.GetConnection(), stack.GetName()
 	}
-	r, w, err := os.Pipe()
-	if err != nil {
-		panic("Pipe error:" + err.Error())
-	}
+	// r, w, err := os.Pipe()
+	// if err != nil {
+	// 	panic("Pipe error:" + err.Error())
+	// }
 
-	parts := strings.Fields(app + " 3")
+	// lis, err := net.Listen("tcp", "127.0.0.1:51001")
+	// if err != nil {
+	// 	log.Fatalf("failed to listen: %v", err)
+	// }
+
+	// // 2. Get the listener's actual address (e.g., "localhost:54321")
+	// serverAddr := lis.Addr().String()
+	// log.Printf("Go server listening on: %s", serverAddr)
+
+	// // 3. Create the gRPC server
+	// s := grpc.NewServer()
+
+	// // 4. Start the Python child process
+	// log.Println("Starting Python client subprocess...")
+
+	tmpDir := os.TempDir()
+	socketPath := filepath.Join(tmpDir, "my-socket.sock")
+
+	// Remove any existing socket
+	os.Remove(socketPath)
+
+	// Create Unix socket listener
+	listener, err := net.Listen("unix", socketPath)
+	if err != nil {
+		panic(err)
+	}
+	defer listener.Close()
+	defer os.Remove(socketPath)
+
+	parts := strings.Fields(app + " " + socketPath)
 	command := exec.Command(parts[0], parts[1:]...)
 
 	command.Dir = dir
-	command.ExtraFiles = []*os.File{w}
 	command.Stderr = os.Stderr
 	command.Stdout = os.Stdout
 
 	if err := command.Start(); err != nil {
 		fmt.Println(err)
 	}
-	w.Close()
 
-	var data []byte
+	conn, err := listener.Accept()
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		data, err = io.ReadAll(r)
-		if err != nil {
-			fmt.Println("Read error:", err)
-			return
-		}
-		//fmt.Println("Received binary:", string(data)) // Process bytes as needed
+	buf := make([]byte, 1024*1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Println("Read error:", err)
+	}
 
-	}()
-
-	command.Wait()
-	wg.Wait()
-	r.Close()
-
-	// return common.StackFromBinary(data)
+	data := buf[:n]
 
 	var stack common.Stack
 	err = proto.Unmarshal(data, &stack)
