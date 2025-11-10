@@ -9,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -59,7 +58,7 @@ func (connection *K8S_Connection) getLatestSecret(stack_name string) (map[string
 
 func (connection *K8S_Connection) GetCurrentRevision(stack_name string) int {
 	_, latest_version := connection.getLatestSecret(stack_name)
-	return int(latest_version) + 1
+	return int(latest_version)
 }
 
 func (connection *K8S_Connection) makeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response) {
@@ -99,30 +98,77 @@ func (connection *K8S_Connection) makeRequest(method string, location string, re
 // 	}
 // }
 
+const (
+	APIS_APP_V1 = "/apis/apps/v1/namespaces/"
+	API_V1      = "/api/v1/namespaces/"
+)
+
+var (
+	locationMap map[string]map[string]string = map[string]map[string]string{
+		"Deployment": {
+			"before_namespace": APIS_APP_V1,
+			"after_namespace":  "/deployments/",
+		},
+		"Service": {
+			"before_namespace": API_V1,
+			"after_namespace":  "/services/",
+		},
+		"Secret": {
+			"before_namespace": API_V1,
+			"after_namespace":  "/secrets/",
+		},
+		"Pod": {
+			"before_namespace": API_V1,
+			"after_namespace":  "/pods/",
+		},
+	}
+)
+
 func (connection *K8S_Connection) Apply(obj map[string]any) {
-	location := obj["location"].(string)
+	action, ok := obj["action"]
+	if !ok {
+		action = "deploy"
+	}
+
+	if action == "remove" {
+		split_name := strings.Split(obj["name"].(string), "::")
+		kind := split_name[1]
+		namespace := split_name[2]
+		name := split_name[3]
+		connection.makeRequest("DELETE", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 0)))
+		// if resp.StatusCode != http.StatusOK {
+		// 	panic("AAAAAAAAAAAA")
+		// }
+		// fmt.Println(string(body))
+		return
+	}
+	// location := obj["location"].(string)
 	// delete(obj, "location")
 
 	data, _ := json.Marshal(obj)
+	kind := obj["kind"].(string)
+	namespace := obj["metadata"].(map[string]any)["namespace"].(string)
+	name := obj["metadata"].(map[string]any)["name"].(string)
 
 	var resp *http.Response
 	var body []byte
 
-	body, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
+	body, resp = connection.makeRequest("POST", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"], bytes.NewReader(data))
 
 	if resp.StatusCode == http.StatusConflict {
-		body, resp = connection.makeRequest("PUT", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(data))
+		body, resp = connection.makeRequest("PUT", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(data))
 		if resp.StatusCode == http.StatusUnprocessableEntity {
-			body, resp = connection.makeRequest("DELETE", location+"/"+obj["metadata"].(map[string]any)["name"].(string), bytes.NewReader(make([]byte, 0)))
+			body, resp = connection.makeRequest("DELETE", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 0)))
 			if resp.StatusCode == http.StatusOK {
 				time.Sleep(2 * time.Second)
-				body, resp = connection.makeRequest("POST", location, bytes.NewReader(data))
+				body, resp = connection.makeRequest("POST", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"], bytes.NewReader(data))
 			}
 		}
 	}
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		fmt.Println(location)
+		fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+		fmt.Println(locationMap[kind])
 		fmt.Println(resp)
 		fmt.Println(string(body))
 		fmt.Println(obj)
@@ -232,8 +278,8 @@ func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name str
 	return added, removed, changed
 }
 
-func (conn *K8S_Connection) Deploy(dag *dag.DAG, obj_map map[string]map[string]any, name string) {
-	install_number := conn.GetCurrentRevision(name)
+func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map[string]map[string]any, name string, stack_metadata map[string]any) {
+	install_number := conn.GetCurrentRevision(name) + 1
 
 	secret := Secret{
 		Name: name + "-" + strconv.Itoa(install_number),
@@ -248,6 +294,17 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, obj_map map[string]map[string]a
 		Value: string(marshalled),
 	}
 
+	for _, rem := range to_remove {
+		obj_map[rem] = map[string]any{
+			"action": "remove",
+			"name":   rem,
+		}
+		err := dag.AddVertexByID(rem, rem)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	status := SecretData{
 		Key:   "status",
 		Value: "success",
@@ -256,7 +313,8 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, obj_map map[string]map[string]a
 	secret.Data[0] = &data
 	secret.Data[1] = &status
 
-	namespace := obj_map[reflect.ValueOf(obj_map).MapKeys()[0].String()]["metadata"].(map[string]any)["namespace"].(string)
+	// namespace := obj_map[reflect.ValueOf(obj_map).MapKeys()[0].String()]["metadata"].(map[string]any)["namespace"].(string)
+	namespace := stack_metadata["namespace"].(string)
 
 	secret.Synth(name, namespace, dag, obj_map)
 

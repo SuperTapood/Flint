@@ -37,6 +37,12 @@ func (stack *K8S_Stack_) Synth(name string) (*dag.DAG, map[string]map[string]any
 	return obj_dag, objs_map
 }
 
+func (stack *K8S_Stack_) GetMetadata() map[string]any {
+	return map[string]any{
+		"namespace": stack.GetNamespace(),
+	}
+}
+
 // SimpleVisitor collects nodes in topological order.
 // type SimpleVisitor struct {
 // 	Order []string

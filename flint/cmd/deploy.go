@@ -4,6 +4,8 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +17,12 @@ var deployCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		stack, conn, stack_name := StackConnFromApp()
 		obj_dag, obj_map := stack.GetActual().Synth(stack_name)
-		conn.GetActual().Deploy(obj_dag, obj_map, stack_name)
+		added, removed, changed := conn.GetActual().Diff(obj_map, stack_name)
+		if len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
+			fmt.Println("empty changeset nothing to do")
+			return
+		}
+		conn.GetActual().Deploy(obj_dag, removed, obj_map, stack_name, stack.GetActual().GetMetadata())
 	},
 }
 
@@ -27,14 +34,4 @@ func init() {
 	deployCmd.MarkFlagRequired("app")
 
 	deployCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deployCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// deployCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

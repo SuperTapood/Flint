@@ -14,8 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
-
 func printColored(color string, format string, a ...any) {
 	if !noColor {
 		fmt.Printf(color)
@@ -77,8 +75,8 @@ func prettyChangeDiff(conn common.ConnectionType, changeset [][]map[string]any) 
 		}
 
 		diff := difflib.UnifiedDiff{
-			A:       difflib.SplitLines(string(new_bytes)),
-			B:       difflib.SplitLines(string(old_bytes)),
+			A:       difflib.SplitLines(string(old_bytes)),
+			B:       difflib.SplitLines(string(new_bytes)),
 			Context: len(difflib.SplitLines(string(new_bytes))),
 		}
 
@@ -109,8 +107,6 @@ func PrintCDKDiff(diff difflib.UnifiedDiff) {
 	if len(groups) == 0 {
 		return
 	}
-
-	fmt.Println()
 
 	// Iterate over each group (hunk) of changes
 	for _, group := range groups {

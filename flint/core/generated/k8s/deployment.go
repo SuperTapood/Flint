@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"strings"
+
 	"github.com/heimdalr/dag"
 )
 
@@ -9,9 +11,10 @@ func (deployment *Deployment) GetID() string {
 }
 
 func (deployment *Deployment) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
-
+	if strings.Contains(deployment.GetName(), "::") {
+		panic("invalid name " + deployment.Name)
+	}
 	obj_map := map[string]any{
-		"location":   "/apis/apps/v1/namespaces/" + namespace + "/deployments",
 		"apiVersion": "apps/v1",
 		"kind":       "Deployment",
 		"metadata": map[string]any{

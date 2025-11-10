@@ -4,6 +4,7 @@ import "github.com/heimdalr/dag"
 
 type StackType interface {
 	Synth(string) (*dag.DAG, map[string]map[string]any)
+	GetMetadata() map[string]any
 }
 
 func (stackType *StackTypes) GetActual() StackType {
@@ -15,7 +16,7 @@ func (stackType *StackTypes) GetActual() StackType {
 }
 
 type ConnectionType interface {
-	Deploy(*dag.DAG, map[string]map[string]any, string)
+	Deploy(*dag.DAG, []string, map[string]map[string]any, string, map[string]any)
 	Diff(map[string]map[string]any, string) ([]string, []string, [][]map[string]any)
 	ToFileName(map[string]any) string
 }

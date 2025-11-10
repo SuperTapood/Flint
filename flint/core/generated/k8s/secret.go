@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"encoding/base64"
+	"strings"
 
 	"github.com/heimdalr/dag"
 )
@@ -11,8 +12,10 @@ func (secret *Secret) GetID() string {
 }
 
 func (secret *Secret) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+	if strings.Contains(secret.GetName(), "::") {
+		panic("invalid name " + secret.Name)
+	}
 	obj_map := map[string]any{
-		"location":   "/api/v1/namespaces/" + namespace + "/secrets",
 		"apiVersion": "v1",
 		"kind":       "Secret",
 

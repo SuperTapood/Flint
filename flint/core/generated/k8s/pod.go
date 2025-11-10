@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"strings"
+
 	"github.com/heimdalr/dag"
 )
 
@@ -9,6 +11,9 @@ func (pod *Pod) GetID() string {
 }
 
 func (pod *Pod) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+	if strings.Contains(pod.GetName(), "::") {
+		panic("invalid name " + pod.Name)
+	}
 
 	obj_map := map[string]any{
 		"location":   "/api/v1/namespaces/" + namespace + "/pods",

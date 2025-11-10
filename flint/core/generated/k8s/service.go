@@ -29,8 +29,10 @@ func (service *Service_) GetTargetID() string {
 }
 
 func (service *Service_) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+	if strings.Contains(service.GetName(), "::") {
+		panic("invalid name " + service.Name)
+	}
 	obj_map := map[string]any{
-		"location":   "/api/v1/namespaces/" + namespace + "/services",
 		"apiVersion": "v1",
 		"kind":       "Service",
 		"metadata": map[string]any{
