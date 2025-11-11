@@ -11,6 +11,7 @@ import (
 
 var (
 	deployMaxSecretNumber int
+	deployForce           bool
 )
 
 // deployCmd represents the deploy command
@@ -22,7 +23,7 @@ var deployCmd = &cobra.Command{
 		stack, conn, stack_name := StackConnFromApp()
 		obj_dag, obj_map := stack.GetActual().Synth(stack_name)
 		added, removed, changed := conn.GetActual().Diff(obj_map, stack_name)
-		if len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
+		if !deployForce && len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
 			fmt.Println("empty changeset nothing to do")
 			return
 		}
@@ -40,4 +41,5 @@ func init() {
 	deployCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
 
 	deployCmd.Flags().IntVar(&deployMaxSecretNumber, "history", 5, "the number of flint stacks you want remembered")
+	deployCmd.Flags().BoolVarP(&deployForce, "force", "f", false, "if set, deploy even if there are no changes")
 }

@@ -19,6 +19,7 @@ type ConnectionType interface {
 	Deploy(*dag.DAG, []string, map[string]map[string]any, string, map[string]any, int)
 	Diff(map[string]map[string]any, string) ([]string, []string, [][]map[string]any)
 	ToFileName(map[string]any) string
+	Destroy(string, map[string]any)
 }
 
 func (connType *ConnectionTypes) GetActual() ConnectionType {

@@ -2,16 +2,7 @@ from ..generated.k8s.k8s_stack_ import K8STypes, K8S_Stack_
 from ..generated.common.stack_ import Stack, StackTypes, ConnectionTypes
 from ..generated.k8s.k8s_connection import K8S_Connection
 import sys
-import os
-import grpc
-from concurrent import futures
-import asyncio
-from grpclib.server import Server
-import time
-import betterproto
-from grpclib.client import Channel
 import socket
-from google.protobuf import json_format
 
 class K8SStack:
     def __init__(self, api: str, token: str, name: str, namespace: str):

@@ -53,7 +53,7 @@ func init() {
 	rootCmd.AddCommand(diffCmd)
 	diffCmd.Flags().SortFlags = false
 
-	diffCmd.Flags().StringVarP(&app, "app", "a", "", "the app to synth the ")
+	diffCmd.Flags().StringVarP(&app, "app", "a", "", "the app to diff ")
 	diffCmd.MarkFlagRequired("app")
 	diffCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
 	diffCmd.Flags().BoolVarP(&noColor, "no-color", "c", false, "turn off diff coloring")

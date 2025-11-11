@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"regexp"
 	"slices"
@@ -211,7 +212,7 @@ func (connection *K8S_Connection) List() []gen_base.FlintDeployment {
 			}
 			deployments = append(deployments, gen_base.FlintDeployment{
 				Name:     deployment_name,
-				Age:      time.Since(date).Truncate(time.Second).String(),
+				Age:      time.Since(date).Round(time.Second).String(),
 				Status:   status,
 				Revision: version,
 			})
@@ -228,7 +229,7 @@ func (connection *K8S_Connection) ToFileName(obj map[string]any) string {
 
 func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name string) ([]string, []string, [][]map[string]any) {
 	secret, _ := connection.getLatestSecret(name)
-	b64_secret := secret["data"].(map[string]any)["data"].(string)
+	b64_secret := secret["data"].(map[string]any)["obj_map"].(string)
 	current, err := base64.StdEncoding.DecodeString(b64_secret)
 
 	if err != nil {
@@ -296,19 +297,6 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 
 	conn.CleanHistory(name, lowest_revision, namespace)
 
-	secret := Secret{
-		Name: name + "-" + strconv.Itoa(install_number),
-		Type: "v1.flint.io",
-		Data: make([]*SecretData, 2),
-	}
-
-	marshalled, _ := json.Marshal(obj_map)
-
-	data := SecretData{
-		Key:   "data",
-		Value: string(marshalled),
-	}
-
 	for _, rem := range to_remove {
 		obj_map[rem] = map[string]any{
 			"action": "remove",
@@ -318,6 +306,27 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 		if err != nil {
 			panic(err)
 		}
+		delete(obj_map, rem)
+	}
+
+	secret := Secret{
+		Name: name + "-" + strconv.Itoa(install_number),
+		Type: "v1.flint.io",
+		Data: make([]*SecretData, 3),
+	}
+
+	marshalled, _ := json.Marshal(obj_map)
+
+	obj_map_data := SecretData{
+		Key:   "obj_map",
+		Value: string(marshalled),
+	}
+
+	marshalled_dag, _ := json.Marshal(dag)
+
+	dag_data := SecretData{
+		Key:   "dag",
+		Value: string(marshalled_dag),
 	}
 
 	status := SecretData{
@@ -325,8 +334,9 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 		Value: "success",
 	}
 
-	secret.Data[0] = &data
-	secret.Data[1] = &status
+	secret.Data[0] = &obj_map_data
+	secret.Data[1] = &dag_data
+	secret.Data[2] = &status
 
 	secret.Synth(name, namespace, dag, obj_map)
 
@@ -405,4 +415,55 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 			}
 		}
 	}
+}
+
+func (conn *K8S_Connection) Destroy(stack_name string, stack_metadata map[string]any) {
+	secret, _ := conn.getLatestSecret(stack_name)
+	b64_obj_data := secret["data"].(map[string]any)["obj_map"].(string)
+	obj_data_string, err := base64.StdEncoding.DecodeString(b64_obj_data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var obj_map map[string]map[string]any
+	err = json.Unmarshal(obj_data_string, &obj_map)
+	if err != nil {
+		panic(err)
+	}
+
+	b64_dag_data := secret["data"].(map[string]any)["dag"].(string)
+	dag_data_string, err := base64.StdEncoding.DecodeString(b64_dag_data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var dag_map map[string]any
+
+	err = json.Unmarshal(dag_data_string, &dag_map)
+	if err != nil {
+		panic(err)
+	}
+
+	dag := dag.NewDAG()
+
+	for _, value := range dag_map["vs"].([]any) {
+		i := value.(map[string]any)["i"].(string)
+		v := value.(map[string]any)["v"].(string)
+		dag.AddVertexByID(i, v)
+	}
+
+	for _, value := range dag_map["es"].([]any) {
+		d := value.(map[string]any)["d"].(string)
+		s := value.(map[string]any)["s"].(string)
+		dag.AddEdge(d, s)
+	}
+
+	for _, value := range obj_map {
+		value["action"] = "remove"
+		value["name"] = conn.ToFileName(value)
+	}
+
+	conn.Deploy(dag, make([]string, 0), obj_map, stack_name, stack_metadata, math.MaxInt)
 }
