@@ -2,5 +2,7 @@
 
 # install_import_hook("pyflint")
 
+
 from .k8s import Secret, Service, K8SStack, Deployment, Pod
 from .generated.base.port import Port
+# from .k8s.output import Output as K8SOutput

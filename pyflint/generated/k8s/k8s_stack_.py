@@ -17,6 +17,14 @@ class K8STypes(betterproto.Message):
     service_: "Service_" = betterproto.message_field(2, group="type")
     deployment: "Deployment" = betterproto.message_field(3, group="type")
     secret: "Secret" = betterproto.message_field(4, group="type")
+    k8soutput: "K8SOutput" = betterproto.message_field(5, group="type")
+
+
+@dataclass(kw_only=True)
+class K8SOutput(betterproto.Message):
+    objects: List["K8STypes"] = betterproto.message_field(1)
+    indices: List[str] = betterproto.string_field(2)
+    strings: List[str] = betterproto.string_field(3)
 
 
 @dataclass(kw_only=True)

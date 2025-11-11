@@ -12,7 +12,14 @@ message K8STypes {
         Service_ service_ = 2;
         Deployment deployment = 3;
         Secret secret = 4;
+        K8SOutput k8soutput = 5;
     }
+}
+
+message K8SOutput {
+    repeated K8STypes objects = 1;
+    repeated string indices = 2;
+    repeated string strings = 3;
 }
 
 message K8S_Stack_ {

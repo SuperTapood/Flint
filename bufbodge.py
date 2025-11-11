@@ -132,6 +132,8 @@ def force_kwargs():
                     data = file.read()
                 if "@dataclass\n" in data:
                     data = data.replace("@dataclass\n", "@dataclass(kw_only=True)\n")
+                    # i fucking hate protocol buffers
+                    # data = data.replace("betterproto", "betterproto2")
                     with open(full_path, "w") as file:
                         file.write(data)
             if os.path.basename(full_path).split(os.path.extsep)[1] == "pyi":
