@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"net/http"
 	"regexp"
 	"slices"
@@ -290,56 +289,7 @@ func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name str
 	return added, removed, changed
 }
 
-func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map[string]map[string]any, name string, stack_metadata map[string]any, max_revisions int) {
-	install_number := conn.GetCurrentRevision(name) + 1
-	namespace := stack_metadata["namespace"].(string)
-	lowest_revision := max(install_number-max_revisions, 0) + 1
-
-	conn.CleanHistory(name, lowest_revision, namespace)
-
-	for _, rem := range to_remove {
-		obj_map[rem] = map[string]any{
-			"action": "remove",
-			"name":   rem,
-		}
-		err := dag.AddVertexByID(rem, rem)
-		if err != nil {
-			panic(err)
-		}
-		delete(obj_map, rem)
-	}
-
-	secret := Secret{
-		Name: name + "-" + strconv.Itoa(install_number),
-		Type: "v1.flint.io",
-		Data: make([]*SecretData, 3),
-	}
-
-	marshalled, _ := json.Marshal(obj_map)
-
-	obj_map_data := SecretData{
-		Key:   "obj_map",
-		Value: string(marshalled),
-	}
-
-	marshalled_dag, _ := json.Marshal(dag)
-
-	dag_data := SecretData{
-		Key:   "dag",
-		Value: string(marshalled_dag),
-	}
-
-	status := SecretData{
-		Key:   "status",
-		Value: "success",
-	}
-
-	secret.Data[0] = &obj_map_data
-	secret.Data[1] = &dag_data
-	secret.Data[2] = &status
-
-	secret.Synth(name, namespace, dag, obj_map)
-
+func (self *K8S_Connection) deployObjects(dag *dag.DAG, obj_map map[string]map[string]any) {
 	// Get all vertices
 	vertices := dag.GetVertices()
 
@@ -397,7 +347,7 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 					return
 				}
 
-				conn.Apply(obj_map[vertex.(string)])
+				self.Apply(obj_map[vertex.(string)])
 
 				mu.Lock()
 				completed[nodeID] = true
@@ -415,6 +365,59 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 			}
 		}
 	}
+}
+
+func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map[string]map[string]any, name string, stack_metadata map[string]any, max_revisions int) {
+	install_number := conn.GetCurrentRevision(name) + 1
+	namespace := stack_metadata["namespace"].(string)
+	lowest_revision := max(install_number-max_revisions, 0) + 1
+
+	conn.CleanHistory(name, lowest_revision, namespace)
+
+	for _, rem := range to_remove {
+		obj_map[rem] = map[string]any{
+			"action": "remove",
+			"name":   rem,
+		}
+		err := dag.AddVertexByID(rem, rem)
+		if err != nil {
+			panic(err)
+		}
+		delete(obj_map, rem)
+	}
+
+	secret := Secret{
+		Name: name + "-" + strconv.Itoa(install_number),
+		Type: "v1.flint.io",
+		Data: make([]*SecretData, 3),
+	}
+
+	marshalled, _ := json.Marshal(obj_map)
+
+	obj_map_data := SecretData{
+		Key:   "obj_map",
+		Value: string(marshalled),
+	}
+
+	marshalled_dag, _ := json.Marshal(dag)
+
+	dag_data := SecretData{
+		Key:   "dag",
+		Value: string(marshalled_dag),
+	}
+
+	status := SecretData{
+		Key:   "status",
+		Value: "success",
+	}
+
+	secret.Data[0] = &obj_map_data
+	secret.Data[1] = &dag_data
+	secret.Data[2] = &status
+
+	secret.Synth(name, namespace, dag, obj_map)
+
+	conn.deployObjects(dag, obj_map)
 }
 
 func (conn *K8S_Connection) Destroy(stack_name string, stack_metadata map[string]any) {
@@ -465,5 +468,77 @@ func (conn *K8S_Connection) Destroy(stack_name string, stack_metadata map[string
 		value["name"] = conn.ToFileName(value)
 	}
 
-	conn.Deploy(dag, make([]string, 0), obj_map, stack_name, stack_metadata, math.MaxInt)
+	conn.deployObjects(dag, obj_map)
+}
+
+func (self *K8S_Connection) Rollback(stack_name string, targetRevision int, stack_metadata map[string]any) {
+	result := self.getSecrets()
+	var target_secret map[string]any
+
+	for _, secret := range result["items"].([]any) {
+		if secret.(map[string]any)["type"] == "v1.flint.io" {
+			secret_name := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
+			re := regexp.MustCompile(stack_name + `-[0-9]+`)
+			if re.FindString(secret_name) != "" {
+				version_re := regexp.MustCompile(`[0-9]+`)
+				version, err := strconv.Atoi(version_re.FindString(secret_name))
+				if err != nil {
+					panic(err)
+				}
+				if version == targetRevision {
+					target_secret = secret.(map[string]any)
+					break
+				}
+			}
+		}
+	}
+
+	data := target_secret["data"]
+
+	if data == nil {
+		panic("revision " + strconv.Itoa(targetRevision) + " doesn't exist or isn't remembered")
+	}
+
+	b64_obj_data := data.(map[string]any)["obj_map"].(string)
+	obj_data_string, err := base64.StdEncoding.DecodeString(b64_obj_data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var obj_map map[string]map[string]any
+	err = json.Unmarshal(obj_data_string, &obj_map)
+	if err != nil {
+		panic(err)
+	}
+
+	b64_dag_data := data.(map[string]any)["dag"].(string)
+	dag_data_string, err := base64.StdEncoding.DecodeString(b64_dag_data)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var dag_map map[string]any
+
+	err = json.Unmarshal(dag_data_string, &dag_map)
+	if err != nil {
+		panic(err)
+	}
+
+	dag := dag.NewDAG()
+
+	for _, value := range dag_map["vs"].([]any) {
+		i := value.(map[string]any)["i"].(string)
+		v := value.(map[string]any)["v"].(string)
+		dag.AddVertexByID(i, v)
+	}
+
+	for _, value := range dag_map["es"].([]any) {
+		d := value.(map[string]any)["d"].(string)
+		s := value.(map[string]any)["s"].(string)
+		dag.AddEdge(s, d)
+	}
+
+	self.deployObjects(dag, obj_map)
 }

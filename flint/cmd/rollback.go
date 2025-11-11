@@ -1,40 +1,38 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-
 */
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+)
+
+var (
+	rollbackTargetRevision int
 )
 
 // rollbackCmd represents the rollback command
 var rollbackCmd = &cobra.Command{
 	Use:   "rollback",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "rollback your stack to an earlier",
+	Long:  `rollback your stack to an earlier`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("rollback called")
+		stack, conn, stack_name := StackConnFromApp()
+		revision := rollbackTargetRevision
+		if rollbackTargetRevision < 0 {
+			revision = conn.GetActual().GetCurrentRevision(stack_name)
+			revision += rollbackTargetRevision
+		}
+		conn.GetActual().Rollback(stack_name, revision, stack.GetActual().GetMetadata())
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(rollbackCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// rollbackCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// rollbackCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rollbackCmd.Flags().StringVarP(&app, "app", "a", "", "the app to destroy ")
+	rollbackCmd.MarkFlagRequired("app")
+	rollbackCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
+	rollbackCmd.Flags().IntVarP(&rollbackTargetRevision, "number", "n", 0, "the revision of the stack to rollback to")
+	rollbackCmd.MarkFlagRequired("number")
 }
