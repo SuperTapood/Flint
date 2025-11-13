@@ -8,11 +8,15 @@ import (
 func (types *K8STypes) ActualType() base.ResourceType {
 	if out := types.GetPod(); out != nil {
 		return out
-	} else if out := types.GetService_(); out != nil {
+	} else if out := types.GetService(); out != nil {
 		return out
 	} else if out := types.GetDeployment(); out != nil {
 		return out
 	} else if out := types.GetSecret(); out != nil {
+		return out
+	} else if out := types.GetK8Soutput(); out != nil {
+		// fmt.Println(out.GetStrings())
+		// fmt.Println(out.GetLookups())
 		return out
 	}
 	panic("got bad resource type")

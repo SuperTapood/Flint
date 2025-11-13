@@ -56,3 +56,7 @@ func (pod *Pod) Synth(stack_name string, namespace string, dag *dag.DAG, objs_ma
 
 	objs_map[pod.GetID()] = obj_map
 }
+
+func (pod *Pod) Lookup() map[string]any {
+	panic("can't lookup a pod")
+}

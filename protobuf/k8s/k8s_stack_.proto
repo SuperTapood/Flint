@@ -19,12 +19,13 @@ message K8STypes {
 
 message Lookup {
     K8STypes object = 1;
-    string key = 2;
+    repeated string keys = 2;
 }
 
 message K8SOutput {
     repeated Lookup lookups = 1;
-    repeated string strings = 2; 
+    repeated string strings = 2;
+    string ID = 3; 
 }
 
 message K8S_Stack_ {

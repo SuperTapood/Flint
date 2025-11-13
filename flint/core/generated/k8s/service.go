@@ -73,3 +73,7 @@ func (service *Service_) Synth(stack_name string, namespace string, dag *dag.DAG
 
 	objs_map[service.GetID()] = obj_map
 }
+
+func (service *Service_) Lookup() map[string]any {
+	return map[string]any{}
+}

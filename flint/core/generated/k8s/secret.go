@@ -42,3 +42,7 @@ func (secret *Secret) Synth(stack_name string, namespace string, dag *dag.DAG, o
 
 	objs_map[secret.GetID()] = obj_map
 }
+
+func (secret *Secret) Lookup() map[string]any {
+	panic("can't lookup a secret")
+}

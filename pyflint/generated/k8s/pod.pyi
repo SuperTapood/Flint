@@ -4,17 +4,17 @@
 from dataclasses import dataclass
 from typing import List
 
+
 class Pod:
-    def __init__(
-        self,
-        *,
-        name: str,
-        image: str,
-        ports: List[int],
-    ):
+    def __init__(self, *, 
+         name: str,
+         image: str,
+         ports: List[int],
+        ):
         """
         :param name: None
         :param image: todo add repeated container
         :param ports: None
         """
     ...
+    

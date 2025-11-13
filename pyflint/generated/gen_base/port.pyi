@@ -3,15 +3,14 @@
 # plugin: python-betterproto
 from dataclasses import dataclass
 
+
 class Port:
-    def __init__(
-        self,
-        *,
-        name: str,
-        protocol: str,
-        id: str,
-        number: int,
-    ):
+    def __init__(self, *, 
+         name: str,
+         protocol: str,
+         id: str,
+         number: int,
+        ):
         """
         :param name: None
         :param protocol: None
@@ -19,3 +18,4 @@ class Port:
         :param number: None
         """
     ...
+    

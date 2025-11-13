@@ -51,3 +51,7 @@ func (deployment *Deployment) Synth(stack_name string, namespace string, dag *da
 
 	objs_map[deployment.GetID()] = obj_map
 }
+
+func (deployment *Deployment) Lookup() map[string]any {
+	panic("can't lookup a deployment")
+}

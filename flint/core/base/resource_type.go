@@ -6,4 +6,5 @@ type ResourceType interface {
 	String() string
 	GetID() string
 	Synth(string, string, *dag.DAG, map[string]map[string]any)
+	Lookup() map[string]any
 }

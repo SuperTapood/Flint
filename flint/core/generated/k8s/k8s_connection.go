@@ -140,19 +140,60 @@ var (
 	}
 )
 
-func (connection *K8S_Connection) Apply(obj map[string]any) {
+func (connection *K8S_Connection) Apply(obj map[string]any, objs_map map[string]map[string]any) {
 	action, ok := obj["action"]
 	if !ok {
 		action = "deploy"
 	}
 
-	if action == "remove" {
+	switch action {
+	case "remove":
 		split_name := strings.Split(obj["name"].(string), "::")
 		kind := split_name[1]
 		namespace := split_name[2]
 		name := split_name[3]
 		connection.makeRequest("DELETE", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 0)))
 		// fmt.Println(string(body))
+		return
+	case "lookup":
+		lookups := obj["lookups"].([]*Lookup)
+		strings := obj["strings"].([]string)
+		length := max(len(lookups), len(strings))
+		for i := range length {
+			if i < len(strings) {
+				fmt.Print(strings[i])
+			}
+			if i < len(lookups) {
+				lookup := lookups[i]
+				var lookup_id = lookup.GetObject().ActualType().GetID()
+				target := objs_map[lookup_id]
+				kind := target["kind"].(string)
+				namespace := target["metadata"].(map[string]any)["namespace"].(string)
+				name := target["metadata"].(map[string]any)["name"].(string)
+				body, _ := connection.makeRequest("GET", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 1)))
+				var currentMap map[string]any
+				err := json.Unmarshal(body, &currentMap)
+				if err != nil {
+					panic(err)
+				}
+				var current any = currentMap
+				for _, k := range lookup.GetKeys() {
+					// must be a map to go deeper
+					mmap, ok := current.(map[string]any)
+					if !ok {
+						panic("badbad")
+					}
+					v, ok := mmap[k]
+					if !ok {
+						panic("badbad")
+					}
+					current = v
+				}
+
+				fmt.Print(current)
+			}
+		}
+		fmt.Println()
 		return
 	}
 
@@ -223,11 +264,18 @@ func (connection *K8S_Connection) List() []gen_base.FlintDeployment {
 }
 
 func (connection *K8S_Connection) ToFileName(obj map[string]any) string {
+	if obj["kind"] == "" {
+		return obj["id"].(string)
+	}
 	return "Kubernetes::" + obj["kind"].(string) + "::" + obj["metadata"].(map[string]any)["namespace"].(string) + "::" + obj["metadata"].(map[string]any)["name"].(string)
 }
 
 func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name string) ([]string, []string, [][]map[string]any) {
-	secret, _ := connection.getLatestSecret(name)
+	secret, version := connection.getLatestSecret(name)
+
+	if version == 0 {
+		return make([]string, 1), make([]string, 1), make([][]map[string]any, 1)
+	}
 	b64_secret := secret["data"].(map[string]any)["obj_map"].(string)
 	current, err := base64.StdEncoding.DecodeString(b64_secret)
 
@@ -235,15 +283,15 @@ func (connection *K8S_Connection) Diff(stack map[string]map[string]any, name str
 		panic(err)
 	}
 
+	added := make([]string, 0)
+	removed := make([]string, 0)
+	changed := make([][]map[string]any, 0)
+
 	var obj_map map[string]map[string]any
 	err = json.Unmarshal(current, &obj_map)
 	if err != nil {
 		panic(err)
 	}
-
-	added := make([]string, 0)
-	removed := make([]string, 0)
-	changed := make([][]map[string]any, 0)
 
 	for newName, newObj := range stack {
 		if newObj == nil {
@@ -347,7 +395,7 @@ func (self *K8S_Connection) deployObjects(dag *dag.DAG, obj_map map[string]map[s
 					return
 				}
 
-				self.Apply(obj_map[vertex.(string)])
+				self.Apply(obj_map[vertex.(string)], obj_map)
 
 				mu.Lock()
 				completed[nodeID] = true
@@ -367,7 +415,7 @@ func (self *K8S_Connection) deployObjects(dag *dag.DAG, obj_map map[string]map[s
 	}
 }
 
-func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map[string]map[string]any, name string, stack_metadata map[string]any, max_revisions int) {
+func (conn *K8S_Connection) Deploy(dag_ *dag.DAG, to_remove []string, obj_map map[string]map[string]any, name string, stack_metadata map[string]any, max_revisions int) {
 	install_number := conn.GetCurrentRevision(name) + 1
 	namespace := stack_metadata["namespace"].(string)
 	lowest_revision := max(install_number-max_revisions, 0) + 1
@@ -375,15 +423,59 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 	conn.CleanHistory(name, lowest_revision, namespace)
 
 	for _, rem := range to_remove {
+		if rem == "" {
+			continue
+		}
 		obj_map[rem] = map[string]any{
 			"action": "remove",
 			"name":   rem,
 		}
-		err := dag.AddVertexByID(rem, rem)
+		err := dag_.AddVertexByID(rem, rem)
 		if err != nil {
 			panic(err)
 		}
 		delete(obj_map, rem)
+	}
+
+	conn.deployObjects(dag_, obj_map)
+
+	remove_from_dag := make([]string, 0)
+	for name, obj := range obj_map {
+		if obj["kind"] == "" {
+			delete(obj_map, name)
+			remove_from_dag = append(remove_from_dag, name)
+		}
+	}
+
+	b, err := json.Marshal(dag_)
+	if err != nil {
+		panic(err)
+	}
+
+	var dag_map map[string]any
+	err = json.Unmarshal(b, &dag_map)
+	if err != nil {
+		panic(err)
+	}
+
+	newDag := dag.NewDAG()
+
+	for _, value := range dag_map["vs"].([]any) {
+		i := value.(map[string]any)["i"].(string)
+		v := value.(map[string]any)["v"].(string)
+		if slices.Contains(remove_from_dag, i) || slices.Contains(remove_from_dag, v) {
+			continue
+		}
+		newDag.AddVertexByID(v, i)
+	}
+
+	for _, value := range dag_map["es"].([]any) {
+		d := value.(map[string]any)["d"].(string)
+		s := value.(map[string]any)["s"].(string)
+		if slices.Contains(remove_from_dag, d) || slices.Contains(remove_from_dag, s) {
+			continue
+		}
+		newDag.AddEdge(s, d)
 	}
 
 	secret := Secret{
@@ -399,7 +491,7 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 		Value: string(marshalled),
 	}
 
-	marshalled_dag, _ := json.Marshal(dag)
+	marshalled_dag, _ := json.Marshal(newDag)
 
 	dag_data := SecretData{
 		Key:   "dag",
@@ -415,9 +507,9 @@ func (conn *K8S_Connection) Deploy(dag *dag.DAG, to_remove []string, obj_map map
 	secret.Data[1] = &dag_data
 	secret.Data[2] = &status
 
-	secret.Synth(name, namespace, dag, obj_map)
+	secret.Synth(name, namespace, newDag, obj_map)
 
-	conn.deployObjects(dag, obj_map)
+	conn.Apply(obj_map[secret.GetID()], nil)
 }
 
 func (conn *K8S_Connection) Destroy(stack_name string, stack_metadata map[string]any) {

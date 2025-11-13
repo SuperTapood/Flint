@@ -34,6 +34,12 @@ var diffCmd = &cobra.Command{
 		fmt.Println("generating changeset for stack '" + stack_name + "' (" + strconv.Itoa(revision) + " -> " + strconv.Itoa(revision+1) + "):")
 		_, obj_map := stack.GetActual().Synth(stack_name)
 
+		for name, obj := range obj_map {
+			if obj["kind"] == "" {
+				delete(obj_map, name)
+			}
+		}
+
 		added, removed, changed := conn.GetActual().Diff(obj_map, stack_name)
 		if len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
 			fmt.Println("empty changeset nothing to do")

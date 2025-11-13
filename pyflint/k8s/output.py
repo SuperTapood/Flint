@@ -1,22 +1,23 @@
 from ..generated.test import K8SOutput as _output, Lookup, K8STypes
 import sys
+import uuid
 
 if sys.version_info >= (3, 14):
     from betterproto2 import Message
 
     Message.getitem = lambda self, item: Lookup(
-        K8STypes(**{self.__class__.__name__.lower(): self}), item
+        object=K8STypes(**{self.__class__.__name__.lower(): self}), keys=[item, ]
     )
+
+    Lookup.getitem = lambda self, item: [self.keys.append(item), self][1]
 
     from string.templatelib import Template
 
     def Output(template: Template):
-        lookups = []
-        strings = []
-        for string, inter in zip(template.strings, template.interpolations):
-            strings.append(string)
-            lookups.append(inter.value.object)
-        return _output(lookups=lookups, strings=strings)
+        lookups = [inter.value for inter in template.interpolations]
+        strings = [string for string in template.strings]
+        o = _output(lookups=lookups, strings=strings, id=uuid.uuid8().__str__())
+        return o
 else:
 
     def Output(template: any):

@@ -26,9 +26,10 @@ type K8STypes struct {
 	// Types that are valid to be assigned to Type:
 	//
 	//	*K8STypes_Pod
-	//	*K8STypes_Service_
+	//	*K8STypes_Service
 	//	*K8STypes_Deployment
 	//	*K8STypes_Secret
+	//	*K8STypes_Lookup
 	//	*K8STypes_K8Soutput
 	Type          isK8STypes_Type `protobuf_oneof:"type"`
 	unknownFields protoimpl.UnknownFields
@@ -81,10 +82,10 @@ func (x *K8STypes) GetPod() *Pod {
 	return nil
 }
 
-func (x *K8STypes) GetService_() *Service_ {
+func (x *K8STypes) GetService() *Service_ {
 	if x != nil {
-		if x, ok := x.Type.(*K8STypes_Service_); ok {
-			return x.Service_
+		if x, ok := x.Type.(*K8STypes_Service); ok {
+			return x.Service
 		}
 	}
 	return nil
@@ -108,6 +109,15 @@ func (x *K8STypes) GetSecret() *Secret {
 	return nil
 }
 
+func (x *K8STypes) GetLookup() *Lookup {
+	if x != nil {
+		if x, ok := x.Type.(*K8STypes_Lookup); ok {
+			return x.Lookup
+		}
+	}
+	return nil
+}
+
 func (x *K8STypes) GetK8Soutput() *K8SOutput {
 	if x != nil {
 		if x, ok := x.Type.(*K8STypes_K8Soutput); ok {
@@ -125,8 +135,8 @@ type K8STypes_Pod struct {
 	Pod *Pod `protobuf:"bytes,1,opt,name=pod,proto3,oneof"`
 }
 
-type K8STypes_Service_ struct {
-	Service_ *Service_ `protobuf:"bytes,2,opt,name=service_,json=service,proto3,oneof"`
+type K8STypes_Service struct {
+	Service *Service_ `protobuf:"bytes,2,opt,name=service,proto3,oneof"`
 }
 
 type K8STypes_Deployment struct {
@@ -137,32 +147,90 @@ type K8STypes_Secret struct {
 	Secret *Secret `protobuf:"bytes,4,opt,name=secret,proto3,oneof"`
 }
 
+type K8STypes_Lookup struct {
+	Lookup *Lookup `protobuf:"bytes,5,opt,name=lookup,proto3,oneof"`
+}
+
 type K8STypes_K8Soutput struct {
-	K8Soutput *K8SOutput `protobuf:"bytes,5,opt,name=k8soutput,proto3,oneof"`
+	K8Soutput *K8SOutput `protobuf:"bytes,6,opt,name=k8soutput,proto3,oneof"`
 }
 
 func (*K8STypes_Pod) isK8STypes_Type() {}
 
-func (*K8STypes_Service_) isK8STypes_Type() {}
+func (*K8STypes_Service) isK8STypes_Type() {}
 
 func (*K8STypes_Deployment) isK8STypes_Type() {}
 
 func (*K8STypes_Secret) isK8STypes_Type() {}
 
+func (*K8STypes_Lookup) isK8STypes_Type() {}
+
 func (*K8STypes_K8Soutput) isK8STypes_Type() {}
+
+type Lookup struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Object        *K8STypes              `protobuf:"bytes,1,opt,name=object,proto3" json:"object,omitempty"`
+	Keys          []string               `protobuf:"bytes,2,rep,name=keys,proto3" json:"keys,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Lookup) Reset() {
+	*x = Lookup{}
+	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Lookup) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Lookup) ProtoMessage() {}
+
+func (x *Lookup) ProtoReflect() protoreflect.Message {
+	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Lookup.ProtoReflect.Descriptor instead.
+func (*Lookup) Descriptor() ([]byte, []int) {
+	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Lookup) GetObject() *K8STypes {
+	if x != nil {
+		return x.Object
+	}
+	return nil
+}
+
+func (x *Lookup) GetKeys() []string {
+	if x != nil {
+		return x.Keys
+	}
+	return nil
+}
 
 type K8SOutput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Objects       []*K8STypes            `protobuf:"bytes,1,rep,name=objects,proto3" json:"objects,omitempty"`
-	Indices       []string               `protobuf:"bytes,2,rep,name=indices,proto3" json:"indices,omitempty"`
-	Strings       []string               `protobuf:"bytes,3,rep,name=strings,proto3" json:"strings,omitempty"`
+	Lookups       []*Lookup              `protobuf:"bytes,1,rep,name=lookups,proto3" json:"lookups,omitempty"`
+	Strings       []string               `protobuf:"bytes,2,rep,name=strings,proto3" json:"strings,omitempty"`
+	ID            string                 `protobuf:"bytes,3,opt,name=ID,proto3" json:"ID,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *K8SOutput) Reset() {
 	*x = K8SOutput{}
-	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
+	mi := &file_k8s_k8s_stack__proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -174,7 +242,7 @@ func (x *K8SOutput) String() string {
 func (*K8SOutput) ProtoMessage() {}
 
 func (x *K8SOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
+	mi := &file_k8s_k8s_stack__proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,19 +255,12 @@ func (x *K8SOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use K8SOutput.ProtoReflect.Descriptor instead.
 func (*K8SOutput) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{1}
+	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{2}
 }
 
-func (x *K8SOutput) GetObjects() []*K8STypes {
+func (x *K8SOutput) GetLookups() []*Lookup {
 	if x != nil {
-		return x.Objects
-	}
-	return nil
-}
-
-func (x *K8SOutput) GetIndices() []string {
-	if x != nil {
-		return x.Indices
+		return x.Lookups
 	}
 	return nil
 }
@@ -209,6 +270,13 @@ func (x *K8SOutput) GetStrings() []string {
 		return x.Strings
 	}
 	return nil
+}
+
+func (x *K8SOutput) GetID() string {
+	if x != nil {
+		return x.ID
+	}
+	return ""
 }
 
 type K8S_Stack_ struct {
@@ -221,7 +289,7 @@ type K8S_Stack_ struct {
 
 func (x *K8S_Stack_) Reset() {
 	*x = K8S_Stack_{}
-	mi := &file_k8s_k8s_stack__proto_msgTypes[2]
+	mi := &file_k8s_k8s_stack__proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -233,7 +301,7 @@ func (x *K8S_Stack_) String() string {
 func (*K8S_Stack_) ProtoMessage() {}
 
 func (x *K8S_Stack_) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack__proto_msgTypes[2]
+	mi := &file_k8s_k8s_stack__proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -246,7 +314,7 @@ func (x *K8S_Stack_) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use K8S_Stack_.ProtoReflect.Descriptor instead.
 func (*K8S_Stack_) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{2}
+	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{3}
 }
 
 func (x *K8S_Stack_) GetObjects() []*K8STypes {
@@ -267,21 +335,25 @@ var File_k8s_k8s_stack__proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_stack__proto_rawDesc = "" +
 	"\n" +
-	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\x1a\x12k8s/service_.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\"\xd2\x01\n" +
+	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\x1a\x12k8s/service_.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\"\xf4\x01\n" +
 	"\bK8STypes\x12\x18\n" +
-	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12&\n" +
-	"\bservice_\x18\x02 \x01(\v2\t.Service_H\x00R\aservice\x12-\n" +
+	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12%\n" +
+	"\aservice\x18\x02 \x01(\v2\t.Service_H\x00R\aservice\x12-\n" +
 	"\n" +
 	"deployment\x18\x03 \x01(\v2\v.DeploymentH\x00R\n" +
 	"deployment\x12!\n" +
-	"\x06secret\x18\x04 \x01(\v2\a.SecretH\x00R\x06secret\x12*\n" +
-	"\tk8soutput\x18\x05 \x01(\v2\n" +
+	"\x06secret\x18\x04 \x01(\v2\a.SecretH\x00R\x06secret\x12!\n" +
+	"\x06lookup\x18\x05 \x01(\v2\a.LookupH\x00R\x06lookup\x12*\n" +
+	"\tk8soutput\x18\x06 \x01(\v2\n" +
 	".K8SOutputH\x00R\tk8soutputB\x06\n" +
-	"\x04type\"d\n" +
-	"\tK8SOutput\x12#\n" +
-	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x18\n" +
-	"\aindices\x18\x02 \x03(\tR\aindices\x12\x18\n" +
-	"\astrings\x18\x03 \x03(\tR\astrings\"O\n" +
+	"\x04type\"?\n" +
+	"\x06Lookup\x12!\n" +
+	"\x06object\x18\x01 \x01(\v2\t.K8STypesR\x06object\x12\x12\n" +
+	"\x04keys\x18\x02 \x03(\tR\x04keys\"X\n" +
+	"\tK8SOutput\x12!\n" +
+	"\alookups\x18\x01 \x03(\v2\a.LookupR\alookups\x12\x18\n" +
+	"\astrings\x18\x02 \x03(\tR\astrings\x12\x0e\n" +
+	"\x02ID\x18\x03 \x01(\tR\x02ID\"O\n" +
 	"\n" +
 	"K8S_Stack_\x12#\n" +
 	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x1c\n" +
@@ -299,29 +371,32 @@ func file_k8s_k8s_stack__proto_rawDescGZIP() []byte {
 	return file_k8s_k8s_stack__proto_rawDescData
 }
 
-var file_k8s_k8s_stack__proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_k8s_k8s_stack__proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_k8s_k8s_stack__proto_goTypes = []any{
 	(*K8STypes)(nil),   // 0: K8STypes
-	(*K8SOutput)(nil),  // 1: K8SOutput
-	(*K8S_Stack_)(nil), // 2: K8S_Stack_
-	(*Pod)(nil),        // 3: Pod
-	(*Service_)(nil),   // 4: Service_
-	(*Deployment)(nil), // 5: Deployment
-	(*Secret)(nil),     // 6: Secret
+	(*Lookup)(nil),     // 1: Lookup
+	(*K8SOutput)(nil),  // 2: K8SOutput
+	(*K8S_Stack_)(nil), // 3: K8S_Stack_
+	(*Pod)(nil),        // 4: Pod
+	(*Service_)(nil),   // 5: Service_
+	(*Deployment)(nil), // 6: Deployment
+	(*Secret)(nil),     // 7: Secret
 }
 var file_k8s_k8s_stack__proto_depIdxs = []int32{
-	3, // 0: K8STypes.pod:type_name -> Pod
-	4, // 1: K8STypes.service_:type_name -> Service_
-	5, // 2: K8STypes.deployment:type_name -> Deployment
-	6, // 3: K8STypes.secret:type_name -> Secret
-	1, // 4: K8STypes.k8soutput:type_name -> K8SOutput
-	0, // 5: K8SOutput.objects:type_name -> K8STypes
-	0, // 6: K8S_Stack_.objects:type_name -> K8STypes
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	4, // 0: K8STypes.pod:type_name -> Pod
+	5, // 1: K8STypes.service:type_name -> Service_
+	6, // 2: K8STypes.deployment:type_name -> Deployment
+	7, // 3: K8STypes.secret:type_name -> Secret
+	1, // 4: K8STypes.lookup:type_name -> Lookup
+	2, // 5: K8STypes.k8soutput:type_name -> K8SOutput
+	0, // 6: Lookup.object:type_name -> K8STypes
+	1, // 7: K8SOutput.lookups:type_name -> Lookup
+	0, // 8: K8S_Stack_.objects:type_name -> K8STypes
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_k8s_k8s_stack__proto_init() }
@@ -335,9 +410,10 @@ func file_k8s_k8s_stack__proto_init() {
 	file_k8s_secret_proto_init()
 	file_k8s_k8s_stack__proto_msgTypes[0].OneofWrappers = []any{
 		(*K8STypes_Pod)(nil),
-		(*K8STypes_Service_)(nil),
+		(*K8STypes_Service)(nil),
 		(*K8STypes_Deployment)(nil),
 		(*K8STypes_Secret)(nil),
+		(*K8STypes_Lookup)(nil),
 		(*K8STypes_K8Soutput)(nil),
 	}
 	type x struct{}
@@ -346,7 +422,7 @@ func file_k8s_k8s_stack__proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_k8s_k8s_stack__proto_rawDesc), len(file_k8s_k8s_stack__proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

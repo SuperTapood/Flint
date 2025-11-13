@@ -1,4 +1,4 @@
-from ..generated.k8s.secret import Secret as _secret, SecretData
+from ..generated.test import Secret as _secret, SecretData
 
 
 def Secret(name, data, secret_type):

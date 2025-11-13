@@ -107,6 +107,8 @@ class K8SOutput(betterproto2.Message):
         2, betterproto2.TYPE_STRING, repeated=True
     )
 
+    id: "str" = betterproto2.field(3, betterproto2.TYPE_STRING)
+
 
 default_message_pool.register_message("", "K8SOutput", K8SOutput)
 
@@ -154,7 +156,7 @@ class Lookup(betterproto2.Message):
         1, betterproto2.TYPE_MESSAGE, optional=True
     )
 
-    key: "str" = betterproto2.field(2, betterproto2.TYPE_STRING)
+    keys: "list[str]" = betterproto2.field(2, betterproto2.TYPE_STRING, repeated=True)
 
 
 default_message_pool.register_message("", "Lookup", Lookup)
