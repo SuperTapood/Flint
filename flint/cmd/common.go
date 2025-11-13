@@ -105,5 +105,7 @@ func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 		panic(err)
 	}
 
+	fmt.Println(stack.String())
+
 	return stack.GetStack(), stack.GetConnection(), stack.GetName()
 }

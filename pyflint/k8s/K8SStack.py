@@ -1,6 +1,4 @@
-from ..generated.k8s.k8s_stack_ import K8STypes, K8S_Stack_
-from ..generated.common.stack_ import Stack, StackTypes, ConnectionTypes
-from ..generated.k8s.k8s_connection import K8S_Connection
+from ..generated.test import K8STypes, K8SStack as K8SStack_, Stack, K8SConnection, ConnectionTypes, StackTypes
 import sys
 import socket
 
@@ -22,8 +20,8 @@ class K8SStack:
             self.objects.append(K8STypes(**{class_name: obj}))
 
     def synth(self):
-        k_stack = K8S_Stack_(objects=self.objects, namespace=self.namespace)
-        k_conn = K8S_Connection(api=self.api, token=self.token)
+        k_stack = K8SStack_(objects=self.objects, namespace=self.namespace)
+        k_conn = K8SConnection(api=self.api, token=self.token)
         stack = Stack(
             name=self.name,
             stack=StackTypes(k8s_stack=k_stack),

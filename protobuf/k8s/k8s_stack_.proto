@@ -9,17 +9,22 @@ import "k8s/secret.proto";
 message K8STypes {
     oneof type {
         Pod pod = 1;
-        Service_ service_ = 2;
+        Service_ service = 2;
         Deployment deployment = 3;
         Secret secret = 4;
-        K8SOutput k8soutput = 5;
+        Lookup lookup = 5;
+        K8SOutput k8soutput = 6;
     }
 }
 
+message Lookup {
+    K8STypes object = 1;
+    string key = 2;
+}
+
 message K8SOutput {
-    repeated K8STypes objects = 1;
-    repeated string indices = 2;
-    repeated string strings = 3;
+    repeated Lookup lookups = 1;
+    repeated string strings = 2; 
 }
 
 message K8S_Stack_ {
