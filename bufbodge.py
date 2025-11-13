@@ -143,6 +143,7 @@ def force_kwargs():
                 with open(full_path, "w") as file:
                     file.write(data)
 
+
 def fix_python():
     fix_python_imports()
     fix_python_pyi()

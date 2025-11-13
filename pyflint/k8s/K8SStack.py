@@ -1,6 +1,14 @@
-from ..generated.test import K8STypes, K8SStack as K8SStack_, Stack, K8SConnection, ConnectionTypes, StackTypes
+from ..generated.test import (
+    K8STypes,
+    K8SStack as K8SStack_,
+    Stack,
+    K8SConnection,
+    ConnectionTypes,
+    StackTypes,
+)
 import sys
 import socket
+
 
 class K8SStack:
     def __init__(self, api: str, token: str, name: str, namespace: str):
@@ -28,11 +36,10 @@ class K8SStack:
             connection=ConnectionTypes(k8s_connection=k_conn),
         )
         socket_path = sys.argv[1]
-    
+
         # Connect to Unix socket
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.connect(socket_path)
         a = stack.SerializeToString()
         sock.sendall(a)
         sock.close()
-
