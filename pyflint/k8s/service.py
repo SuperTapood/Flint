@@ -1,7 +1,10 @@
 from typing import Union, List
-from ..generated.test import Service as Service_, Port, ServiceTarget
+
+from typeguard import typechecked
+from ..generated import Service as Service_, Port, ServiceTarget
 
 
+@typechecked
 def Service(*, name: str, target, ports: Union[Port, List[Port]]) -> Service_:
     if type(ports) != list:
         ports = [

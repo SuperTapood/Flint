@@ -1,4 +1,4 @@
-from ..generated.test import K8SOutput as _output, Lookup, K8STypes
+from ..generated import K8SOutput as _output, Lookup, K8STypes
 import sys
 import uuid
 
@@ -6,7 +6,10 @@ if sys.version_info >= (3, 14):
     from betterproto2 import Message
 
     Message.getitem = lambda self, item: Lookup(
-        object=K8STypes(**{self.__class__.__name__.lower(): self}), keys=[item, ]
+        object=K8STypes(**{self.__class__.__name__.lower(): self}),
+        keys=[
+            item,
+        ],
     )
 
     Lookup.getitem = lambda self, item: [self.keys.append(item), self][1]

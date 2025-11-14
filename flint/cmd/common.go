@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -82,7 +81,7 @@ func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 	command.Stdout = os.Stdout
 
 	if err := command.Start(); err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
 	conn, err := listener.Accept()
@@ -94,7 +93,7 @@ func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 	buf := make([]byte, 1024*1024)
 	n, err := conn.Read(buf)
 	if err != nil {
-		fmt.Println("Read error:", err)
+		panic(err)
 	}
 
 	data := buf[:n]

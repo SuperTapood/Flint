@@ -1,4 +1,4 @@
-from ..generated.test import (
+from ..generated import (
     K8STypes,
     K8SStack as K8SStack_,
     Stack,
@@ -8,6 +8,48 @@ from ..generated.test import (
 )
 import sys
 import socket
+
+# import traceback
+
+
+# class AutoCollect:
+#     def __init__(self):
+#         self.items = []
+#         self._prev_factory = None
+
+#     def __enter__(self):
+#         self._prev_factory = Element.factory
+#         Element.factory = self.collecting_factory
+#         return self.items
+
+#     def __exit__(self, exc_type, exc, tb: traceback):
+#         # Restore the original factory
+#         Element.factory = self._prev_factory
+
+#         if exc:
+#             # Store the exception for later use
+#             self.error = exc
+#             print(exc)
+#             print(exc_type)
+
+#             # Decide if you want to suppress the exception:
+#             # return True   → suppress
+#             # return False  → re-raise
+#             return True  # ← change to True if you want to swallow errors
+
+#     def collecting_factory(self, *args, **kwargs):
+#         obj = Element(*args, **kwargs)
+#         self.items.append(obj)
+#         return obj
+
+
+# class Element:
+#     def __init__(self, value):
+#         self.value = value
+
+#     @classmethod
+#     def factory(cls, *a, **kw):
+#         return cls(*a, **kw)
 
 
 class K8SStack:
