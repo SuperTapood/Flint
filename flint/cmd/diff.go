@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -86,7 +83,6 @@ func prettyChangeDiff(conn common.ConnectionType, changeset [][]map[string]any) 
 			Context: len(difflib.SplitLines(string(new_bytes))),
 		}
 
-		// fmt.Printf("%s[~] %s%s", colorYellow, name, unchagedColor)
 		printColored(colorYellow, "[~] %s", name)
 
 		PrintCDKDiff(diff)

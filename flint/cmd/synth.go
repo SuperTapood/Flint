@@ -1,6 +1,3 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -14,13 +11,8 @@ import (
 // synthCmd represents the synth command
 var synthCmd = &cobra.Command{
 	Use:   "synth",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "synth a stack into a stack file",
+	Long:  `synth a stack into a stack file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		stack, _, _ := StackConnFromApp()
 
@@ -55,14 +47,4 @@ func init() {
 	synthCmd.Flags().StringVarP(&app, "app", "a", "", "the app to synth the ")
 	synthCmd.MarkFlagRequired("app")
 	synthCmd.Flags().StringVarP(&dir, "dir", "d", ".", "the directory to run the app at")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// synthCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// synthCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

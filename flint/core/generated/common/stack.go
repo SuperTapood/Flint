@@ -2,11 +2,15 @@ package common
 
 import "github.com/heimdalr/dag"
 
+// a generic representation of a stack
 type StackType interface {
+	// synth this stack and return the resulting dag and object map
 	Synth(string) (*dag.DAG, map[string]map[string]any)
+	// get the useful metadata of this stack
 	GetMetadata() map[string]any
 }
 
+// resolve a StackTypes object to a StackType
 func (stackType *StackTypes) GetActual() StackType {
 	if out := stackType.GetK8SStack(); out != nil {
 		return out

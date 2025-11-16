@@ -13,11 +13,8 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "flint",
 	Short: "A multi provider CDK synthetication and orchestration tool",
-	Long: `Flint is a Go-based tool to orchestrate deployments to cloud infrastructre tools
+	Long: `Flint is a BLAZING FAST Go-based tool to orchestrate deployments to cloud infrastructre tools
 Use your favorite script languages to easily synth deployments!`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

@@ -11,6 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// common useful variables
 var (
 	app     string
 	dir     string
@@ -26,6 +27,14 @@ const (
 	unchagedColor = "\033[38;5;181m"
 )
 
+/*
+Load stack from either a runnable program or a synthed file.
+
+Returns:
+  - StackTypes* - The abstract protobuf stack (needs to be `GetActual()`-ed to get a the actual useable `StackType`)
+  - ConnectionTypes* - The abstract protobuf connection (needs to be `GetActual()`-ed to get a the actual useable `ConnectionType`)
+  - string - The name of the stack. This value is inaccessible later on.
+*/
 func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 	if _, err := os.Stat(app); err == nil {
 		data, err := os.ReadFile(app)
@@ -39,33 +48,12 @@ func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 		}
 		return stack.GetStack(), stack.GetConnection(), stack.GetName()
 	}
-	// r, w, err := os.Pipe()
-	// if err != nil {
-	// 	panic("Pipe error:" + err.Error())
-	// }
-
-	// lis, err := net.Listen("tcp", "127.0.0.1:51001")
-	// if err != nil {
-	// 	log.Fatalf("failed to listen: %v", err)
-	// }
-
-	// // 2. Get the listener's actual address (e.g., "localhost:54321")
-	// serverAddr := lis.Addr().String()
-	// log.Printf("Go server listening on: %s", serverAddr)
-
-	// // 3. Create the gRPC server
-	// s := grpc.NewServer()
-
-	// // 4. Start the Python child process
-	// log.Println("Starting Python client subprocess...")
 
 	tmpDir := os.TempDir()
 	socketPath := filepath.Join(tmpDir, "my-socket.sock")
 
-	// Remove any existing socket
 	os.Remove(socketPath)
 
-	// Create Unix socket listener
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
 		panic(err)
