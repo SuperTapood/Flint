@@ -1,0 +1,14 @@
+[project]
+name = "pyflint"
+version = "0.1.0"
+description = "A BLAZING FAST Cloud Development Kit with a chance of meatballs."
+readme = "README.md"
+requires-python = ">=3.14"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Yoav Oren" }
+]
+
+# If your module is src-layout
+[tool.setuptools]
+packages = ["pyflint"]
