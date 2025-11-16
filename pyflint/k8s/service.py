@@ -1,7 +1,7 @@
 from typing import Union, List
 
 from typeguard import typechecked
-from ..generated import Service as Service_, Port, ServiceTarget
+from pyflint.generated import Service as Service_, Port, ServiceTarget
 
 
 @typechecked

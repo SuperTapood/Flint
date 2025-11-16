@@ -1,4 +1,4 @@
-from ..generated import K8SOutput as _output, Lookup, K8STypes
+from pyflint.generated import K8SOutput as _output, Lookup, K8STypes
 import sys
 import uuid
 

@@ -1,4 +1,4 @@
-from ..generated import (
+from pyflint.generated import (
     K8STypes,
     K8SStack as K8SStack_,
     Stack,
