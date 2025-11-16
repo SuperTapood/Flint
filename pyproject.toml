@@ -1,5 +1,5 @@
 [project]
-name = "flintpy"
+name = "flint-python"
 version = "0.1.0"
 description = "A BLAZING FAST Cloud Development Kit with a chance of meatballs."
 readme = "README.md"
@@ -16,4 +16,4 @@ dependencies = [
 
 # If your module is src-layout
 [tool.setuptools]
-packages = ["flintpy"]
+packages = ["pyflint"]
