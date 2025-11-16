@@ -77,6 +77,8 @@ class K8SStack:
             stack=StackTypes(k8s_stack=k_stack),
             connection=ConnectionTypes(k8s_connection=k_conn),
         )
+        if len(sys.argv) < 2:
+            return
         socket_path = sys.argv[1]
 
         # Connect to Unix socket
