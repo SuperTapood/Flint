@@ -8,8 +8,16 @@ type ResourceType interface {
 	String() string
 	// return the id of the current object. The id is very opinionated.
 	GetID() string
-	// synth this object and add it to both the stack and its directed acyclic graph
-	Synth(string, string, *dag.DAG, map[string]map[string]any)
+	/*
+		synth this object and add it to both the stack and its directed acyclic graph
+
+		Parameters:
+			- map[string]any - stack metadata
+			- *dag.DAG - the stack's dag to be modified personally by the object
+			- map[string] - the object map to be deployed to the cloud provider
+
+	*/
+	Synth(map[string]any, *dag.DAG, map[string]map[string]any)
 	// return an opinionated map of this object's important properties from the cloud provider
 	Lookup() map[string]any
 }

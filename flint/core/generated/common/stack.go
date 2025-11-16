@@ -19,7 +19,20 @@ func (stackType *StackTypes) GetActual() StackType {
 	panic("got bad stack type")
 }
 
+// a generic representation of a connection
 type ConnectionType interface {
+	/*
+		deploy a stack using this connection
+
+		Parameters:
+			- *dag.DAG - the stack's dag to be modified personally by the object
+			- []string - a list of object names to remove
+			- map[string] - the object map to be deployed to the cloud provider
+			- string - the name of the stack
+			- map[string]any - stack metadata
+			- int - max revisions to keep
+
+	*/
 	Deploy(*dag.DAG, []string, map[string]map[string]any, string, map[string]any, int)
 	Diff(map[string]map[string]any, string) ([]string, []string, [][]map[string]any)
 	ToFileName(map[string]any) string

@@ -22,15 +22,15 @@ func (types *K8STypes) ActualType() base.ResourceType {
 	panic("got bad resource type")
 }
 
-func (types *K8STypes) Synth(stack_name string, namespace string, dag *dag.DAG, obj_map map[string]map[string]any) {
-	types.ActualType().Synth(stack_name, namespace, dag, obj_map)
+func (types *K8STypes) Synth(stack_metadata map[string]any, dag *dag.DAG, obj_map map[string]map[string]any) {
+	types.ActualType().Synth(stack_metadata, dag, obj_map)
 }
 
 func (stack *K8S_Stack_) Synth(name string) (*dag.DAG, map[string]map[string]any) {
 	objs_map := map[string]map[string]any{}
 	obj_dag := dag.NewDAG()
 	for _, obj := range stack.Objects {
-		obj.Synth(name, stack.GetNamespace(), obj_dag, objs_map)
+		obj.Synth(stack.GetMetadata(), obj_dag, objs_map)
 	}
 
 	return obj_dag, objs_map

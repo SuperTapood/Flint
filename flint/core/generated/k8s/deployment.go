@@ -10,10 +10,11 @@ func (deployment *Deployment) GetID() string {
 	return deployment.GetName()
 }
 
-func (deployment *Deployment) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (deployment *Deployment) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
 	if strings.Contains(deployment.GetName(), "::") {
 		panic("invalid name " + deployment.Name)
 	}
+	namespace := stack_metadata["namespace"].(string)
 	obj_map := map[string]any{
 		"apiVersion": "apps/v1",
 		"kind":       "Deployment",
@@ -40,7 +41,7 @@ func (deployment *Deployment) Synth(stack_name string, namespace string, dag *da
 
 	template := obj_map["spec"].(map[string]any)["template"].(map[string]any)
 	pod_map_map := make(map[string]map[string]any, 0)
-	deployment.GetPod().Synth(stack_name, namespace, nil, pod_map_map)
+	deployment.GetPod().Synth(stack_metadata, nil, pod_map_map)
 	pod_map := pod_map_map[deployment.GetPod().GetID()]
 	template["metadata"] = pod_map["metadata"]
 	template["spec"] = pod_map["spec"]

@@ -28,10 +28,11 @@ func (service *Service_) GetTargetID() string {
 	panic("got bad service target")
 }
 
-func (service *Service_) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (service *Service_) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
 	if strings.Contains(service.GetName(), "::") {
 		panic("invalid name " + service.Name)
 	}
+	namespace := stack_metadata["namespace"].(string)
 	obj_map := map[string]any{
 		"apiVersion": "v1",
 		"kind":       "Service",

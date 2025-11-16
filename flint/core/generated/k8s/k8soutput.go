@@ -17,7 +17,7 @@ func (lookup *Lookup) GetID() string {
 	return lookup.Object.ActualType().GetID()
 }
 
-func (output *K8SOutput) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (output *K8SOutput) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
 	lookups := output.GetLookups()
 	strings := output.GetStrings()
 	dag.AddVertexByID(output.GetID(), output.GetID())
@@ -30,7 +30,7 @@ func (output *K8SOutput) Synth(stack_name string, namespace string, dag *dag.DAG
 			"namespace": "",
 			"name":      "",
 		},
-		"id":      output.GetID(),
+		"id": output.GetID(),
 	}
 	objs_map[output.GetID()] = obj_map
 }

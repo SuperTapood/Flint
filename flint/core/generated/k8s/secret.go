@@ -11,10 +11,11 @@ func (secret *Secret) GetID() string {
 	return secret.GetName()
 }
 
-func (secret *Secret) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (secret *Secret) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
 	if strings.Contains(secret.GetName(), "::") {
 		panic("invalid name " + secret.Name)
 	}
+	namespace := stack_metadata["namespace"].(string)
 	obj_map := map[string]any{
 		"apiVersion": "v1",
 		"kind":       "Secret",

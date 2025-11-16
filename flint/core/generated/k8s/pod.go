@@ -10,10 +10,13 @@ func (pod *Pod) GetID() string {
 	return pod.GetName()
 }
 
-func (pod *Pod) Synth(stack_name string, namespace string, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (pod *Pod) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
 	if strings.Contains(pod.GetName(), "::") {
 		panic("invalid name " + pod.Name)
 	}
+
+	namespace := stack_metadata["namespace"].(string)
+	
 
 	obj_map := map[string]any{
 		"location":   "/api/v1/namespaces/" + namespace + "/pods",

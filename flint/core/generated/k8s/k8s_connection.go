@@ -507,7 +507,7 @@ func (conn *K8S_Connection) Deploy(dag_ *dag.DAG, to_remove []string, obj_map ma
 	secret.Data[1] = &dag_data
 	secret.Data[2] = &status
 
-	secret.Synth(name, namespace, newDag, obj_map)
+	secret.Synth(stack_metadata, newDag, obj_map)
 
 	conn.Apply(obj_map[secret.GetID()], nil)
 }
