@@ -22,6 +22,7 @@ builds:
       - linux
       - windows
       - darwin
+    binary: flint
 
 archives:
   - formats: [tar.gz]
