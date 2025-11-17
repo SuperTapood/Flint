@@ -15,4 +15,4 @@ dependencies = [
 
 # If your module is src-layout
 [tool.setuptools]
-packages = ["pyflint"]
+packages = { find = { where = ["."] } }
