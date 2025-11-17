@@ -1,4 +1,4 @@
-from pyflint.generated import Secret as _secret, SecretData
+from ..generated import Secret as _secret, SecretData
 
 
 def Secret(name, data, secret_type):
