@@ -16,3 +16,4 @@ dependencies = [
 # If your module is src-layout
 [tool.setuptools]
 packages = { find = { where = ["."] } }
+py-modules = []
