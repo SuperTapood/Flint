@@ -27,8 +27,8 @@ func (connection *K8S_Connection) getSecrets() map[string]any {
 		panic(err)
 	}
 
-	fmt.Println(body)
-	fmt.Println(result)
+	// fmt.Println(string(body))
+	// fmt.Println(result)
 
 	return result
 }
