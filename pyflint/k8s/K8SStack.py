@@ -8,6 +8,7 @@ from ..generated import (
 )
 import sys
 import socket
+from .K8SOutput import K8SOutput, K8STemplateOutput
 
 # import traceback
 
@@ -87,3 +88,11 @@ class K8SStack:
         a = stack.SerializeToString()
         sock.sendall(a)
         sock.close()
+    
+    def output(self, *args):
+        if sys.version_info >= (3, 14):
+            from string.templatelib import Template
+            if type(args[0]) == Template:
+                self.add_objects(K8STemplateOutput(args[0]))
+                return
+        self.add_objects(K8SOutput(*args))

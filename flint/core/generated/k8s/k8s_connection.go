@@ -20,6 +20,9 @@ import (
 	"github.com/heimdalr/dag"
 )
 
+var outputMu sync.Mutex
+var buffer bytes.Buffer
+
 func (connection *K8S_Connection) getSecrets() map[string]any {
 	var body, _ = connection.makeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
 	var result map[string]interface{}
@@ -159,12 +162,14 @@ func (connection *K8S_Connection) Apply(obj map[string]any, objs_map map[string]
 		// fmt.Println(string(body))
 		return
 	case "lookup":
+		outputMu.Lock()
+		defer outputMu.Unlock()
 		lookups := obj["lookups"].([]*K8SLookup)
 		strings := obj["strings"].([]string)
 		length := max(len(lookups), len(strings))
 		for i := range length {
 			if i < len(strings) {
-				fmt.Print(strings[i])
+				fmt.Fprint(&buffer, strings[i])
 			}
 			if i < len(lookups) {
 				lookup := lookups[i]
@@ -193,10 +198,10 @@ func (connection *K8S_Connection) Apply(obj map[string]any, objs_map map[string]
 					current = v
 				}
 
-				fmt.Print(current)
+				fmt.Fprint(&buffer, current)
 			}
 		}
-		fmt.Println()
+		fmt.Fprintln(&buffer)
 		return
 	}
 
@@ -513,6 +518,8 @@ func (conn *K8S_Connection) Deploy(dag_ *dag.DAG, to_remove []string, obj_map ma
 	secret.Synth(stack_metadata, newDag, obj_map)
 
 	conn.Apply(obj_map[secret.GetID()], nil)
+
+	fmt.Println(buffer.String())
 }
 
 func (conn *K8S_Connection) Destroy(stack_name string, stack_metadata map[string]any) {

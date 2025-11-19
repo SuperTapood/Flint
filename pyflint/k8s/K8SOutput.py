@@ -22,9 +22,12 @@ if sys.version_info >= (3, 14):
             if type(inter.value) == K8SLookup:
                 lookups.append(inter.value)
             else:
-                lookups.append(
-                    inter
-                )
+                lookups.append(K8SLookup(
+    object=K8STypes(**{inter.value.__class__.__name__.lower(): inter.value}),
+    keys=[
+        
+    ],
+))
         strings = [string for string in template.strings]
         o = _output(lookups=lookups, strings=strings, id=uuid.uuid8().__str__())
         return o
