@@ -9,12 +9,20 @@ import (
 func (lookup *Lookup) resolve() string {
 	obj := lookup.GetObject()
 	result := obj.ActualType().Lookup()
-	fmt.Println(result)
+	fmt.Println("AAAAAAAAAAA", result)
 	return ""
 }
 
 func (lookup *Lookup) GetID() string {
 	return lookup.Object.ActualType().GetID()
+}
+
+func (lookup *Lookup) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
+	panic("WOW")
+}
+
+func (lookup *Lookup) Lookup() map[string]any {
+	panic("can't lookup a lookup what the fuck are you even trying to do?")
 }
 
 func (output *K8SOutput) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
