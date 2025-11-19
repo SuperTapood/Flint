@@ -6,22 +6,22 @@ import (
 	"github.com/heimdalr/dag"
 )
 
-func (lookup *Lookup) resolve() string {
+func (lookup *K8SLookup) resolve() string {
 	obj := lookup.GetObject()
 	result := obj.ActualType().Lookup()
 	fmt.Println("AAAAAAAAAAA", result)
 	return ""
 }
 
-func (lookup *Lookup) GetID() string {
+func (lookup *K8SLookup) GetID() string {
 	return lookup.Object.ActualType().GetID()
 }
 
-func (lookup *Lookup) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (lookup *K8SLookup) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
 	panic("WOW")
 }
 
-func (lookup *Lookup) Lookup() map[string]any {
+func (lookup *K8SLookup) Lookup() map[string]any {
 	panic("can't lookup a lookup what the fuck are you even trying to do?")
 }
 

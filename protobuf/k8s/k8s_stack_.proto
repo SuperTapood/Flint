@@ -12,18 +12,18 @@ message K8STypes {
         Service_ service = 2;
         Deployment deployment = 3;
         Secret secret = 4;
-        Lookup lookup = 5;
+        K8SLookup lookup = 5;
         K8SOutput k8soutput = 6;
     }
 }
 
-message Lookup {
+message K8SLookup {
     K8STypes object = 1;
     repeated string keys = 2;
 }
 
 message K8SOutput {
-    repeated Lookup lookups = 1;
+    repeated K8SLookup lookups = 1;
     repeated string strings = 2;
     string ID = 3; 
 }

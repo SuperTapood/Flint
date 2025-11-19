@@ -159,7 +159,7 @@ func (connection *K8S_Connection) Apply(obj map[string]any, objs_map map[string]
 		// fmt.Println(string(body))
 		return
 	case "lookup":
-		lookups := obj["lookups"].([]*Lookup)
+		lookups := obj["lookups"].([]*K8SLookup)
 		strings := obj["strings"].([]string)
 		length := max(len(lookups), len(strings))
 		for i := range length {

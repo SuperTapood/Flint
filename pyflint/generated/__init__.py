@@ -8,10 +8,10 @@ __all__ = (
     "Deployment",
     "FlintDeployment",
     "K8SConnection",
+    "K8SLookup",
     "K8SOutput",
     "K8SStack",
     "K8STypes",
-    "Lookup",
     "Pod",
     "Port",
     "Secret",
@@ -98,8 +98,20 @@ default_message_pool.register_message("", "K8S_Stack_", K8SStack)
 
 
 @dataclass(kw_only=True, eq=False, repr=False)
+class K8SLookup(betterproto2.Message):
+    object: "K8STypes | None" = betterproto2.field(
+        1, betterproto2.TYPE_MESSAGE, optional=True
+    )
+
+    keys: "list[str]" = betterproto2.field(2, betterproto2.TYPE_STRING, repeated=True)
+
+
+default_message_pool.register_message("", "K8SLookup", K8SLookup)
+
+
+@dataclass(kw_only=True, eq=False, repr=False)
 class K8SOutput(betterproto2.Message):
-    lookups: "list[Lookup]" = betterproto2.field(
+    lookups: "list[K8SLookup]" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
@@ -138,7 +150,7 @@ class K8STypes(betterproto2.Message):
         4, betterproto2.TYPE_MESSAGE, optional=True, group="type"
     )
 
-    lookup: "Lookup | None" = betterproto2.field(
+    lookup: "K8SLookup | None" = betterproto2.field(
         5, betterproto2.TYPE_MESSAGE, optional=True, group="type"
     )
 
@@ -148,18 +160,6 @@ class K8STypes(betterproto2.Message):
 
 
 default_message_pool.register_message("", "K8STypes", K8STypes)
-
-
-@dataclass(kw_only=True, eq=False, repr=False)
-class Lookup(betterproto2.Message):
-    object: "K8STypes | None" = betterproto2.field(
-        1, betterproto2.TYPE_MESSAGE, optional=True
-    )
-
-    keys: "list[str]" = betterproto2.field(2, betterproto2.TYPE_STRING, repeated=True)
-
-
-default_message_pool.register_message("", "Lookup", Lookup)
 
 
 @dataclass(kw_only=True, eq=False, repr=False)

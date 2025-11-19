@@ -109,7 +109,7 @@ func (x *K8STypes) GetSecret() *Secret {
 	return nil
 }
 
-func (x *K8STypes) GetLookup() *Lookup {
+func (x *K8STypes) GetLookup() *K8SLookup {
 	if x != nil {
 		if x, ok := x.Type.(*K8STypes_Lookup); ok {
 			return x.Lookup
@@ -148,7 +148,7 @@ type K8STypes_Secret struct {
 }
 
 type K8STypes_Lookup struct {
-	Lookup *Lookup `protobuf:"bytes,5,opt,name=lookup,proto3,oneof"`
+	Lookup *K8SLookup `protobuf:"bytes,5,opt,name=lookup,proto3,oneof"`
 }
 
 type K8STypes_K8Soutput struct {
@@ -167,7 +167,7 @@ func (*K8STypes_Lookup) isK8STypes_Type() {}
 
 func (*K8STypes_K8Soutput) isK8STypes_Type() {}
 
-type Lookup struct {
+type K8SLookup struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Object        *K8STypes              `protobuf:"bytes,1,opt,name=object,proto3" json:"object,omitempty"`
 	Keys          []string               `protobuf:"bytes,2,rep,name=keys,proto3" json:"keys,omitempty"`
@@ -175,20 +175,20 @@ type Lookup struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Lookup) Reset() {
-	*x = Lookup{}
+func (x *K8SLookup) Reset() {
+	*x = K8SLookup{}
 	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Lookup) String() string {
+func (x *K8SLookup) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Lookup) ProtoMessage() {}
+func (*K8SLookup) ProtoMessage() {}
 
-func (x *Lookup) ProtoReflect() protoreflect.Message {
+func (x *K8SLookup) ProtoReflect() protoreflect.Message {
 	mi := &file_k8s_k8s_stack__proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -200,19 +200,19 @@ func (x *Lookup) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Lookup.ProtoReflect.Descriptor instead.
-func (*Lookup) Descriptor() ([]byte, []int) {
+// Deprecated: Use K8SLookup.ProtoReflect.Descriptor instead.
+func (*K8SLookup) Descriptor() ([]byte, []int) {
 	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Lookup) GetObject() *K8STypes {
+func (x *K8SLookup) GetObject() *K8STypes {
 	if x != nil {
 		return x.Object
 	}
 	return nil
 }
 
-func (x *Lookup) GetKeys() []string {
+func (x *K8SLookup) GetKeys() []string {
 	if x != nil {
 		return x.Keys
 	}
@@ -221,7 +221,7 @@ func (x *Lookup) GetKeys() []string {
 
 type K8SOutput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Lookups       []*Lookup              `protobuf:"bytes,1,rep,name=lookups,proto3" json:"lookups,omitempty"`
+	Lookups       []*K8SLookup           `protobuf:"bytes,1,rep,name=lookups,proto3" json:"lookups,omitempty"`
 	Strings       []string               `protobuf:"bytes,2,rep,name=strings,proto3" json:"strings,omitempty"`
 	ID            string                 `protobuf:"bytes,3,opt,name=ID,proto3" json:"ID,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -258,7 +258,7 @@ func (*K8SOutput) Descriptor() ([]byte, []int) {
 	return file_k8s_k8s_stack__proto_rawDescGZIP(), []int{2}
 }
 
-func (x *K8SOutput) GetLookups() []*Lookup {
+func (x *K8SOutput) GetLookups() []*K8SLookup {
 	if x != nil {
 		return x.Lookups
 	}
@@ -335,23 +335,25 @@ var File_k8s_k8s_stack__proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_stack__proto_rawDesc = "" +
 	"\n" +
-	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\x1a\x12k8s/service_.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\"\xf4\x01\n" +
+	"\x14k8s/k8s_stack_.proto\x1a\rk8s/pod.proto\x1a\x12k8s/service_.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\"\xf7\x01\n" +
 	"\bK8STypes\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12%\n" +
 	"\aservice\x18\x02 \x01(\v2\t.Service_H\x00R\aservice\x12-\n" +
 	"\n" +
 	"deployment\x18\x03 \x01(\v2\v.DeploymentH\x00R\n" +
 	"deployment\x12!\n" +
-	"\x06secret\x18\x04 \x01(\v2\a.SecretH\x00R\x06secret\x12!\n" +
-	"\x06lookup\x18\x05 \x01(\v2\a.LookupH\x00R\x06lookup\x12*\n" +
+	"\x06secret\x18\x04 \x01(\v2\a.SecretH\x00R\x06secret\x12$\n" +
+	"\x06lookup\x18\x05 \x01(\v2\n" +
+	".K8SLookupH\x00R\x06lookup\x12*\n" +
 	"\tk8soutput\x18\x06 \x01(\v2\n" +
 	".K8SOutputH\x00R\tk8soutputB\x06\n" +
-	"\x04type\"?\n" +
-	"\x06Lookup\x12!\n" +
+	"\x04type\"B\n" +
+	"\tK8SLookup\x12!\n" +
 	"\x06object\x18\x01 \x01(\v2\t.K8STypesR\x06object\x12\x12\n" +
-	"\x04keys\x18\x02 \x03(\tR\x04keys\"X\n" +
-	"\tK8SOutput\x12!\n" +
-	"\alookups\x18\x01 \x03(\v2\a.LookupR\alookups\x12\x18\n" +
+	"\x04keys\x18\x02 \x03(\tR\x04keys\"[\n" +
+	"\tK8SOutput\x12$\n" +
+	"\alookups\x18\x01 \x03(\v2\n" +
+	".K8SLookupR\alookups\x12\x18\n" +
 	"\astrings\x18\x02 \x03(\tR\astrings\x12\x0e\n" +
 	"\x02ID\x18\x03 \x01(\tR\x02ID\"O\n" +
 	"\n" +
@@ -374,7 +376,7 @@ func file_k8s_k8s_stack__proto_rawDescGZIP() []byte {
 var file_k8s_k8s_stack__proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_k8s_k8s_stack__proto_goTypes = []any{
 	(*K8STypes)(nil),   // 0: K8STypes
-	(*Lookup)(nil),     // 1: Lookup
+	(*K8SLookup)(nil),  // 1: K8SLookup
 	(*K8SOutput)(nil),  // 2: K8SOutput
 	(*K8S_Stack_)(nil), // 3: K8S_Stack_
 	(*Pod)(nil),        // 4: Pod
@@ -387,10 +389,10 @@ var file_k8s_k8s_stack__proto_depIdxs = []int32{
 	5, // 1: K8STypes.service:type_name -> Service_
 	6, // 2: K8STypes.deployment:type_name -> Deployment
 	7, // 3: K8STypes.secret:type_name -> Secret
-	1, // 4: K8STypes.lookup:type_name -> Lookup
+	1, // 4: K8STypes.lookup:type_name -> K8SLookup
 	2, // 5: K8STypes.k8soutput:type_name -> K8SOutput
-	0, // 6: Lookup.object:type_name -> K8STypes
-	1, // 7: K8SOutput.lookups:type_name -> Lookup
+	0, // 6: K8SLookup.object:type_name -> K8STypes
+	1, // 7: K8SOutput.lookups:type_name -> K8SLookup
 	0, // 8: K8S_Stack_.objects:type_name -> K8STypes
 	9, // [9:9] is the sub-list for method output_type
 	9, // [9:9] is the sub-list for method input_type
