@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"strings"
 
+	"github.com/SuperTapood/Flint/core/base"
 	"github.com/heimdalr/dag"
 )
 
@@ -11,7 +12,7 @@ func (secret *Secret) GetID() string {
 	return secret.GetName()
 }
 
-func (secret *Secret) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (secret *Secret) Synth(stack_metadata map[string]any) map[string]any {
 	if strings.Contains(secret.GetName(), "::") {
 		panic("invalid name " + secret.Name)
 	}
@@ -19,7 +20,6 @@ func (secret *Secret) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_ma
 	obj_map := map[string]any{
 		"apiVersion": "v1",
 		"kind":       "Secret",
-
 		"metadata": map[string]any{
 			"name":      secret.GetName(),
 			"namespace": namespace,
@@ -37,11 +37,21 @@ func (secret *Secret) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_ma
 		data[d.Key] = base64.StdEncoding.EncodeToString([]byte(d.Value))
 	}
 
+	return obj_map
+}
+
+func (secret *Secret) AddToDag(dag *dag.DAG) {
 	if dag != nil {
 		dag.AddVertexByID(secret.GetID(), secret.GetID())
 	}
+}
 
-	objs_map[secret.GetID()] = obj_map
+func (secret *Secret) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+	apply_metadata := make(map[string]any)
+	apply_metadata["name"] = secret.GetName()
+	apply_metadata["location"] = "/api/v1/namespaces/" + stack_metadata["namespace"].(string) + "/secrets/"
+
+	client.Apply(apply_metadata, secret.Synth(stack_metadata))
 }
 
 func (secret *Secret) Lookup() map[string]any {

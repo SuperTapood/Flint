@@ -11,7 +11,7 @@ var destroyCmd = &cobra.Command{
 	Long:  `destroy a stack`,
 	Run: func(cmd *cobra.Command, args []string) {
 		stack, conn, stack_name := StackConnFromApp()
-		conn.GetActual().Destroy(stack_name, stack.GetActual().GetMetadata())
+		conn.Destroy(stack_name, stack.GetActual().GetMetadata())
 	},
 }
 

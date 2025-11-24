@@ -27,17 +27,11 @@ var diffCmd = &cobra.Command{
 	Long:  `display the difference between the given stack and the existing one (if exists)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		stack, conn, stack_name := StackConnFromApp()
-		revision := conn.GetK8SConnection().GetCurrentRevision(stack_name)
+		revision := conn.GetCurrentRevision(stack_name)
 		fmt.Println("generating changeset for stack '" + stack_name + "' (" + strconv.Itoa(revision) + " -> " + strconv.Itoa(revision+1) + "):")
 		_, obj_map := stack.GetActual().Synth(stack_name)
 
-		for name, obj := range obj_map {
-			if obj["kind"] == "" {
-				delete(obj_map, name)
-			}
-		}
-
-		added, removed, changed := conn.GetActual().Diff(obj_map, stack_name)
+		added, removed, changed := conn.Diff(obj_map, stack.GetActual().GetMetadata(), stack_name)
 		if len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
 			fmt.Println("empty changeset nothing to do")
 			return
@@ -48,7 +42,7 @@ var diffCmd = &cobra.Command{
 		for _, rem := range removed {
 			printColored(colorRed, "[-] %s\n", rem)
 		}
-		prettyChangeDiff(conn.GetActual(), changed)
+		prettyChangeDiff(conn.GetActual(), stack.GetActual().GetMetadata(), changed)
 	},
 }
 
@@ -62,17 +56,17 @@ func init() {
 	diffCmd.Flags().BoolVarP(&noColor, "no-color", "c", false, "turn off diff coloring")
 }
 
-func prettyChangeDiff(conn common.ConnectionType, changeset [][]map[string]any) {
+func prettyChangeDiff(conn common.ConnectionType, stack_metadata map[string]any, changeset []map[string]map[string]any) {
 	for _, change := range changeset {
-		new_json := change[0]
-		name := conn.ToFileName(new_json)
-		new_bytes, err := json.MarshalIndent(new_json, " ", "\t")
+		new_obj := change["new"]
+		name := conn.PrettyName(new_obj, stack_metadata)
+		new_bytes, err := json.MarshalIndent(new_obj, " ", "\t")
 		if err != nil {
 			panic(err)
 		}
 
-		old_json := change[1]
-		old_bytes, err := json.MarshalIndent(old_json, " ", "\t")
+		old_obj := change["old"]
+		old_bytes, err := json.MarshalIndent(old_obj, " ", "\t")
 		if err != nil {
 			panic(err)
 		}

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/proto"
 )
 
 // synthCmd represents the synth command
@@ -14,13 +13,9 @@ var synthCmd = &cobra.Command{
 	Short: "synth a stack into a stack file",
 	Long:  `synth a stack into a stack file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		stack, _, _ := StackConnFromApp()
+		stack, _, stack_name := StackConnFromApp()
 
-		binary_synthed, err := proto.Marshal(stack)
-
-		if err != nil {
-			panic(err)
-		}
+		binary_synthed, _ := stack.GetActual().Synth(stack_name)
 
 		file, err := os.Create(filename)
 		if err != nil {

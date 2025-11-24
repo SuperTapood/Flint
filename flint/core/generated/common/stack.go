@@ -1,11 +1,24 @@
 package common
 
-import "github.com/heimdalr/dag"
+import (
+	"encoding/json"
+	"io"
+	"math"
+	"net/http"
+	"slices"
+	"strings"
+	sync "sync"
+
+	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/generated/gen_base"
+	"github.com/google/uuid"
+	"github.com/heimdalr/dag"
+)
 
 // a generic representation of a stack
 type StackType interface {
 	// synth this stack and return the resulting dag and object map
-	Synth(string) (*dag.DAG, map[string]map[string]any)
+	Synth(string) (*dag.DAG, map[string]base.ResourceType)
 	// get the useful metadata of this stack
 	GetMetadata() map[string]any
 }
@@ -21,24 +34,22 @@ func (stackType *StackTypes) GetActual() StackType {
 
 // a generic representation of a connection
 type ConnectionType interface {
-	/*
-		deploy a stack using this connection
-
-		Parameters:
-			- *dag.DAG - the stack's dag to be modified personally by the object
-			- []string - a list of object names to remove
-			- map[string] - the object map to be deployed to the cloud provider
-			- string - the name of the stack
-			- map[string]any - stack metadata
-			- int - max revisions to keep
-
-	*/
-	Deploy(*dag.DAG, []string, map[string]map[string]any, string, map[string]any, int)
-	Diff(map[string]map[string]any, string) ([]string, []string, [][]map[string]any)
-	ToFileName(map[string]any) string
-	Destroy(string, map[string]any)
-	GetCurrentRevision(string) int
-	Rollback(string, int, map[string]any)
+	// ToFileName(id string) string
+	// List() []gen_base.FlintDeployment
+	// GetCurrentRevision(stack_name string) int
+	PrettyName(resource map[string]any, stack_metadata map[string]any) string
+	// Diff(resources map[string]base.ResourceType, stack_metadata map[string]any, stack_name string) ([]string, []string, []map[string]map[string]any)
+	CleanHistory(stack_name string, oldest int, stack_metadata map[string]any)
+	Apply(apply_metadata map[string]any, resource map[string]any)
+	MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
+	CreateRevision(stack_name string, stack_metadata map[string]any, newDag *dag.DAG, marshalled []byte)
+	GetRevisions() map[string]map[string]any
+	GetLatestRevision(stack_name string) (map[string]any, string, string, int32)
+	GetDeployments() []string
+	Delete(delete_metadata map[string]any)
+	// Deploy(dag *dag.DAG, resources map[string]base.ResourceType, stack_name string, stack_metadata map[string]any, max_revisions int)
+	// Destroy(stack_name string, stack_metadata map[string]any)
+	// Rollback(stack_name string, targetRevision int, stack_metadata map[string]any)
 }
 
 func (connType *ConnectionTypes) GetActual() ConnectionType {
@@ -47,4 +58,248 @@ func (connType *ConnectionTypes) GetActual() ConnectionType {
 	}
 
 	panic("got bad connection type")
+}
+
+func (connType *ConnectionTypes) List() []gen_base.FlintDeployment {
+	secrets := connType.GetActual().GetDeployments()
+	deployments := []gen_base.FlintDeployment{}
+	visited := []string{}
+	for _, name := range secrets {
+		if slices.Contains(visited, name) {
+			continue
+		}
+
+		_, status, age, version := connType.GetActual().GetLatestRevision(name)
+		deployments = append(deployments, gen_base.FlintDeployment{
+			Name:     name,
+			Age:      age,
+			Status:   status,
+			Revision: version,
+		})
+		visited = append(visited, name)
+	}
+
+	return deployments
+}
+
+func (connType *ConnectionTypes) GetCurrentRevision(stack_name string) int {
+	_, _, _, version := connType.GetActual().GetLatestRevision(stack_name)
+	return int(version)
+}
+
+func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base.ResourceType, stack_name string, stack_metadata map[string]any, max_revisions int, createRevision bool) {
+	install_number := connType.GetCurrentRevision(stack_name) + 1
+	lowest_revision := max(install_number-max_revisions, 0) + 1
+
+	connType.GetActual().CleanHistory(stack_name, lowest_revision, stack_metadata)
+
+	// Get all vertices
+	vertices := _dag.GetVertices()
+
+	completed := make(map[string]bool)
+	var mu sync.Mutex
+
+	for len(completed) < len(vertices) {
+		// Find nodes ready to process (all dependencies completed)
+		var ready []string
+		for id := range vertices {
+			mu.Lock()
+			if completed[id] {
+				mu.Unlock()
+				continue
+			}
+
+			// Get descendants (dependencies)
+			descendants, err := _dag.GetDescendants(id)
+			if err != nil {
+				mu.Unlock()
+				panic(err)
+			}
+
+			// Check if all dependencies are completed
+			allDepsComplete := true
+			for depID := range descendants {
+				if !completed[depID] {
+					allDepsComplete = false
+					break
+				}
+			}
+			mu.Unlock()
+
+			if allDepsComplete {
+				ready = append(ready, id)
+			}
+		}
+
+		if len(ready) == 0 {
+			break // No more nodes to process
+		}
+
+		// Process ready nodes in parallel
+		var wg sync.WaitGroup
+		errChan := make(chan error, len(ready))
+
+		for _, id := range ready {
+			wg.Add(1)
+			go func(nodeID string) {
+				defer wg.Done()
+
+				vertex, err := _dag.GetVertex(nodeID)
+				if err != nil {
+					errChan <- err
+					return
+				}
+
+				resources[vertex.(string)].Apply(stack_metadata, resources, connType.GetActual())
+
+				mu.Lock()
+				completed[nodeID] = true
+				mu.Unlock()
+			}(id)
+		}
+
+		wg.Wait()
+		close(errChan)
+
+		// Check for errors
+		for err := range errChan {
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	if !createRevision {
+		return
+	}
+
+	newDag := dag.NewDAG()
+
+	b, err := json.Marshal(_dag)
+	if err != nil {
+		panic(err)
+	}
+
+	var dag_map map[string]any
+	err = json.Unmarshal(b, &dag_map)
+	if err != nil {
+		panic(err)
+	}
+
+	remove_from_dag := make([]string, 0)
+	for name, obj := range resources {
+		if obj.Synth(stack_metadata)["kind"] == "" {
+			// delete(obj_map, name)
+			remove_from_dag = append(remove_from_dag, name)
+		}
+	}
+
+	for _, value := range dag_map["vs"].([]any) {
+		i := value.(map[string]any)["i"].(string)
+		v := value.(map[string]any)["v"].(string)
+		if slices.Contains(remove_from_dag, i) || slices.Contains(remove_from_dag, v) {
+			continue
+		}
+		newDag.AddVertexByID(v, i)
+	}
+
+	for _, value := range dag_map["es"].([]any) {
+		d := value.(map[string]any)["d"].(string)
+		s := value.(map[string]any)["s"].(string)
+		if slices.Contains(remove_from_dag, d) || slices.Contains(remove_from_dag, s) {
+			continue
+		}
+		newDag.AddEdge(s, d)
+	}
+	objs_map := make(map[string]map[string]any, 0)
+
+	for _, resource := range resources {
+		synthed := resource.Synth(stack_metadata)
+		if synthed == nil {
+			continue
+		}
+		objs_map[resource.GetID()] = synthed
+	}
+
+	marshalled, _ := json.Marshal(objs_map)
+
+	connType.GetActual().CreateRevision(stack_name, stack_metadata, newDag, marshalled)
+
+}
+
+func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, stack_metadata map[string]any, stack_name string) ([]string, []string, []map[string]map[string]any) {
+	obj_map, _, _, version := connType.GetActual().GetLatestRevision(stack_name)
+
+	if version == 0 {
+		return make([]string, 1), make([]string, 1), make([]map[string]map[string]any, 1)
+	}
+
+	added := make([]string, 0)
+	removed := make([]string, 0)
+	changed := make([]map[string]map[string]any, 0)
+
+	for newName, newObj := range resources {
+		found := false
+		if newObj.Synth(stack_metadata) == nil {
+			continue
+		}
+		var foundObjKey string
+		for name, _ := range obj_map {
+			if name == newName {
+				found = true
+				foundObjKey = name
+				break
+			}
+		}
+
+		if found {
+			bytesOld, err := json.Marshal(obj_map[foundObjKey])
+			if err != nil {
+				panic(err)
+			}
+
+			bytesNew, err := json.Marshal(newObj.Synth(stack_metadata))
+			if err != nil {
+				panic(err)
+			}
+			if !strings.EqualFold(string(bytesOld), string(bytesNew)) {
+				objects := make(map[string]map[string]any, 2)
+				objects["new"] = newObj.Synth(stack_metadata)
+				objects["old"] = obj_map[foundObjKey].(map[string]any)
+				changed = append(changed, objects)
+			}
+
+			delete(obj_map, foundObjKey)
+		} else {
+			added = append(added, connType.GetActual().PrettyName(newObj.Synth(stack_metadata), stack_metadata))
+		}
+	}
+
+	for _, obj := range obj_map {
+		removed = append(removed, connType.GetActual().PrettyName(obj.(map[string]any), stack_metadata))
+	}
+
+	return added, removed, changed
+}
+
+func (connType *ConnectionTypes) Destroy(stack_name string, stack_metadata map[string]any) {
+	obj_map, _, _, version := connType.GetActual().GetLatestRevision(stack_name)
+
+	if version == 0 {
+		return
+	}
+
+	removes := make(map[string]base.ResourceType, 0)
+	obj_dag := dag.NewDAG()
+
+	for _, resource := range obj_map {
+		unresource := base.Unresource{
+			Name: connType.GetActual().PrettyName(resource.(map[string]any), stack_metadata),
+			ID:   uuid.New().String(),
+		}
+		removes[unresource.GetID()] = &unresource
+		obj_dag.AddVertexByID(unresource.GetID(), unresource.GetID())
+	}
+
+	connType.Deploy(obj_dag, removes, stack_name, stack_metadata, math.MaxInt, false)
 }

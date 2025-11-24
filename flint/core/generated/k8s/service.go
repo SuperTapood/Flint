@@ -3,6 +3,7 @@ package k8s
 import (
 	"strings"
 
+	"github.com/SuperTapood/Flint/core/base"
 	"github.com/heimdalr/dag"
 )
 
@@ -28,7 +29,11 @@ func (service *Service_) GetTargetID() string {
 	panic("got bad service target")
 }
 
-func (service *Service_) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (service *Service_) GetPrettyName(stack_metadata map[string]any) string {
+	return "Kubernetes::Service::" + stack_metadata["namespace"].(string) + "::" + service.GetName()
+}
+
+func (service *Service_) Synth(stack_metadata map[string]any) map[string]any {
 	if strings.Contains(service.GetName(), "::") {
 		panic("invalid name " + service.Name)
 	}
@@ -61,6 +66,10 @@ func (service *Service_) Synth(stack_metadata map[string]any, dag *dag.DAG, objs
 		spec["ports"] = append(spec["ports"].([]any), port_map)
 	}
 
+	return obj_map
+}
+
+func (service *Service_) AddToDag(dag *dag.DAG) {
 	if dag != nil {
 		err := dag.AddVertexByID(service.GetID(), service.GetID())
 		if err != nil {
@@ -71,10 +80,16 @@ func (service *Service_) Synth(stack_metadata map[string]any, dag *dag.DAG, objs
 			panic(err)
 		}
 	}
+}
 
-	objs_map[service.GetID()] = obj_map
+func (service *Service_) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+	apply_metadata := make(map[string]any)
+	apply_metadata["name"] = service.GetName()
+	apply_metadata["location"] = "/api/v1/namespaces/" + stack_metadata["namespace"].(string) + "/services/"
+
+	client.Apply(apply_metadata, service.Synth(stack_metadata))
 }
 
 func (service *Service_) Lookup() map[string]any {
-	return map[string]any{}
+	panic("fuck")
 }

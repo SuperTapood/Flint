@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
+	"github.com/SuperTapood/Flint/core/generated/common"
 	"github.com/SuperTapood/Flint/core/generated/k8s"
 	"github.com/spf13/cobra"
 )
@@ -44,6 +45,19 @@ func init() {
 	listK8SCmd.Flags().StringVarP(&k8s_api, "api", "a", "", "the api url of the kubernetes cluster")
 }
 
+func prettyList(connType *common.ConnectionTypes) {
+	deployments := connType.List()
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
+
+	fmt.Fprintln(w, "Name\tAge\tStatus\tRevision")
+
+	for i := range deployments {
+		deployment := &deployments[i]
+		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age+"\t"+deployment.Status+"\t"+strconv.Itoa(int(deployment.Revision)))
+	}
+	w.Flush()
+}
+
 func listK8s(cmd *cobra.Command, args []string) {
 	var bad = false
 
@@ -67,15 +81,11 @@ func listK8s(cmd *cobra.Command, args []string) {
 		Token: k8s_token,
 	}
 
-	deployments := conn.List()
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
-
-	fmt.Fprintln(w, "Name\tAge\tStatus\tRevision")
-
-	for i := range deployments {
-		deployment := &deployments[i]
-		fmt.Fprintln(w, deployment.Name+"\t"+deployment.Age+"\t"+deployment.Status+"\t"+strconv.Itoa(int(deployment.Revision)))
+	types := common.ConnectionTypes{
+		Type: &common.ConnectionTypes_K8SConnection{
+			K8SConnection: &conn,
+		},
 	}
-	w.Flush()
 
+	prettyList(&types)
 }

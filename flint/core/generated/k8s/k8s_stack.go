@@ -18,21 +18,19 @@ func (types *K8STypes) ActualType() base.ResourceType {
 		// fmt.Println(out.GetStrings())
 		// fmt.Println(out.GetLookups())
 		return out
-	} else if out := types.GetLookup(); out != nil {
-		return out
 	}
+	// } else if out := types.GetLookup(); out != nil {
+	// 	return out
+	// }
 	panic("got bad resource type")
 }
 
-func (types *K8STypes) Synth(stack_metadata map[string]any, dag *dag.DAG, obj_map map[string]map[string]any) {
-	types.ActualType().Synth(stack_metadata, dag, obj_map)
-}
-
-func (stack *K8S_Stack_) Synth(name string) (*dag.DAG, map[string]map[string]any) {
-	objs_map := map[string]map[string]any{}
+func (stack *K8S_Stack_) Synth(name string) (*dag.DAG, map[string]base.ResourceType) {
+	objs_map := map[string]base.ResourceType{}
 	obj_dag := dag.NewDAG()
 	for _, obj := range stack.Objects {
-		obj.Synth(stack.GetMetadata(), obj_dag, objs_map)
+		objs_map[obj.ActualType().GetID()] = obj.ActualType()
+		obj.ActualType().AddToDag(obj_dag)
 	}
 
 	return obj_dag, objs_map

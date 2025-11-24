@@ -17,7 +17,10 @@ type ResourceType interface {
 			- map[string] - the object map to be deployed to the cloud provider
 
 	*/
-	Synth(map[string]any, *dag.DAG, map[string]map[string]any)
+	AddToDag(dag *dag.DAG)
 	// return an opinionated map of this object's important properties from the cloud provider
 	Lookup() map[string]any
+
+	Synth(stack_metadata map[string]any) map[string]any
+	Apply(stack_metadata map[string]any, resources map[string]ResourceType, client CloudClient)
 }
