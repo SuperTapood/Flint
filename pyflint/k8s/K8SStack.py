@@ -5,52 +5,20 @@ from ..generated import (
     K8SConnection,
     ConnectionTypes,
     StackTypes,
+    Port,
+    SecretData,
+    ServiceTarget,
+    K8SLookup,
 )
+from ..generated import k8s
 import sys
 import socket
 from .K8SOutput import K8SOutput, K8STemplateOutput
 
-# import traceback
+from betterproto2 import Message
+import inspect
 
-
-# class AutoCollect:
-#     def __init__(self):
-#         self.items = []
-#         self._prev_factory = None
-
-#     def __enter__(self):
-#         self._prev_factory = Element.factory
-#         Element.factory = self.collecting_factory
-#         return self.items
-
-#     def __exit__(self, exc_type, exc, tb: traceback):
-#         # Restore the original factory
-#         Element.factory = self._prev_factory
-
-#         if exc:
-#             # Store the exception for later use
-#             self.error = exc
-#             print(exc)
-#             print(exc_type)
-
-#             # Decide if you want to suppress the exception:
-#             # return True   → suppress
-#             # return False  → re-raise
-#             return True  # ← change to True if you want to swallow errors
-
-#     def collecting_factory(self, *args, **kwargs):
-#         obj = Element(*args, **kwargs)
-#         self.items.append(obj)
-#         return obj
-
-
-# class Element:
-#     def __init__(self, value):
-#         self.value = value
-
-#     @classmethod
-#     def factory(cls, *a, **kw):
-#         return cls(*a, **kw)
+import traceback
 
 
 class K8SStack:
@@ -64,9 +32,26 @@ class K8SStack:
         self.name = name
         self.namespace = namespace
         self.objects = []
+        self._prev_post_init = None
 
     def add_objects(self, *objects):
+        excluded = [
+            K8STypes,
+            Port,
+            SecretData,
+            K8SStack,
+            K8SStack_,
+            K8SConnection,
+            StackTypes,
+            ConnectionTypes,
+            Stack,
+            ServiceTarget,
+            K8SOutput,
+            K8SLookup,
+        ]
         for obj in objects:
+            if type(obj) in excluded:
+                continue
             class_name = obj.__class__.__name__.lower()
             self.objects.append(K8STypes(**{class_name: obj}))
 
@@ -75,8 +60,8 @@ class K8SStack:
         k_conn = K8SConnection(api=self.api, token=self.token)
         stack = Stack(
             name=self.name,
-            stack=StackTypes(k8s_stack=k_stack),
-            connection=ConnectionTypes(k8s_connection=k_conn),
+            stack=StackTypes(k8sstack=k_stack),
+            connection=ConnectionTypes(k8sconnection=k_conn),
         )
         if len(sys.argv) < 2:
             return
@@ -88,11 +73,35 @@ class K8SStack:
         a = stack.SerializeToString()
         sock.sendall(a)
         sock.close()
-    
+
     def output(self, *args):
         if sys.version_info >= (3, 14):
             from string.templatelib import Template
+
             if type(args[0]) == Template:
                 self.add_objects(K8STemplateOutput(args[0]))
                 return
         self.add_objects(K8SOutput(*args))
+
+    def __enter__(self):
+        self._prev_post_init = Message.__post_init__
+
+        def post_init(obj):
+            obj._unknown_fields = b""
+            self.add_objects(obj)
+
+        
+        Message.__post_init__ = post_init
+
+    def __exit__(self, exc_type, exc, tb: traceback):
+        Message.__post_init__ = self._prev_post_init
+        if exc:
+            # Store the exception for later use
+            self.error = exc
+            print(exc)
+            print(exc_type)
+
+            # Decide if you want to suppress the exception:
+            # return True   → suppress
+            # return False  → re-raise
+            return False  # ← change to True if you want to swallow errors

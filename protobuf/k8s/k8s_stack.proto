@@ -2,14 +2,14 @@ syntax = "proto3";
 option go_package = "github.com/SuperTapood/Flint/core/generated/k8s";
 
 import "k8s/pod.proto";
-import "k8s/service_.proto";
+import "k8s/service.proto";
 import "k8s/deployment.proto";
 import "k8s/secret.proto";
 
 message K8STypes {
     oneof type {
         Pod pod = 1;
-        Service_ service = 2;
+        Service service = 2;
         Deployment deployment = 3;
         Secret secret = 4;
         K8SLookup lookup = 5;
@@ -28,7 +28,7 @@ message K8SOutput {
     string ID = 3; 
 }
 
-message K8S_Stack_ {
+message K8SStack {
     repeated K8STypes objects = 1;
     string namespace = 2;
 }

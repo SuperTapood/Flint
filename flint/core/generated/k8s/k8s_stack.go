@@ -25,7 +25,7 @@ func (types *K8STypes) ActualType() base.ResourceType {
 	panic("got bad resource type")
 }
 
-func (stack *K8S_Stack_) Synth(name string) (*dag.DAG, map[string]base.ResourceType) {
+func (stack *K8SStack) Synth(name string) (*dag.DAG, map[string]base.ResourceType) {
 	objs_map := map[string]base.ResourceType{}
 	obj_dag := dag.NewDAG()
 	for _, obj := range stack.Objects {
@@ -36,13 +36,13 @@ func (stack *K8S_Stack_) Synth(name string) (*dag.DAG, map[string]base.ResourceT
 	return obj_dag, objs_map
 }
 
-func (stack *K8S_Stack_) GetMetadata() map[string]any {
+func (stack *K8SStack) GetMetadata() map[string]any {
 	return map[string]any{
 		"namespace": stack.GetNamespace(),
 	}
 }
 
-func (stack *K8S_Stack_) FetchObjects() []base.ResourceType {
+func (stack *K8SStack) FetchObjects() []base.ResourceType {
 	objs := stack.GetObjects()
 	out := make([]base.ResourceType, len(objs))
 

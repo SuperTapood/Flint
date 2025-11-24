@@ -13,9 +13,9 @@ var synthCmd = &cobra.Command{
 	Short: "synth a stack into a stack file",
 	Long:  `synth a stack into a stack file`,
 	Run: func(cmd *cobra.Command, args []string) {
-		stack, _, stack_name := StackConnFromApp()
+		stack, _, stackName := StackConnFromApp()
 
-		binary_synthed, _ := stack.GetActual().Synth(stack_name)
+		binary_synthed, _ := stack.GetActual().Synth(stackName)
 
 		file, err := os.Create(filename)
 		if err != nil {

@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type K8S_Connection struct {
+type K8SConnection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Api           string                 `protobuf:"bytes,1,opt,name=api,proto3" json:"api,omitempty"`
 	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
@@ -29,20 +29,20 @@ type K8S_Connection struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *K8S_Connection) Reset() {
-	*x = K8S_Connection{}
+func (x *K8SConnection) Reset() {
+	*x = K8SConnection{}
 	mi := &file_k8s_k8s_connection_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *K8S_Connection) String() string {
+func (x *K8SConnection) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*K8S_Connection) ProtoMessage() {}
+func (*K8SConnection) ProtoMessage() {}
 
-func (x *K8S_Connection) ProtoReflect() protoreflect.Message {
+func (x *K8SConnection) ProtoReflect() protoreflect.Message {
 	mi := &file_k8s_k8s_connection_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,19 +54,19 @@ func (x *K8S_Connection) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use K8S_Connection.ProtoReflect.Descriptor instead.
-func (*K8S_Connection) Descriptor() ([]byte, []int) {
+// Deprecated: Use K8SConnection.ProtoReflect.Descriptor instead.
+func (*K8SConnection) Descriptor() ([]byte, []int) {
 	return file_k8s_k8s_connection_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *K8S_Connection) GetApi() string {
+func (x *K8SConnection) GetApi() string {
 	if x != nil {
 		return x.Api
 	}
 	return ""
 }
 
-func (x *K8S_Connection) GetToken() string {
+func (x *K8SConnection) GetToken() string {
 	if x != nil {
 		return x.Token
 	}
@@ -77,8 +77,8 @@ var File_k8s_k8s_connection_proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_connection_proto_rawDesc = "" +
 	"\n" +
-	"\x18k8s/k8s_connection.proto\"8\n" +
-	"\x0eK8S_Connection\x12\x10\n" +
+	"\x18k8s/k8s_connection.proto\"7\n" +
+	"\rK8SConnection\x12\x10\n" +
 	"\x03api\x18\x01 \x01(\tR\x03api\x12\x14\n" +
 	"\x05token\x18\x02 \x01(\tR\x05tokenBGB\x12K8sConnectionProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
@@ -96,7 +96,7 @@ func file_k8s_k8s_connection_proto_rawDescGZIP() []byte {
 
 var file_k8s_k8s_connection_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_k8s_k8s_connection_proto_goTypes = []any{
-	(*K8S_Connection)(nil), // 0: K8S_Connection
+	(*K8SConnection)(nil), // 0: K8SConnection
 }
 var file_k8s_k8s_connection_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type

@@ -26,12 +26,12 @@ var diffCmd = &cobra.Command{
 	Short: "display the difference between the given stack and the existing one (if exists)",
 	Long:  `display the difference between the given stack and the existing one (if exists)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		stack, conn, stack_name := StackConnFromApp()
-		revision := conn.GetCurrentRevision(stack_name)
-		fmt.Println("generating changeset for stack '" + stack_name + "' (" + strconv.Itoa(revision) + " -> " + strconv.Itoa(revision+1) + "):")
-		_, obj_map := stack.GetActual().Synth(stack_name)
+		stack, conn, stackName := StackConnFromApp()
+		revision := conn.GetCurrentRevision(stackName)
+		fmt.Println("generating changeset for stack '" + stackName + "' (" + strconv.Itoa(revision) + " -> " + strconv.Itoa(revision+1) + "):")
+		_, objMap := stack.GetActual().Synth(stackName)
 
-		added, removed, changed := conn.Diff(obj_map, stack.GetActual().GetMetadata(), stack_name)
+		added, removed, changed := conn.Diff(objMap, stack.GetActual().GetMetadata(), stackName)
 		if len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
 			fmt.Println("empty changeset nothing to do")
 			return
@@ -56,25 +56,25 @@ func init() {
 	diffCmd.Flags().BoolVarP(&noColor, "no-color", "c", false, "turn off diff coloring")
 }
 
-func prettyChangeDiff(conn common.ConnectionType, stack_metadata map[string]any, changeset []map[string]map[string]any) {
+func prettyChangeDiff(conn common.ConnectionType, stackMetadata map[string]any, changeset []map[string]map[string]any) {
 	for _, change := range changeset {
-		new_obj := change["new"]
-		name := conn.PrettyName(new_obj, stack_metadata)
-		new_bytes, err := json.MarshalIndent(new_obj, " ", "\t")
+		newObj := change["new"]
+		name := conn.PrettyName(newObj, stackMetadata)
+		newBytes, err := json.MarshalIndent(newObj, " ", "\t")
 		if err != nil {
 			panic(err)
 		}
 
-		old_obj := change["old"]
-		old_bytes, err := json.MarshalIndent(old_obj, " ", "\t")
+		oldObj := change["old"]
+		oldBytes, err := json.MarshalIndent(oldObj, " ", "\t")
 		if err != nil {
 			panic(err)
 		}
 
 		diff := difflib.UnifiedDiff{
-			A:       difflib.SplitLines(string(old_bytes)),
-			B:       difflib.SplitLines(string(new_bytes)),
-			Context: len(difflib.SplitLines(string(new_bytes))),
+			A:       difflib.SplitLines(string(oldBytes)),
+			B:       difflib.SplitLines(string(newBytes)),
+			Context: len(difflib.SplitLines(string(newBytes))),
 		}
 
 		printColored(colorYellow, "[~] %s", name)

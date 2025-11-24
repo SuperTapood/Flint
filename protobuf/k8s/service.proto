@@ -12,7 +12,7 @@ message ServiceTarget {
     }
 }
 
-message Service_ {
+message Service {
     string name = 1;
     // the pod to bind the service to
     ServiceTarget target = 2;

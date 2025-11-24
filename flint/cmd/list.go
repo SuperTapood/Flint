@@ -76,14 +76,14 @@ func listK8s(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	conn := k8s.K8S_Connection{
+	conn := k8s.K8SConnection{
 		Api:   k8s_api,
 		Token: k8s_token,
 	}
 
 	types := common.ConnectionTypes{
-		Type: &common.ConnectionTypes_K8SConnection{
-			K8SConnection: &conn,
+		Type: &common.ConnectionTypes_K8Sconnection{
+			K8Sconnection: &conn,
 		},
 	}
 

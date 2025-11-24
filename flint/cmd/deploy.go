@@ -19,9 +19,9 @@ var deployCmd = &cobra.Command{
 	Short: "deploy a flint stack to the cloud",
 	Long:  `deploy a flint stack to the cloud`,
 	Run: func(cmd *cobra.Command, args []string) {
-		stack, conn, stack_name := StackConnFromApp()
-		obj_dag, obj_map := stack.GetActual().Synth(stack_name)
-		added, removed, changed := conn.Diff(obj_map, stack.GetActual().GetMetadata(), stack_name)
+		stack, conn, stackName := StackConnFromApp()
+		objDag, objMap := stack.GetActual().Synth(stackName)
+		added, removed, changed := conn.Diff(objMap, stack.GetActual().GetMetadata(), stackName)
 		if !deployForce && len(added) == 0 && len(removed) == 0 && len(changed) == 0 {
 			fmt.Println("empty changeset nothing to do")
 			return
@@ -31,10 +31,10 @@ var deployCmd = &cobra.Command{
 				Name: name,
 				ID:   uuid.New().String(),
 			}
-			obj_map[unresource.GetID()] = &unresource
-			obj_dag.AddVertexByID(unresource.GetID(), unresource.GetID())
+			objMap[unresource.GetID()] = &unresource
+			objDag.AddVertexByID(unresource.GetID(), unresource.GetID())
 		}
-		conn.Deploy(obj_dag, obj_map, stack_name, stack.GetActual().GetMetadata(), deployMaxSecretNumber, true)
+		conn.Deploy(objDag, objMap, stackName, stack.GetActual().GetMetadata(), deployMaxSecretNumber, true)
 	},
 }
 

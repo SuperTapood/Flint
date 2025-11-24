@@ -25,7 +25,7 @@ type StackType interface {
 
 // resolve a StackTypes object to a StackType
 func (stackType *StackTypes) GetActual() StackType {
-	if out := stackType.GetK8SStack(); out != nil {
+	if out := stackType.GetK8Sstack(); out != nil {
 		return out
 	}
 
@@ -53,7 +53,7 @@ type ConnectionType interface {
 }
 
 func (connType *ConnectionTypes) GetActual() ConnectionType {
-	if out := connType.GetK8SConnection(); out != nil {
+	if out := connType.GetK8Sconnection(); out != nil {
 		return out
 	}
 

@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        (unknown)
-// source: k8s/service_.proto
+// source: k8s/service.proto
 
 package k8s
 
@@ -35,7 +35,7 @@ type ServiceTarget struct {
 
 func (x *ServiceTarget) Reset() {
 	*x = ServiceTarget{}
-	mi := &file_k8s_service__proto_msgTypes[0]
+	mi := &file_k8s_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +47,7 @@ func (x *ServiceTarget) String() string {
 func (*ServiceTarget) ProtoMessage() {}
 
 func (x *ServiceTarget) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_service__proto_msgTypes[0]
+	mi := &file_k8s_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +60,7 @@ func (x *ServiceTarget) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceTarget.ProtoReflect.Descriptor instead.
 func (*ServiceTarget) Descriptor() ([]byte, []int) {
-	return file_k8s_service__proto_rawDescGZIP(), []int{0}
+	return file_k8s_service_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *ServiceTarget) GetType() isServiceTarget_Type {
@@ -104,7 +104,7 @@ func (*ServiceTarget_Pod) isServiceTarget_Type() {}
 
 func (*ServiceTarget_Deployment) isServiceTarget_Type() {}
 
-type Service_ struct {
+type Service struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// the pod to bind the service to
@@ -114,21 +114,21 @@ type Service_ struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Service_) Reset() {
-	*x = Service_{}
-	mi := &file_k8s_service__proto_msgTypes[1]
+func (x *Service) Reset() {
+	*x = Service{}
+	mi := &file_k8s_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Service_) String() string {
+func (x *Service) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Service_) ProtoMessage() {}
+func (*Service) ProtoMessage() {}
 
-func (x *Service_) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_service__proto_msgTypes[1]
+func (x *Service) ProtoReflect() protoreflect.Message {
+	mi := &file_k8s_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -139,73 +139,73 @@ func (x *Service_) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Service_.ProtoReflect.Descriptor instead.
-func (*Service_) Descriptor() ([]byte, []int) {
-	return file_k8s_service__proto_rawDescGZIP(), []int{1}
+// Deprecated: Use Service.ProtoReflect.Descriptor instead.
+func (*Service) Descriptor() ([]byte, []int) {
+	return file_k8s_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Service_) GetName() string {
+func (x *Service) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *Service_) GetTarget() *ServiceTarget {
+func (x *Service) GetTarget() *ServiceTarget {
 	if x != nil {
 		return x.Target
 	}
 	return nil
 }
 
-func (x *Service_) GetPorts() []*gen_base.Port {
+func (x *Service) GetPorts() []*gen_base.Port {
 	if x != nil {
 		return x.Ports
 	}
 	return nil
 }
 
-var File_k8s_service__proto protoreflect.FileDescriptor
+var File_k8s_service_proto protoreflect.FileDescriptor
 
-const file_k8s_service__proto_rawDesc = "" +
+const file_k8s_service_proto_rawDesc = "" +
 	"\n" +
-	"\x12k8s/service_.proto\x1a\rk8s/pod.proto\x1a\x14k8s/deployment.proto\x1a\x13gen_base/port.proto\"`\n" +
+	"\x11k8s/service.proto\x1a\rk8s/pod.proto\x1a\x14k8s/deployment.proto\x1a\x13gen_base/port.proto\"`\n" +
 	"\rServiceTarget\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12-\n" +
 	"\n" +
 	"deployment\x18\x02 \x01(\v2\v.DeploymentH\x00R\n" +
 	"deploymentB\x06\n" +
-	"\x04type\"c\n" +
-	"\bService_\x12\x12\n" +
+	"\x04type\"b\n" +
+	"\aService\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12&\n" +
 	"\x06target\x18\x02 \x01(\v2\x0e.ServiceTargetR\x06target\x12\x1b\n" +
 	"\x05ports\x18\x03 \x03(\v2\x05.PortR\x05portsBAB\fServiceProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
-	file_k8s_service__proto_rawDescOnce sync.Once
-	file_k8s_service__proto_rawDescData []byte
+	file_k8s_service_proto_rawDescOnce sync.Once
+	file_k8s_service_proto_rawDescData []byte
 )
 
-func file_k8s_service__proto_rawDescGZIP() []byte {
-	file_k8s_service__proto_rawDescOnce.Do(func() {
-		file_k8s_service__proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_k8s_service__proto_rawDesc), len(file_k8s_service__proto_rawDesc)))
+func file_k8s_service_proto_rawDescGZIP() []byte {
+	file_k8s_service_proto_rawDescOnce.Do(func() {
+		file_k8s_service_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_k8s_service_proto_rawDesc), len(file_k8s_service_proto_rawDesc)))
 	})
-	return file_k8s_service__proto_rawDescData
+	return file_k8s_service_proto_rawDescData
 }
 
-var file_k8s_service__proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_k8s_service__proto_goTypes = []any{
+var file_k8s_service_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_k8s_service_proto_goTypes = []any{
 	(*ServiceTarget)(nil), // 0: ServiceTarget
-	(*Service_)(nil),      // 1: Service_
+	(*Service)(nil),       // 1: Service
 	(*Pod)(nil),           // 2: Pod
 	(*Deployment)(nil),    // 3: Deployment
 	(*gen_base.Port)(nil), // 4: Port
 }
-var file_k8s_service__proto_depIdxs = []int32{
+var file_k8s_service_proto_depIdxs = []int32{
 	2, // 0: ServiceTarget.pod:type_name -> Pod
 	3, // 1: ServiceTarget.deployment:type_name -> Deployment
-	0, // 2: Service_.target:type_name -> ServiceTarget
-	4, // 3: Service_.ports:type_name -> Port
+	0, // 2: Service.target:type_name -> ServiceTarget
+	4, // 3: Service.ports:type_name -> Port
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -213,14 +213,14 @@ var file_k8s_service__proto_depIdxs = []int32{
 	0, // [0:4] is the sub-list for field type_name
 }
 
-func init() { file_k8s_service__proto_init() }
-func file_k8s_service__proto_init() {
-	if File_k8s_service__proto != nil {
+func init() { file_k8s_service_proto_init() }
+func file_k8s_service_proto_init() {
+	if File_k8s_service_proto != nil {
 		return
 	}
 	file_k8s_pod_proto_init()
 	file_k8s_deployment_proto_init()
-	file_k8s_service__proto_msgTypes[0].OneofWrappers = []any{
+	file_k8s_service_proto_msgTypes[0].OneofWrappers = []any{
 		(*ServiceTarget_Pod)(nil),
 		(*ServiceTarget_Deployment)(nil),
 	}
@@ -228,17 +228,17 @@ func file_k8s_service__proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_k8s_service__proto_rawDesc), len(file_k8s_service__proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_k8s_service_proto_rawDesc), len(file_k8s_service_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_k8s_service__proto_goTypes,
-		DependencyIndexes: file_k8s_service__proto_depIdxs,
-		MessageInfos:      file_k8s_service__proto_msgTypes,
+		GoTypes:           file_k8s_service_proto_goTypes,
+		DependencyIndexes: file_k8s_service_proto_depIdxs,
+		MessageInfos:      file_k8s_service_proto_msgTypes,
 	}.Build()
-	File_k8s_service__proto = out.File
-	file_k8s_service__proto_goTypes = nil
-	file_k8s_service__proto_depIdxs = nil
+	File_k8s_service_proto = out.File
+	file_k8s_service_proto_goTypes = nil
+	file_k8s_service_proto_depIdxs = nil
 }
