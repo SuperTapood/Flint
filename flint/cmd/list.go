@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/SuperTapood/Flint/core/generated/general"
 	"github.com/SuperTapood/Flint/core/generated/k8s"
 	"github.com/spf13/cobra"
 )
@@ -45,7 +45,7 @@ func init() {
 	listK8SCmd.Flags().StringVarP(&k8s_api, "api", "a", "", "the api url of the kubernetes cluster")
 }
 
-func prettyList(connType *common.ConnectionTypes) {
+func prettyList(connType *general.ConnectionTypes) {
 	deployments := connType.List()
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
 
@@ -81,8 +81,8 @@ func listK8s(cmd *cobra.Command, args []string) {
 		Token: k8s_token,
 	}
 
-	types := common.ConnectionTypes{
-		Type: &common.ConnectionTypes_K8Sconnection{
+	types := general.ConnectionTypes{
+		Type: &general.ConnectionTypes_K8Sconnection{
 			K8Sconnection: &conn,
 		},
 	}

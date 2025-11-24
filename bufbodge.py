@@ -18,6 +18,7 @@ def fix_python(modules):
 
 def run_buf(modules):
     for module in modules:
+        os.makedirs(f"./pyflint/generated/{module}", exist_ok=True)
         cmd = (
             "protoc -I protobuf "
             f"--python_betterproto2_out=./pyflint/generated/{module} "

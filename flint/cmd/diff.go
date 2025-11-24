@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/SuperTapood/Flint/core/generated/general"
 	"github.com/pmezard/go-difflib/difflib"
 	"github.com/spf13/cobra"
 )
@@ -56,7 +56,7 @@ func init() {
 	diffCmd.Flags().BoolVarP(&noColor, "no-color", "c", false, "turn off diff coloring")
 }
 
-func prettyChangeDiff(conn common.ConnectionType, stackMetadata map[string]any, changeset []map[string]map[string]any) {
+func prettyChangeDiff(conn general.ConnectionType, stackMetadata map[string]any, changeset []map[string]map[string]any) {
 	for _, change := range changeset {
 		newObj := change["new"]
 		name := conn.PrettyName(newObj, stackMetadata)

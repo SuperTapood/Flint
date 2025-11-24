@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        (unknown)
-// source: common/stack.proto
+// source: general/stack.proto
 
-package common
+package general
 
 import (
 	k8s "github.com/SuperTapood/Flint/core/generated/k8s"
@@ -34,7 +34,7 @@ type StackTypes struct {
 
 func (x *StackTypes) Reset() {
 	*x = StackTypes{}
-	mi := &file_common_stack_proto_msgTypes[0]
+	mi := &file_general_stack_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -46,7 +46,7 @@ func (x *StackTypes) String() string {
 func (*StackTypes) ProtoMessage() {}
 
 func (x *StackTypes) ProtoReflect() protoreflect.Message {
-	mi := &file_common_stack_proto_msgTypes[0]
+	mi := &file_general_stack_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +59,7 @@ func (x *StackTypes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StackTypes.ProtoReflect.Descriptor instead.
 func (*StackTypes) Descriptor() ([]byte, []int) {
-	return file_common_stack_proto_rawDescGZIP(), []int{0}
+	return file_general_stack_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *StackTypes) GetType() isStackTypes_Type {
@@ -100,7 +100,7 @@ type ConnectionTypes struct {
 
 func (x *ConnectionTypes) Reset() {
 	*x = ConnectionTypes{}
-	mi := &file_common_stack_proto_msgTypes[1]
+	mi := &file_general_stack_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -112,7 +112,7 @@ func (x *ConnectionTypes) String() string {
 func (*ConnectionTypes) ProtoMessage() {}
 
 func (x *ConnectionTypes) ProtoReflect() protoreflect.Message {
-	mi := &file_common_stack_proto_msgTypes[1]
+	mi := &file_general_stack_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -125,7 +125,7 @@ func (x *ConnectionTypes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConnectionTypes.ProtoReflect.Descriptor instead.
 func (*ConnectionTypes) Descriptor() ([]byte, []int) {
-	return file_common_stack_proto_rawDescGZIP(), []int{1}
+	return file_general_stack_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ConnectionTypes) GetType() isConnectionTypes_Type {
@@ -165,7 +165,7 @@ type Stack struct {
 
 func (x *Stack) Reset() {
 	*x = Stack{}
-	mi := &file_common_stack_proto_msgTypes[2]
+	mi := &file_general_stack_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -177,7 +177,7 @@ func (x *Stack) String() string {
 func (*Stack) ProtoMessage() {}
 
 func (x *Stack) ProtoReflect() protoreflect.Message {
-	mi := &file_common_stack_proto_msgTypes[2]
+	mi := &file_general_stack_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -190,7 +190,7 @@ func (x *Stack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Stack.ProtoReflect.Descriptor instead.
 func (*Stack) Descriptor() ([]byte, []int) {
-	return file_common_stack_proto_rawDescGZIP(), []int{2}
+	return file_general_stack_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Stack) GetName() string {
@@ -214,11 +214,11 @@ func (x *Stack) GetConnection() *ConnectionTypes {
 	return nil
 }
 
-var File_common_stack_proto protoreflect.FileDescriptor
+var File_general_stack_proto protoreflect.FileDescriptor
 
-const file_common_stack_proto_rawDesc = "" +
+const file_general_stack_proto_rawDesc = "" +
 	"\n" +
-	"\x12common/stack.proto\x1a\x13k8s/k8s_stack.proto\x1a\x18k8s/k8s_connection.proto\"=\n" +
+	"\x13general/stack.proto\x1a\x13k8s/k8s_stack.proto\x1a\x18k8s/k8s_connection.proto\"=\n" +
 	"\n" +
 	"StackTypes\x12'\n" +
 	"\bk8sstack\x18\x01 \x01(\v2\t.K8SStackH\x00R\bk8sstackB\x06\n" +
@@ -231,30 +231,30 @@ const file_common_stack_proto_rawDesc = "" +
 	"\x05stack\x18\x02 \x01(\v2\v.StackTypesR\x05stack\x120\n" +
 	"\n" +
 	"connection\x18\x03 \x01(\v2\x10.ConnectionTypesR\n" +
-	"connectionBBB\n" +
-	"StackProtoP\x01Z2github.com/SuperTapood/Flint/core/generated/commonb\x06proto3"
+	"connectionBCB\n" +
+	"StackProtoP\x01Z3github.com/SuperTapood/Flint/core/generated/generalb\x06proto3"
 
 var (
-	file_common_stack_proto_rawDescOnce sync.Once
-	file_common_stack_proto_rawDescData []byte
+	file_general_stack_proto_rawDescOnce sync.Once
+	file_general_stack_proto_rawDescData []byte
 )
 
-func file_common_stack_proto_rawDescGZIP() []byte {
-	file_common_stack_proto_rawDescOnce.Do(func() {
-		file_common_stack_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_common_stack_proto_rawDesc), len(file_common_stack_proto_rawDesc)))
+func file_general_stack_proto_rawDescGZIP() []byte {
+	file_general_stack_proto_rawDescOnce.Do(func() {
+		file_general_stack_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_general_stack_proto_rawDesc), len(file_general_stack_proto_rawDesc)))
 	})
-	return file_common_stack_proto_rawDescData
+	return file_general_stack_proto_rawDescData
 }
 
-var file_common_stack_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
-var file_common_stack_proto_goTypes = []any{
+var file_general_stack_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_general_stack_proto_goTypes = []any{
 	(*StackTypes)(nil),        // 0: StackTypes
 	(*ConnectionTypes)(nil),   // 1: ConnectionTypes
 	(*Stack)(nil),             // 2: Stack
 	(*k8s.K8SStack)(nil),      // 3: K8SStack
 	(*k8s.K8SConnection)(nil), // 4: K8SConnection
 }
-var file_common_stack_proto_depIdxs = []int32{
+var file_general_stack_proto_depIdxs = []int32{
 	3, // 0: StackTypes.k8sstack:type_name -> K8SStack
 	4, // 1: ConnectionTypes.k8sconnection:type_name -> K8SConnection
 	0, // 2: Stack.stack:type_name -> StackTypes
@@ -266,32 +266,32 @@ var file_common_stack_proto_depIdxs = []int32{
 	0, // [0:4] is the sub-list for field type_name
 }
 
-func init() { file_common_stack_proto_init() }
-func file_common_stack_proto_init() {
-	if File_common_stack_proto != nil {
+func init() { file_general_stack_proto_init() }
+func file_general_stack_proto_init() {
+	if File_general_stack_proto != nil {
 		return
 	}
-	file_common_stack_proto_msgTypes[0].OneofWrappers = []any{
+	file_general_stack_proto_msgTypes[0].OneofWrappers = []any{
 		(*StackTypes_K8Sstack)(nil),
 	}
-	file_common_stack_proto_msgTypes[1].OneofWrappers = []any{
+	file_general_stack_proto_msgTypes[1].OneofWrappers = []any{
 		(*ConnectionTypes_K8Sconnection)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_stack_proto_rawDesc), len(file_common_stack_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_general_stack_proto_rawDesc), len(file_general_stack_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_common_stack_proto_goTypes,
-		DependencyIndexes: file_common_stack_proto_depIdxs,
-		MessageInfos:      file_common_stack_proto_msgTypes,
+		GoTypes:           file_general_stack_proto_goTypes,
+		DependencyIndexes: file_general_stack_proto_depIdxs,
+		MessageInfos:      file_general_stack_proto_msgTypes,
 	}.Build()
-	File_common_stack_proto = out.File
-	file_common_stack_proto_goTypes = nil
-	file_common_stack_proto_depIdxs = nil
+	File_general_stack_proto = out.File
+	file_general_stack_proto_goTypes = nil
+	file_general_stack_proto_depIdxs = nil
 }

@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        (unknown)
-// source: gen_base/port.proto
+// source: common/port.proto
 
-package gen_base
+package common
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -36,7 +36,7 @@ type Port struct {
 
 func (x *Port) Reset() {
 	*x = Port{}
-	mi := &file_gen_base_port_proto_msgTypes[0]
+	mi := &file_common_port_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -48,7 +48,7 @@ func (x *Port) String() string {
 func (*Port) ProtoMessage() {}
 
 func (x *Port) ProtoReflect() protoreflect.Message {
-	mi := &file_gen_base_port_proto_msgTypes[0]
+	mi := &file_common_port_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -61,7 +61,7 @@ func (x *Port) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Port.ProtoReflect.Descriptor instead.
 func (*Port) Descriptor() ([]byte, []int) {
-	return file_gen_base_port_proto_rawDescGZIP(), []int{0}
+	return file_common_port_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Port) GetName() string {
@@ -119,35 +119,35 @@ func (*Port_Id) isPort_Port() {}
 
 func (*Port_Number) isPort_Port() {}
 
-var File_gen_base_port_proto protoreflect.FileDescriptor
+var File_common_port_proto protoreflect.FileDescriptor
 
-const file_gen_base_port_proto_rawDesc = "" +
+const file_common_port_proto_rawDesc = "" +
 	"\n" +
-	"\x13gen_base/port.proto\"j\n" +
+	"\x11common/port.proto\"j\n" +
 	"\x04Port\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
 	"\bprotocol\x18\x02 \x01(\tR\bprotocol\x12\x10\n" +
 	"\x02id\x18\x03 \x01(\tH\x00R\x02id\x12\x18\n" +
 	"\x06number\x18\x04 \x01(\x05H\x00R\x06numberB\x06\n" +
-	"\x04portBCB\tPortProtoP\x01Z4github.com/SuperTapood/Flint/core/generated/gen_baseb\x06proto3"
+	"\x04portBAB\tPortProtoP\x01Z2github.com/SuperTapood/Flint/core/generated/commonb\x06proto3"
 
 var (
-	file_gen_base_port_proto_rawDescOnce sync.Once
-	file_gen_base_port_proto_rawDescData []byte
+	file_common_port_proto_rawDescOnce sync.Once
+	file_common_port_proto_rawDescData []byte
 )
 
-func file_gen_base_port_proto_rawDescGZIP() []byte {
-	file_gen_base_port_proto_rawDescOnce.Do(func() {
-		file_gen_base_port_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_gen_base_port_proto_rawDesc), len(file_gen_base_port_proto_rawDesc)))
+func file_common_port_proto_rawDescGZIP() []byte {
+	file_common_port_proto_rawDescOnce.Do(func() {
+		file_common_port_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_common_port_proto_rawDesc), len(file_common_port_proto_rawDesc)))
 	})
-	return file_gen_base_port_proto_rawDescData
+	return file_common_port_proto_rawDescData
 }
 
-var file_gen_base_port_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_gen_base_port_proto_goTypes = []any{
+var file_common_port_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_common_port_proto_goTypes = []any{
 	(*Port)(nil), // 0: Port
 }
-var file_gen_base_port_proto_depIdxs = []int32{
+var file_common_port_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
 	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -155,12 +155,12 @@ var file_gen_base_port_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_gen_base_port_proto_init() }
-func file_gen_base_port_proto_init() {
-	if File_gen_base_port_proto != nil {
+func init() { file_common_port_proto_init() }
+func file_common_port_proto_init() {
+	if File_common_port_proto != nil {
 		return
 	}
-	file_gen_base_port_proto_msgTypes[0].OneofWrappers = []any{
+	file_common_port_proto_msgTypes[0].OneofWrappers = []any{
 		(*Port_Id)(nil),
 		(*Port_Number)(nil),
 	}
@@ -168,17 +168,17 @@ func file_gen_base_port_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gen_base_port_proto_rawDesc), len(file_gen_base_port_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_port_proto_rawDesc), len(file_common_port_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_gen_base_port_proto_goTypes,
-		DependencyIndexes: file_gen_base_port_proto_depIdxs,
-		MessageInfos:      file_gen_base_port_proto_msgTypes,
+		GoTypes:           file_common_port_proto_goTypes,
+		DependencyIndexes: file_common_port_proto_depIdxs,
+		MessageInfos:      file_common_port_proto_msgTypes,
 	}.Build()
-	File_gen_base_port_proto = out.File
-	file_gen_base_port_proto_goTypes = nil
-	file_gen_base_port_proto_depIdxs = nil
+	File_common_port_proto = out.File
+	file_common_port_proto_goTypes = nil
+	file_common_port_proto_depIdxs = nil
 }

@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"time"
 
-	gen_base "github.com/SuperTapood/Flint/core/generated/gen_base"
+	common "github.com/SuperTapood/Flint/core/generated/common"
 	"github.com/heimdalr/dag"
 )
 
@@ -137,13 +137,13 @@ func (connection *K8SConnection) GetDeployments() []string {
 	return visited
 }
 
-func (connection *K8SConnection) List() []gen_base.FlintDeployment {
+func (connection *K8SConnection) List() []common.FlintDeployment {
 	secrets := connection.GetDeployments()
-	deployments := []gen_base.FlintDeployment{}
+	deployments := []common.FlintDeployment{}
 	visited := []string{}
 	for _, deployment_name := range secrets {
 		_, status, age, version := connection.GetLatestRevision(deployment_name)
-		deployments = append(deployments, gen_base.FlintDeployment{
+		deployments = append(deployments, common.FlintDeployment{
 			Name:     deployment_name,
 			Age:      age,
 			Status:   status,

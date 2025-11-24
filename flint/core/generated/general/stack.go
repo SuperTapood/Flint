@@ -1,4 +1,4 @@
-package common
+package general
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	sync "sync"
 
 	"github.com/SuperTapood/Flint/core/base"
-	"github.com/SuperTapood/Flint/core/generated/gen_base"
+	"github.com/SuperTapood/Flint/core/generated/common"
 	"github.com/google/uuid"
 	"github.com/heimdalr/dag"
 )
@@ -60,9 +60,9 @@ func (connType *ConnectionTypes) GetActual() ConnectionType {
 	panic("got bad connection type")
 }
 
-func (connType *ConnectionTypes) List() []gen_base.FlintDeployment {
+func (connType *ConnectionTypes) List() []common.FlintDeployment {
 	secrets := connType.GetActual().GetDeployments()
-	deployments := []gen_base.FlintDeployment{}
+	deployments := []common.FlintDeployment{}
 	visited := []string{}
 	for _, name := range secrets {
 		if slices.Contains(visited, name) {
@@ -70,7 +70,7 @@ func (connType *ConnectionTypes) List() []gen_base.FlintDeployment {
 		}
 
 		_, status, age, version := connType.GetActual().GetLatestRevision(name)
-		deployments = append(deployments, gen_base.FlintDeployment{
+		deployments = append(deployments, common.FlintDeployment{
 			Name:     name,
 			Age:      age,
 			Status:   status,

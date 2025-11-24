@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/SuperTapood/Flint/core/generated/general"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -35,13 +35,13 @@ Returns:
   - ConnectionTypes* - The abstract protobuf connection (needs to be `GetActual()`-ed to get a the actual useable `ConnectionType`)
   - string - The name of the stack. This value is inaccessible later on.
 */
-func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
+func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) {
 	if _, err := os.Stat(app); err == nil {
 		data, err := os.ReadFile(app)
 		if err != nil {
 			panic(err)
 		}
-		var stack common.Stack
+		var stack general.Stack
 		err = proto.Unmarshal(data, &stack)
 		if err != nil {
 			panic(err)
@@ -86,7 +86,7 @@ func StackConnFromApp() (*common.StackTypes, *common.ConnectionTypes, string) {
 
 	data := buf[:n]
 
-	var stack common.Stack
+	var stack general.Stack
 	err = proto.Unmarshal(data, &stack)
 	if err != nil {
 		panic(err)
