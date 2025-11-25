@@ -33,10 +33,10 @@ func (unresource *Unresource) AddToDag(dag *dag.DAG) {
 }
 
 func (unresource *Unresource) Apply(stack_metadata map[string]any, resources map[string]ResourceType, client CloudClient) {
-	split_name := strings.Split(unresource.Name, "::")
-	namespace := split_name[1]
-	kind := split_name[2]
-	name := split_name[3]
+	splitName := strings.Split(unresource.Name, "::")
+	namespace := splitName[1]
+	kind := splitName[2]
+	name := splitName[3]
 
 	client.Delete(map[string]any{
 		"kind":      kind,

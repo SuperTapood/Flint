@@ -15,7 +15,7 @@ var synthCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		stack, _, stackName := StackConnFromApp()
 
-		binary_synthed, _ := stack.GetActual().Synth(stackName)
+		binarySynthed, _ := stack.GetActual().Synth(stackName)
 
 		file, err := os.Create(filename)
 		if err != nil {
@@ -24,7 +24,7 @@ var synthCmd = &cobra.Command{
 
 		defer file.Close()
 
-		err = binary.Write(file, binary.LittleEndian, binary_synthed)
+		err = binary.Write(file, binary.LittleEndian, binarySynthed)
 		if err != nil {
 			panic(err)
 		}

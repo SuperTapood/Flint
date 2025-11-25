@@ -21,6 +21,6 @@ type ResourceType interface {
 	// return an opinionated map of this object's important properties from the cloud provider
 	Lookup() map[string]any
 
-	Synth(stack_metadata map[string]any) map[string]any
-	Apply(stack_metadata map[string]any, resources map[string]ResourceType, client CloudClient)
+	Synth(stackMetadata map[string]any) map[string]any
+	Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient)
 }
