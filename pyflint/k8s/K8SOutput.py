@@ -1,4 +1,4 @@
-from ..generated import K8SOutput as _output, K8SLookup, K8STypes
+from ..generated import K8SOutput as _output, K8SLookup, K8STypes, K8SOutputTypes
 import sys
 import uuid
 
@@ -18,20 +18,24 @@ if sys.version_info >= (3, 14):
 
     def K8STemplateOutput(template: Template):
         lookups = []
+        i = 0
+        strings = [string for string in template.strings]
         for inter in template.interpolations:
+            lookups.append(K8SOutputTypes(string=strings[i]))
+            i += 1
             if type(inter.value) == K8SLookup:
-                lookups.append(inter.value)
+                lookups.append(K8SOutputTypes(k8slookup=inter.value))
             else:
-                lookups.append(
+                lookups.append(K8SOutputTypes(k8slookup=
                     K8SLookup(
                         object=K8STypes(
                             **{inter.value.__class__.__name__.lower(): inter.value}
                         ),
                         keys=[],
                     )
-                )
-        strings = [string for string in template.strings]
-        o = _output(lookups=lookups, strings=strings, id=uuid.uuid8().__str__())
+                ))
+        
+        o = _output(types=lookups, id=uuid.uuid8().__str__())
         return o
 else:
 
@@ -42,13 +46,12 @@ else:
 
 
 def K8SOutput(*values):
-    lookups = []
-    strings = []
+    types = []
     for val in values:
         if type(val) == str:
-            strings.append(val)
+            types.append(K8SOutputTypes(string=val))
         else:
-            lookups.append(val)
+            types.append(K8SOutputTypes(k8slookup=val))
 
-    o = _output(lookups=lookups, strings=strings, id=uuid.uuid1().__str__())
+    o = _output(types=types, id=uuid.uuid1().__str__())
     return o

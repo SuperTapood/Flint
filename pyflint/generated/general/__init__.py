@@ -9,6 +9,7 @@ __all__ = (
     "K8SConnection",
     "K8SLookup",
     "K8SOutput",
+    "K8SOutputTypes",
     "K8SStack",
     "K8STypes",
     "Pod",
@@ -84,18 +85,35 @@ default_message_pool.register_message("", "K8SLookup", K8SLookup)
 
 @dataclass(kw_only=True, eq=False, repr=False)
 class K8SOutput(betterproto2.Message):
-    lookups: "list[K8SLookup]" = betterproto2.field(
+    types: "list[K8SOutputTypes]" = betterproto2.field(
         1, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
-    strings: "list[str]" = betterproto2.field(
-        2, betterproto2.TYPE_STRING, repeated=True
-    )
-
-    id: "str" = betterproto2.field(3, betterproto2.TYPE_STRING)
+    id: "str" = betterproto2.field(2, betterproto2.TYPE_STRING)
 
 
 default_message_pool.register_message("", "K8SOutput", K8SOutput)
+
+
+@dataclass(kw_only=True, eq=False, repr=False)
+class K8SOutputTypes(betterproto2.Message):
+    """
+
+
+    Oneofs:
+        - type:
+    """
+
+    k8slookup: "K8SLookup | None" = betterproto2.field(
+        1, betterproto2.TYPE_MESSAGE, optional=True, group="type"
+    )
+
+    string: "str | None" = betterproto2.field(
+        2, betterproto2.TYPE_STRING, optional=True, group="type"
+    )
+
+
+default_message_pool.register_message("", "K8SOutputTypes", K8SOutputTypes)
 
 
 @dataclass(kw_only=True, eq=False, repr=False)

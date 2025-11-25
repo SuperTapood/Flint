@@ -8,11 +8,12 @@ from ..generated import (
     Secret,
     Pod,
     Deployment,
-    Service
+    Service,
+    K8SOutput as _k8soutput
 )
 from ..common import BaseStack
 import sys
-from .K8SOutput import K8SOutput, K8STemplateOutput
+from .K8SOutput import K8SOutput, K8STemplateOutput, K8SLookup
 
 
 class K8SStack(BaseStack):
@@ -34,7 +35,7 @@ class K8SStack(BaseStack):
             Deployment,
             Service,
             Pod,
-            K8STemplateOutput,
+            _k8soutput,
         ]
         for obj in objects:
             if type(obj) not in supported:

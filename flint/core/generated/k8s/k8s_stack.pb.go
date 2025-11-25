@@ -219,18 +219,99 @@ func (x *K8SLookup) GetKeys() []string {
 	return nil
 }
 
+type K8SOutputTypes struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Type:
+	//
+	//	*K8SOutputTypes_K8Slookup
+	//	*K8SOutputTypes_String_
+	Type          isK8SOutputTypes_Type `protobuf_oneof:"type"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *K8SOutputTypes) Reset() {
+	*x = K8SOutputTypes{}
+	mi := &file_k8s_k8s_stack_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *K8SOutputTypes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*K8SOutputTypes) ProtoMessage() {}
+
+func (x *K8SOutputTypes) ProtoReflect() protoreflect.Message {
+	mi := &file_k8s_k8s_stack_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use K8SOutputTypes.ProtoReflect.Descriptor instead.
+func (*K8SOutputTypes) Descriptor() ([]byte, []int) {
+	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *K8SOutputTypes) GetType() isK8SOutputTypes_Type {
+	if x != nil {
+		return x.Type
+	}
+	return nil
+}
+
+func (x *K8SOutputTypes) GetK8Slookup() *K8SLookup {
+	if x != nil {
+		if x, ok := x.Type.(*K8SOutputTypes_K8Slookup); ok {
+			return x.K8Slookup
+		}
+	}
+	return nil
+}
+
+func (x *K8SOutputTypes) GetString_() string {
+	if x != nil {
+		if x, ok := x.Type.(*K8SOutputTypes_String_); ok {
+			return x.String_
+		}
+	}
+	return ""
+}
+
+type isK8SOutputTypes_Type interface {
+	isK8SOutputTypes_Type()
+}
+
+type K8SOutputTypes_K8Slookup struct {
+	K8Slookup *K8SLookup `protobuf:"bytes,1,opt,name=k8slookup,proto3,oneof"`
+}
+
+type K8SOutputTypes_String_ struct {
+	String_ string `protobuf:"bytes,2,opt,name=string,proto3,oneof"`
+}
+
+func (*K8SOutputTypes_K8Slookup) isK8SOutputTypes_Type() {}
+
+func (*K8SOutputTypes_String_) isK8SOutputTypes_Type() {}
+
 type K8SOutput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Lookups       []*K8SLookup           `protobuf:"bytes,1,rep,name=lookups,proto3" json:"lookups,omitempty"`
-	Strings       []string               `protobuf:"bytes,2,rep,name=strings,proto3" json:"strings,omitempty"`
-	ID            string                 `protobuf:"bytes,3,opt,name=ID,proto3" json:"ID,omitempty"`
+	Types         []*K8SOutputTypes      `protobuf:"bytes,1,rep,name=types,proto3" json:"types,omitempty"`
+	ID            string                 `protobuf:"bytes,2,opt,name=ID,proto3" json:"ID,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *K8SOutput) Reset() {
 	*x = K8SOutput{}
-	mi := &file_k8s_k8s_stack_proto_msgTypes[2]
+	mi := &file_k8s_k8s_stack_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -242,7 +323,7 @@ func (x *K8SOutput) String() string {
 func (*K8SOutput) ProtoMessage() {}
 
 func (x *K8SOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack_proto_msgTypes[2]
+	mi := &file_k8s_k8s_stack_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -255,19 +336,12 @@ func (x *K8SOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use K8SOutput.ProtoReflect.Descriptor instead.
 func (*K8SOutput) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{2}
+	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *K8SOutput) GetLookups() []*K8SLookup {
+func (x *K8SOutput) GetTypes() []*K8SOutputTypes {
 	if x != nil {
-		return x.Lookups
-	}
-	return nil
-}
-
-func (x *K8SOutput) GetStrings() []string {
-	if x != nil {
-		return x.Strings
+		return x.Types
 	}
 	return nil
 }
@@ -289,7 +363,7 @@ type K8SStack struct {
 
 func (x *K8SStack) Reset() {
 	*x = K8SStack{}
-	mi := &file_k8s_k8s_stack_proto_msgTypes[3]
+	mi := &file_k8s_k8s_stack_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -301,7 +375,7 @@ func (x *K8SStack) String() string {
 func (*K8SStack) ProtoMessage() {}
 
 func (x *K8SStack) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_k8s_stack_proto_msgTypes[3]
+	mi := &file_k8s_k8s_stack_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -314,7 +388,7 @@ func (x *K8SStack) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use K8SStack.ProtoReflect.Descriptor instead.
 func (*K8SStack) Descriptor() ([]byte, []int) {
-	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{3}
+	return file_k8s_k8s_stack_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *K8SStack) GetObjects() []*K8STypes {
@@ -350,12 +424,15 @@ const file_k8s_k8s_stack_proto_rawDesc = "" +
 	"\x04type\"B\n" +
 	"\tK8SLookup\x12!\n" +
 	"\x06object\x18\x01 \x01(\v2\t.K8STypesR\x06object\x12\x12\n" +
-	"\x04keys\x18\x02 \x03(\tR\x04keys\"[\n" +
-	"\tK8SOutput\x12$\n" +
-	"\alookups\x18\x01 \x03(\v2\n" +
-	".K8SLookupR\alookups\x12\x18\n" +
-	"\astrings\x18\x02 \x03(\tR\astrings\x12\x0e\n" +
-	"\x02ID\x18\x03 \x01(\tR\x02ID\"M\n" +
+	"\x04keys\x18\x02 \x03(\tR\x04keys\"^\n" +
+	"\x0eK8SOutputTypes\x12*\n" +
+	"\tk8slookup\x18\x01 \x01(\v2\n" +
+	".K8SLookupH\x00R\tk8slookup\x12\x18\n" +
+	"\x06string\x18\x02 \x01(\tH\x00R\x06stringB\x06\n" +
+	"\x04type\"B\n" +
+	"\tK8SOutput\x12%\n" +
+	"\x05types\x18\x01 \x03(\v2\x0f.K8SOutputTypesR\x05types\x12\x0e\n" +
+	"\x02ID\x18\x02 \x01(\tR\x02ID\"M\n" +
 	"\bK8SStack\x12#\n" +
 	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x1c\n" +
 	"\tnamespace\x18\x02 \x01(\tR\tnamespaceBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
@@ -372,32 +449,34 @@ func file_k8s_k8s_stack_proto_rawDescGZIP() []byte {
 	return file_k8s_k8s_stack_proto_rawDescData
 }
 
-var file_k8s_k8s_stack_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_k8s_k8s_stack_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_k8s_k8s_stack_proto_goTypes = []any{
-	(*K8STypes)(nil),   // 0: K8STypes
-	(*K8SLookup)(nil),  // 1: K8SLookup
-	(*K8SOutput)(nil),  // 2: K8SOutput
-	(*K8SStack)(nil),   // 3: K8SStack
-	(*Pod)(nil),        // 4: Pod
-	(*Service)(nil),    // 5: Service
-	(*Deployment)(nil), // 6: Deployment
-	(*Secret)(nil),     // 7: Secret
+	(*K8STypes)(nil),       // 0: K8STypes
+	(*K8SLookup)(nil),      // 1: K8SLookup
+	(*K8SOutputTypes)(nil), // 2: K8SOutputTypes
+	(*K8SOutput)(nil),      // 3: K8SOutput
+	(*K8SStack)(nil),       // 4: K8SStack
+	(*Pod)(nil),            // 5: Pod
+	(*Service)(nil),        // 6: Service
+	(*Deployment)(nil),     // 7: Deployment
+	(*Secret)(nil),         // 8: Secret
 }
 var file_k8s_k8s_stack_proto_depIdxs = []int32{
-	4, // 0: K8STypes.pod:type_name -> Pod
-	5, // 1: K8STypes.service:type_name -> Service
-	6, // 2: K8STypes.deployment:type_name -> Deployment
-	7, // 3: K8STypes.secret:type_name -> Secret
-	1, // 4: K8STypes.lookup:type_name -> K8SLookup
-	2, // 5: K8STypes.k8soutput:type_name -> K8SOutput
-	0, // 6: K8SLookup.object:type_name -> K8STypes
-	1, // 7: K8SOutput.lookups:type_name -> K8SLookup
-	0, // 8: K8SStack.objects:type_name -> K8STypes
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+	5,  // 0: K8STypes.pod:type_name -> Pod
+	6,  // 1: K8STypes.service:type_name -> Service
+	7,  // 2: K8STypes.deployment:type_name -> Deployment
+	8,  // 3: K8STypes.secret:type_name -> Secret
+	1,  // 4: K8STypes.lookup:type_name -> K8SLookup
+	3,  // 5: K8STypes.k8soutput:type_name -> K8SOutput
+	0,  // 6: K8SLookup.object:type_name -> K8STypes
+	1,  // 7: K8SOutputTypes.k8slookup:type_name -> K8SLookup
+	2,  // 8: K8SOutput.types:type_name -> K8SOutputTypes
+	0,  // 9: K8SStack.objects:type_name -> K8STypes
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_k8s_k8s_stack_proto_init() }
@@ -417,13 +496,17 @@ func file_k8s_k8s_stack_proto_init() {
 		(*K8STypes_Lookup)(nil),
 		(*K8STypes_K8Soutput)(nil),
 	}
+	file_k8s_k8s_stack_proto_msgTypes[2].OneofWrappers = []any{
+		(*K8SOutputTypes_K8Slookup)(nil),
+		(*K8SOutputTypes_String_)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_k8s_k8s_stack_proto_rawDesc), len(file_k8s_k8s_stack_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

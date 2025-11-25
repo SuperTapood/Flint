@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/generated/general"
-	"github.com/pmezard/go-difflib/difflib"
 	"github.com/spf13/cobra"
 )
 
@@ -109,7 +108,7 @@ func NewDiff(old, new map[string]any) {
 
 	// Check all keys from both maps
 	for k, v := range oldFlat {
-		if newVal, exists := newFlat[k]; !exists || newVal != v {
+		if newVal, exists := newFlat[k]; !exists || toString(newVal) != toString(v) {
 			dontMatch[k] = difference{
 				Old: toString(v),
 				New: toString(newVal),
@@ -226,60 +225,60 @@ func walk(v any, path []string, flat map[string]any) {
 	}
 }
 
-// PrintCDKDiff formats and prints a difflib.UnifiedDiff in a style
-// similar to 'cdk diff', complete with ANSI color codes.
-// It writes the formatted output to the provided io.Writer.
-func PrintCDKDiff(diff difflib.UnifiedDiff) {
-	// Create a matcher to compare the two string slices
-	m := difflib.NewMatcher(diff.A, diff.B)
+// // PrintCDKDiff formats and prints a difflib.UnifiedDiff in a style
+// // similar to 'cdk diff', complete with ANSI color codes.
+// // It writes the formatted output to the provided io.Writer.
+// func PrintCDKDiff(diff difflib.UnifiedDiff) {
+// 	// Create a matcher to compare the two string slices
+// 	m := difflib.NewMatcher(diff.A, diff.B)
 
-	// Use a default context if not provided (or negative)
-	context := diff.Context
-	if context < 0 {
-		context = 3 // A common default context
-	}
+// 	// Use a default context if not provided (or negative)
+// 	context := diff.Context
+// 	if context < 0 {
+// 		context = 3 // A common default context
+// 	}
 
-	// Get the operations grouped by hunks
-	groups := m.GetGroupedOpCodes(context)
+// 	// Get the operations grouped by hunks
+// 	groups := m.GetGroupedOpCodes(context)
 
-	// If there are no diffs, we're done after the headers
-	if len(groups) == 0 {
-		return
-	}
+// 	// If there are no diffs, we're done after the headers
+// 	if len(groups) == 0 {
+// 		return
+// 	}
 
-	// Iterate over each group (hunk) of changes
-	for _, group := range groups {
+// 	// Iterate over each group (hunk) of changes
+// 	for _, group := range groups {
 
-		// Iterate over each operation within the hunk
-		for _, code := range group {
-			switch code.Tag {
-			case 'e': // 'equal' - context line
-				// Lines from A[code.I1:code.I2] are the same in B
-				for _, line := range diff.A[code.I1:code.I2] {
-					// fmt.Fprintf(w, "%s  %s%s", unchagedColor, line, colorReset) // Indent context lines
-					printColored(unchagedColor, " %s", line)
-				}
-			case 'd': // 'delete' - line removed from 'A'
-				for _, line := range diff.A[code.I1:code.I2] {
-					//fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
-					printColored(colorRed, "[-] %s", line)
-				}
-			case 'i': // 'insert' - line added to 'B'
-				for _, line := range diff.B[code.J1:code.J2] {
-					//fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
-					printColored(colorGreen, "[+] %s", line)
-				}
-			case 'r': // 'replace' - lines from 'A' replaced by lines in 'B'
-				// Show as a deletion followed by an insertion
-				for _, line := range diff.A[code.I1:code.I2] {
-					//fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
-					printColored(colorRed, "[-] %s", line)
-				}
-				for _, line := range diff.B[code.J1:code.J2] {
-					//fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
-					printColored(colorGreen, "[+] %s", line)
-				}
-			}
-		}
-	}
-}
+// 		// Iterate over each operation within the hunk
+// 		for _, code := range group {
+// 			switch code.Tag {
+// 			case 'e': // 'equal' - context line
+// 				// Lines from A[code.I1:code.I2] are the same in B
+// 				for _, line := range diff.A[code.I1:code.I2] {
+// 					// fmt.Fprintf(w, "%s  %s%s", unchagedColor, line, colorReset) // Indent context lines
+// 					printColored(unchagedColor, " %s", line)
+// 				}
+// 			case 'd': // 'delete' - line removed from 'A'
+// 				for _, line := range diff.A[code.I1:code.I2] {
+// 					//fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
+// 					printColored(colorRed, "[-] %s", line)
+// 				}
+// 			case 'i': // 'insert' - line added to 'B'
+// 				for _, line := range diff.B[code.J1:code.J2] {
+// 					//fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
+// 					printColored(colorGreen, "[+] %s", line)
+// 				}
+// 			case 'r': // 'replace' - lines from 'A' replaced by lines in 'B'
+// 				// Show as a deletion followed by an insertion
+// 				for _, line := range diff.A[code.I1:code.I2] {
+// 					//fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
+// 					printColored(colorRed, "[-] %s", line)
+// 				}
+// 				for _, line := range diff.B[code.J1:code.J2] {
+// 					//fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
+// 					printColored(colorGreen, "[+] %s", line)
+// 				}
+// 			}
+// 		}
+// 	}
+// }

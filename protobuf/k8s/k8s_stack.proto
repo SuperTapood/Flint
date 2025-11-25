@@ -22,10 +22,16 @@ message K8SLookup {
     repeated string keys = 2;
 }
 
+message K8SOutputTypes {
+    oneof type {
+        K8SLookup k8slookup = 1;
+        string string = 2;
+    }
+}
+
 message K8SOutput {
-    repeated K8SLookup lookups = 1;
-    repeated string strings = 2;
-    string ID = 3; 
+    repeated K8SOutputTypes types = 1;
+    string ID = 2; 
 }
 
 message K8SStack {

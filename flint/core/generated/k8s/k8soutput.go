@@ -53,15 +53,13 @@ func (output *K8SOutput) Synth(stack_metadata map[string]any) map[string]any {
 func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
 	outputMu.Lock()
 	defer outputMu.Unlock()
-	lookups := output.GetLookups()
-	strings := output.GetStrings()
-	length := max(len(lookups), len(strings))
-	for i := range length {
-		if i < len(strings) {
-			fmt.Fprint(&buffer, strings[i])
+	types := output.GetTypes()
+	for _, t := range types {
+		if s := t.GetString_(); s != "" {
+			fmt.Fprint(&buffer, s)
 		}
-		if i < len(lookups) {
-			lookup := lookups[i]
+		if l := t.GetK8Slookup(); l != nil {
+			lookup := l
 			var lookup_id = lookup.GetObject().ActualType().GetID()
 			target := resources[lookup_id].Synth(stack_metadata)
 			kind := target["kind"].(string)
@@ -96,8 +94,11 @@ func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[stri
 
 func (output *K8SOutput) AddToDag(dag *dag.DAG) {
 	dag.AddVertexByID(output.GetID(), output.GetID())
-	for _, lookup := range output.GetLookups() {
-		dag.AddEdge(output.GetID(), lookup.GetObject().ActualType().GetID())
+	for _, lookup := range output.GetTypes() {
+		if l := lookup.GetK8Slookup(); l == nil {
+			continue
+		}
+		dag.AddEdge(output.GetID(), lookup.GetK8Slookup().GetID())
 	}
 }
 
