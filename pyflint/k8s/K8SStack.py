@@ -9,7 +9,7 @@ from ..generated import (
     Pod,
     Deployment,
     Service,
-    K8SOutput as _k8soutput
+    K8SOutput as _k8soutput,
 )
 from ..common import BaseStack
 import sys
@@ -61,3 +61,14 @@ class K8SStack(BaseStack):
                 self.add_objects(K8STemplateOutput(args[0]))
                 return
         self.add_objects(K8SOutput(*args))
+    
+    def lookup(self, obj, key):
+        if type(obj) == K8SLookup:
+            obj.keys.append(key)
+            return obj
+        return K8SLookup(
+            object=K8STypes(**{obj.__class__.__name__.lower(): obj}),
+            keys=[
+                key,
+            ] if key else None,
+        )

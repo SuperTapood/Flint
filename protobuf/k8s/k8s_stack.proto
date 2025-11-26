@@ -12,7 +12,7 @@ message K8STypes {
         Service service = 2;
         Deployment deployment = 3;
         Secret secret = 4;
-        K8SLookup lookup = 5;
+        K8SLookup k8slookup = 5;
         K8SOutput k8soutput = 6;
     }
 }

@@ -4,28 +4,26 @@ import platform
 import subprocess
 
 
-def force_kwargs(modules):
-    for module in modules:
-        with open(f"pyflint/generated/{module}/__init__.py", "r") as file:
-            data = file.read().replace("@dataclass(", "@dataclass(kw_only=True, ")
-        with open(f"pyflint/generated/{module}/__init__.py", "w") as file:
-            file.write(data)
+def force_kwargs():
+    with open(f"pyflint/generated/__init__.py", "r") as file:
+        data = file.read().replace("@dataclass(", "@dataclass(kw_only=True, ")
+
+    with open(f"pyflint/generated/__init__.py", "w") as file:
+        file.write(data)
 
 
-def fix_python(modules):
-    force_kwargs(modules)
+def fix_python():
+    force_kwargs()
 
 
-def run_buf(modules):
-    for module in modules:
-        os.makedirs(f"./pyflint/generated/{module}", exist_ok=True)
-        cmd = (
-            "protoc -I protobuf "
-            f"--python_betterproto2_out=./pyflint/generated/{module} "
-            f"./protobuf/{module}/*"
-        )
+def run_buf():
+    cmd = (
+        "protoc -I protobuf "
+        f"--python_betterproto2_out=./pyflint/generated "
+        f"./protobuf/*/*"
+    )
 
-        subprocess.run(cmd, shell=True, check=True)
+    subprocess.run(cmd, shell=True, check=True)
     if platform.system() == "Linux":
         subprocess.run(["bunx", "buf", "generate"])
     elif platform.system() == "Windows":
@@ -35,6 +33,5 @@ def run_buf(modules):
 
 
 if __name__ == "__main__":
-    modules = os.listdir("./protobuf")
-    run_buf(modules)
-    fix_python(modules)
+    run_buf()
+    fix_python()

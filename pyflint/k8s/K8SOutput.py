@@ -4,14 +4,16 @@ import uuid
 
 from betterproto2 import Message
 
-Message.getitem = lambda self, item: K8SLookup(
-    object=K8STypes(**{self.__class__.__name__.lower(): self}),
-    keys=[
-        item,
-    ],
-)
+# Message.getitem = lambda self, item: K8SLookup(
+#     object=K8STypes(**{self.__class__.__name__.lower(): self}),
+#     keys=[
+#         item,
+#     ],
+# )
 
-K8SLookup.getitem = lambda self, item: [self.keys.append(item), self][1]
+# K8SLookup.getitem = lambda self, item: [self.keys.append(item), self][1]
+
+i = 0
 
 if sys.version_info >= (3, 14):
     from string.templatelib import Template
@@ -26,15 +28,17 @@ if sys.version_info >= (3, 14):
             if type(inter.value) == K8SLookup:
                 lookups.append(K8SOutputTypes(k8slookup=inter.value))
             else:
-                lookups.append(K8SOutputTypes(k8slookup=
-                    K8SLookup(
-                        object=K8STypes(
-                            **{inter.value.__class__.__name__.lower(): inter.value}
-                        ),
-                        keys=[],
+                lookups.append(
+                    K8SOutputTypes(
+                        k8slookup=K8SLookup(
+                            object=K8STypes(
+                                **{inter.value.__class__.__name__.lower(): inter.value}
+                            ),
+                            keys=[],
+                        )
                     )
-                ))
-        
+                )
+
         o = _output(types=lookups, id=uuid.uuid8().__str__())
         return o
 else:

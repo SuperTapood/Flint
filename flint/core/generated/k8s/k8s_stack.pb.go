@@ -29,7 +29,7 @@ type K8STypes struct {
 	//	*K8STypes_Service
 	//	*K8STypes_Deployment
 	//	*K8STypes_Secret
-	//	*K8STypes_Lookup
+	//	*K8STypes_K8Slookup
 	//	*K8STypes_K8Soutput
 	Type          isK8STypes_Type `protobuf_oneof:"type"`
 	unknownFields protoimpl.UnknownFields
@@ -109,10 +109,10 @@ func (x *K8STypes) GetSecret() *Secret {
 	return nil
 }
 
-func (x *K8STypes) GetLookup() *K8SLookup {
+func (x *K8STypes) GetK8Slookup() *K8SLookup {
 	if x != nil {
-		if x, ok := x.Type.(*K8STypes_Lookup); ok {
-			return x.Lookup
+		if x, ok := x.Type.(*K8STypes_K8Slookup); ok {
+			return x.K8Slookup
 		}
 	}
 	return nil
@@ -147,8 +147,8 @@ type K8STypes_Secret struct {
 	Secret *Secret `protobuf:"bytes,4,opt,name=secret,proto3,oneof"`
 }
 
-type K8STypes_Lookup struct {
-	Lookup *K8SLookup `protobuf:"bytes,5,opt,name=lookup,proto3,oneof"`
+type K8STypes_K8Slookup struct {
+	K8Slookup *K8SLookup `protobuf:"bytes,5,opt,name=k8slookup,proto3,oneof"`
 }
 
 type K8STypes_K8Soutput struct {
@@ -163,7 +163,7 @@ func (*K8STypes_Deployment) isK8STypes_Type() {}
 
 func (*K8STypes_Secret) isK8STypes_Type() {}
 
-func (*K8STypes_Lookup) isK8STypes_Type() {}
+func (*K8STypes_K8Slookup) isK8STypes_Type() {}
 
 func (*K8STypes_K8Soutput) isK8STypes_Type() {}
 
@@ -409,16 +409,16 @@ var File_k8s_k8s_stack_proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_stack_proto_rawDesc = "" +
 	"\n" +
-	"\x13k8s/k8s_stack.proto\x1a\rk8s/pod.proto\x1a\x11k8s/service.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\"\xf6\x01\n" +
+	"\x13k8s/k8s_stack.proto\x1a\rk8s/pod.proto\x1a\x11k8s/service.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\"\xfc\x01\n" +
 	"\bK8STypes\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12$\n" +
 	"\aservice\x18\x02 \x01(\v2\b.ServiceH\x00R\aservice\x12-\n" +
 	"\n" +
 	"deployment\x18\x03 \x01(\v2\v.DeploymentH\x00R\n" +
 	"deployment\x12!\n" +
-	"\x06secret\x18\x04 \x01(\v2\a.SecretH\x00R\x06secret\x12$\n" +
-	"\x06lookup\x18\x05 \x01(\v2\n" +
-	".K8SLookupH\x00R\x06lookup\x12*\n" +
+	"\x06secret\x18\x04 \x01(\v2\a.SecretH\x00R\x06secret\x12*\n" +
+	"\tk8slookup\x18\x05 \x01(\v2\n" +
+	".K8SLookupH\x00R\tk8slookup\x12*\n" +
 	"\tk8soutput\x18\x06 \x01(\v2\n" +
 	".K8SOutputH\x00R\tk8soutputB\x06\n" +
 	"\x04type\"B\n" +
@@ -466,7 +466,7 @@ var file_k8s_k8s_stack_proto_depIdxs = []int32{
 	6,  // 1: K8STypes.service:type_name -> Service
 	7,  // 2: K8STypes.deployment:type_name -> Deployment
 	8,  // 3: K8STypes.secret:type_name -> Secret
-	1,  // 4: K8STypes.lookup:type_name -> K8SLookup
+	1,  // 4: K8STypes.k8slookup:type_name -> K8SLookup
 	3,  // 5: K8STypes.k8soutput:type_name -> K8SOutput
 	0,  // 6: K8SLookup.object:type_name -> K8STypes
 	1,  // 7: K8SOutputTypes.k8slookup:type_name -> K8SLookup
@@ -493,7 +493,7 @@ func file_k8s_k8s_stack_proto_init() {
 		(*K8STypes_Service)(nil),
 		(*K8STypes_Deployment)(nil),
 		(*K8STypes_Secret)(nil),
-		(*K8STypes_Lookup)(nil),
+		(*K8STypes_K8Slookup)(nil),
 		(*K8STypes_K8Soutput)(nil),
 	}
 	file_k8s_k8s_stack_proto_msgTypes[2].OneofWrappers = []any{

@@ -24,12 +24,16 @@ func (lookup *K8SLookup) GetID() string {
 	return lookup.Object.ActualType().GetID()
 }
 
-func (lookup *K8SLookup) Synth(stack_metadata map[string]any, dag *dag.DAG, objs_map map[string]map[string]any) {
+func (lookup *K8SLookup) Synth(stack_metadata map[string]any) map[string]any {
 	panic("WOW")
 }
 
 func (lookup *K8SLookup) Lookup() map[string]any {
 	panic("can't lookup a lookup what the fuck are you even trying to do?")
+}
+
+func (lookup *K8SLookup) AddToDag(dag *dag.DAG) {}
+func (lookup *K8SLookup) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
 }
 
 func (output *K8SOutput) Synth(stack_metadata map[string]any) map[string]any {
@@ -84,7 +88,6 @@ func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[stri
 				}
 				current = v
 			}
-
 			fmt.Fprint(&buffer, current)
 		}
 	}

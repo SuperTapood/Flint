@@ -18,10 +18,9 @@ func (types *K8STypes) ActualType() base.ResourceType {
 		// fmt.Println(out.GetStrings())
 		// fmt.Println(out.GetLookups())
 		return out
+	} else if out := types.GetK8Slookup(); out != nil {
+		return out
 	}
-	// } else if out := types.GetLookup(); out != nil {
-	// 	return out
-	// }
 	panic("got bad resource type")
 }
 
