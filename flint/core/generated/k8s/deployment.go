@@ -11,12 +11,12 @@ func (deployment *Deployment) GetID() string {
 	return deployment.GetName()
 }
 
-func (deployment *Deployment) Synth(stack_metadata map[string]any) map[string]any {
+func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any {
 	if strings.Contains(deployment.GetName(), "::") {
 		panic("invalid name " + deployment.Name)
 	}
-	namespace := stack_metadata["namespace"].(string)
-	obj_map := map[string]any{
+	namespace := stackMetadata["namespace"].(string)
+	objMap := map[string]any{
 		"apiVersion": "apps/v1",
 		"kind":       "Deployment",
 		"metadata": map[string]any{
@@ -40,30 +40,30 @@ func (deployment *Deployment) Synth(stack_metadata map[string]any) map[string]an
 		},
 	}
 
-	template := obj_map["spec"].(map[string]any)["template"].(map[string]any)
-	pod_map := deployment.GetPod().Synth(stack_metadata)
-	template["metadata"] = pod_map["metadata"]
-	template["spec"] = pod_map["spec"]
+	template := objMap["spec"].(map[string]any)["template"].(map[string]any)
+	podMap := deployment.GetPod().Synth(stackMetadata)
+	template["metadata"] = podMap["metadata"]
+	template["spec"] = podMap["spec"]
 
-	return obj_map
+	return objMap
 }
 
-func (deployment *Deployment) AddToDag(dag *dag.DAG) {
+func (deployment *Deployment) AddToDag(_dag *dag.DAG) {
 	if strings.Contains(deployment.GetName(), "::") {
 		panic("invalid name " + deployment.Name)
 	}
 
-	if dag != nil {
-		dag.AddVertexByID(deployment.GetID(), deployment.GetID())
+	if _dag != nil {
+		_dag.AddVertexByID(deployment.GetID(), deployment.GetID())
 	}
 }
 
-func (deployment *Deployment) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
-	apply_metadata := make(map[string]any)
-	apply_metadata["name"] = deployment.GetName()
-	apply_metadata["location"] = "/apis/apps/v1/namespaces/" + stack_metadata["namespace"].(string) + "/deployments/"
+func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+	applyMetadata := make(map[string]any)
+	applyMetadata["name"] = deployment.GetName()
+	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/deployments/"
 
-	client.Apply(apply_metadata, deployment.Synth(stack_metadata))
+	client.Apply(applyMetadata, deployment.Synth(stackMetadata))
 }
 
 func (deployment *Deployment) Lookup() map[string]any {

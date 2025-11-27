@@ -12,12 +12,12 @@ func (secret *Secret) GetID() string {
 	return secret.GetName()
 }
 
-func (secret *Secret) Synth(stack_metadata map[string]any) map[string]any {
+func (secret *Secret) Synth(stackMetadata map[string]any) map[string]any {
 	if strings.Contains(secret.GetName(), "::") {
 		panic("invalid name " + secret.Name)
 	}
-	namespace := stack_metadata["namespace"].(string)
-	obj_map := map[string]any{
+	namespace := stackMetadata["namespace"].(string)
+	objMap := map[string]any{
 		"apiVersion": "v1",
 		"kind":       "Secret",
 		"metadata": map[string]any{
@@ -31,27 +31,27 @@ func (secret *Secret) Synth(stack_metadata map[string]any) map[string]any {
 		"type": secret.GetType(),
 	}
 
-	data := obj_map["data"].(map[string]string)
+	data := objMap["data"].(map[string]string)
 
 	for _, d := range secret.GetData() {
 		data[d.Key] = base64.StdEncoding.EncodeToString([]byte(d.Value))
 	}
 
-	return obj_map
+	return objMap
 }
 
-func (secret *Secret) AddToDag(dag *dag.DAG) {
-	if dag != nil {
-		dag.AddVertexByID(secret.GetID(), secret.GetID())
+func (secret *Secret) AddToDag(_dag *dag.DAG) {
+	if _dag != nil {
+		_dag.AddVertexByID(secret.GetID(), secret.GetID())
 	}
 }
 
-func (secret *Secret) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
-	apply_metadata := make(map[string]any)
-	apply_metadata["name"] = secret.GetName()
-	apply_metadata["location"] = "/api/v1/namespaces/" + stack_metadata["namespace"].(string) + "/secrets/"
+func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+	applyMetadata := make(map[string]any)
+	applyMetadata["name"] = secret.GetName()
+	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/secrets/"
 
-	client.Apply(apply_metadata, secret.Synth(stack_metadata))
+	client.Apply(applyMetadata, secret.Synth(stackMetadata))
 }
 
 func (secret *Secret) Lookup() map[string]any {

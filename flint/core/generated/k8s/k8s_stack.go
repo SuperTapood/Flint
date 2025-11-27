@@ -25,14 +25,14 @@ func (types *K8STypes) ActualType() base.ResourceType {
 }
 
 func (stack *K8SStack) Synth(name string) (*dag.DAG, map[string]base.ResourceType) {
-	objs_map := map[string]base.ResourceType{}
-	obj_dag := dag.NewDAG()
+	objsMap := map[string]base.ResourceType{}
+	objDag := dag.NewDAG()
 	for _, obj := range stack.Objects {
-		objs_map[obj.ActualType().GetID()] = obj.ActualType()
-		obj.ActualType().AddToDag(obj_dag)
+		objsMap[obj.ActualType().GetID()] = obj.ActualType()
+		obj.ActualType().AddToDag(objDag)
 	}
 
-	return obj_dag, objs_map
+	return objDag, objsMap
 }
 
 func (stack *K8SStack) GetMetadata() map[string]any {

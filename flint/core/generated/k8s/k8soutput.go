@@ -24,7 +24,7 @@ func (lookup *K8SLookup) GetID() string {
 	return lookup.Object.ActualType().GetID()
 }
 
-func (lookup *K8SLookup) Synth(stack_metadata map[string]any) map[string]any {
+func (lookup *K8SLookup) Synth(stackMetadata map[string]any) map[string]any {
 	panic("WOW")
 }
 
@@ -33,28 +33,14 @@ func (lookup *K8SLookup) Lookup() map[string]any {
 }
 
 func (lookup *K8SLookup) AddToDag(dag *dag.DAG) {}
-func (lookup *K8SLookup) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (lookup *K8SLookup) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
 }
 
-func (output *K8SOutput) Synth(stack_metadata map[string]any) map[string]any {
-	// lookups := output.GetLookups()
-	// strings := output.GetStrings()
-
-	// obj_map := map[string]any{
-	// 	"lookups": lookups,
-	// 	"strings": strings,
-	// 	"action":  "lookup",
-	// 	"kind":    "",
-	// 	"metadata": map[string]any{
-	// 		"namespace": "",
-	// 		"name":      "",
-	// 	},
-	// 	"id": output.GetID(),
-	// }
+func (output *K8SOutput) Synth(stackMetadata map[string]any) map[string]any {
 	return nil
 }
 
-func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
 	types := output.GetTypes()
 	buffer := bytes.Buffer{}
 
@@ -64,8 +50,8 @@ func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[stri
 		}
 		if l := t.GetK8Slookup(); l != nil {
 			lookup := l
-			var lookup_id = lookup.GetObject().ActualType().GetID()
-			target := resources[lookup_id].Synth(stack_metadata)
+			var lookupId = lookup.GetObject().ActualType().GetID()
+			target := resources[lookupId].Synth(stackMetadata)
 			kind := target["kind"].(string)
 			namespace := target["metadata"].(map[string]any)["namespace"].(string)
 			name := target["metadata"].(map[string]any)["name"].(string)
@@ -100,13 +86,13 @@ func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[stri
 	outputBufferMap[output.GetIndex()] = &buffer
 }
 
-func (output *K8SOutput) AddToDag(dag *dag.DAG) {
-	dag.AddVertexByID(output.GetID(), output.GetID())
+func (output *K8SOutput) AddToDag(_dag *dag.DAG) {
+	_dag.AddVertexByID(output.GetID(), output.GetID())
 	for _, lookup := range output.GetTypes() {
 		if l := lookup.GetK8Slookup(); l == nil {
 			continue
 		}
-		dag.AddEdge(output.GetID(), lookup.GetK8Slookup().GetID())
+		_dag.AddEdge(output.GetID(), lookup.GetK8Slookup().GetID())
 	}
 }
 

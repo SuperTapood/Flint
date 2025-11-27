@@ -11,11 +11,11 @@ func (pod *Pod) GetID() string {
 	return pod.GetName()
 }
 
-func (pod *Pod) Synth(stack_metadata map[string]any) map[string]any {
+func (pod *Pod) Synth(stackMetadata map[string]any) map[string]any {
 
-	namespace := stack_metadata["namespace"].(string)
+	namespace := stackMetadata["namespace"].(string)
 
-	obj_map := map[string]any{
+	objMap := map[string]any{
 		"location":   "/api/v1/namespaces/" + namespace + "/pods",
 		"apiVersion": "v1",
 		"kind":       "Pod",
@@ -38,7 +38,7 @@ func (pod *Pod) Synth(stack_metadata map[string]any) map[string]any {
 	}
 
 	// Navigate to the container map
-	spec := obj_map["spec"].(map[string]any)
+	spec := objMap["spec"].(map[string]any)
 	containers := spec["containers"].([]any)
 	container := containers[0].(map[string]any)
 
@@ -50,24 +50,24 @@ func (pod *Pod) Synth(stack_metadata map[string]any) map[string]any {
 		container["ports"] = append(container["ports"].([]any), port_map)
 	}
 
-	return obj_map
+	return objMap
 }
 
-func (pod *Pod) AddToDag(dag *dag.DAG) {
+func (pod *Pod) AddToDag(_dag *dag.DAG) {
 	if strings.Contains(pod.GetName(), "::") {
 		panic("invalid name " + pod.Name)
 	}
-	if dag != nil {
-		dag.AddVertexByID(pod.GetID(), pod.GetID())
+	if _dag != nil {
+		_dag.AddVertexByID(pod.GetID(), pod.GetID())
 	}
 }
 
-func (pod *Pod) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
-	apply_metadata := make(map[string]any)
-	apply_metadata["name"] = pod.GetName()
-	apply_metadata["location"] = "/apis/v1/namespaces/" + stack_metadata["namespace"].(string) + "/pods/"
+func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+	applyMetadata := make(map[string]any)
+	applyMetadata["name"] = pod.GetName()
+	applyMetadata["location"] = "/apis/v1/namespaces/" + stackMetadata["namespace"].(string) + "/pods/"
 
-	client.Apply(apply_metadata, pod.Synth(stack_metadata))
+	client.Apply(applyMetadata, pod.Synth(stackMetadata))
 }
 
 func (pod *Pod) Lookup() map[string]any {

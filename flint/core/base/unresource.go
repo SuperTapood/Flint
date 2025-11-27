@@ -19,12 +19,12 @@ func (unresource *Unresource) GetID() string {
 	return unresource.String()
 }
 
-func (unresource *Unresource) GetPrettyName(stack_metadata map[string]any) string {
-	// return "Kubernetes::Pod::" + stack_metadata["namespace"].(string) + "::" + pod.GetName()
+func (unresource *Unresource) GetPrettyName(stackMetadata map[string]any) string {
+	// return "Kubernetes::Pod::" + stackMetadata["namespace"].(string) + "::" + pod.GetName()
 	return unresource.String()
 }
 
-func (unresource *Unresource) Synth(stack_metadata map[string]any) map[string]any {
+func (unresource *Unresource) Synth(stackMetadata map[string]any) map[string]any {
 	return nil
 }
 
@@ -32,7 +32,7 @@ func (unresource *Unresource) AddToDag(dag *dag.DAG) {
 	panic("what the fuck are you doing")
 }
 
-func (unresource *Unresource) Apply(stack_metadata map[string]any, resources map[string]ResourceType, client CloudClient) {
+func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) {
 	splitName := strings.Split(unresource.Name, "::")
 	namespace := splitName[1]
 	kind := splitName[2]

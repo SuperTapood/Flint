@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"time"
 
-	common "github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/SuperTapood/Flint/core/generated/common"
 	"github.com/heimdalr/dag"
 )
 
@@ -45,9 +45,9 @@ func (connection *K8SConnection) MakeRequest(method string, location string, rea
 	return body, resp
 }
 
-func (connection *K8SConnection) Apply(apply_metadata map[string]any, resource map[string]any) {
-	name := apply_metadata["name"].(string)
-	location := apply_metadata["location"].(string)
+func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any) {
+	name := applyMetadata["name"].(string)
+	location := applyMetadata["location"].(string)
 
 	data, err := json.Marshal(resource)
 	if err != nil {
@@ -90,28 +90,29 @@ func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 
 	for _, secret := range result["items"].([]any) {
 		if secret.(map[string]any)["type"] == "v1.flint.io" {
-			secret_name := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
-			output[secret_name] = secret.(map[string]any)
-			b64_secret := secret.(map[string]any)["data"].(map[string]any)["obj_map"].(string)
-			current, err := base64.StdEncoding.DecodeString(b64_secret)
+			secretName := secret.(map[string]any)["metadata"].(map[string]any)["name"].(string)
+			output[secretName] = secret.(map[string]any)
+			b64Secret := secret.(map[string]any)["data"].(map[string]any)["obj_map"].(string)
+			current, err := base64.StdEncoding.DecodeString(b64Secret)
 
 			if err != nil {
 				panic(err)
 			}
 
-			status := "failed"
-			if secret.(map[string]any)["data"].(map[string]any)["status"].(string) == "c3VjY2Vzcw==" {
-				status = "success"
-			}
-
-			var current_map map[string]any
-			err = json.Unmarshal(current, &current_map)
+			b64Status := secret.(map[string]any)["data"].(map[string]any)["status"].(string)
+			status, err := base64.RawStdEncoding.DecodeString(b64Status)
 			if err != nil {
 				panic(err)
 			}
 
-			output[secret_name] = map[string]any{
-				"map":       current_map,
+			var currentMap map[string]any
+			err = json.Unmarshal(current, &currentMap)
+			if err != nil {
+				panic(err)
+			}
+
+			output[secretName] = map[string]any{
+				"map":       currentMap,
 				"status":    status,
 				"timestamp": secret.(map[string]any)["metadata"].(map[string]any)["creationTimestamp"].(string),
 			}
@@ -124,14 +125,14 @@ func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 func (connection *K8SConnection) GetDeployments() []string {
 	visited := []string{}
 	secrets := connection.GetRevisions()
-	for secret_name, _ := range secrets {
+	for secretName := range secrets {
 		deployment_re := regexp.MustCompile("([-a-z0-9]*[a-z0-9]?)-[0-9]+")
-		results := deployment_re.FindStringSubmatch(secret_name)
-		deployment_name := results[1]
-		if slices.Contains(visited, deployment_name) {
+		results := deployment_re.FindStringSubmatch(secretName)
+		deploymentName := results[1]
+		if slices.Contains(visited, deploymentName) {
 			continue
 		}
-		visited = append(visited, deployment_name)
+		visited = append(visited, deploymentName)
 	}
 
 	return visited
@@ -141,49 +142,54 @@ func (connection *K8SConnection) List() []common.FlintDeployment {
 	secrets := connection.GetDeployments()
 	deployments := []common.FlintDeployment{}
 	visited := []string{}
-	for _, deployment_name := range secrets {
-		_, status, age, version := connection.GetLatestRevision(deployment_name)
+	for _, deploymentName := range secrets {
+		_, status, age, version := connection.GetLatestRevision(deploymentName)
 		deployments = append(deployments, common.FlintDeployment{
-			Name:     deployment_name,
+			Name:     deploymentName,
 			Age:      age,
 			Status:   status,
 			Revision: version,
 		})
-		visited = append(visited, deployment_name)
+		visited = append(visited, deploymentName)
 	}
 
 	return deployments
 }
 
-func (connection *K8SConnection) GetLatestRevision(stack_name string) (map[string]any, string, string, int32) {
+func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string]any, string, string, int32) {
 	result := connection.GetRevisions()
-	latest_version := 0
-	var latest_secret map[string]any
+	latestVersion := 0
+	var latestSecret map[string]any
 
-	for secret_name, secret := range result {
-		version_re := regexp.MustCompile(`[0-9]+`)
-		version, err := strconv.Atoi(version_re.FindString(secret_name))
+	for secretName, secret := range result {
+		versionRe := regexp.MustCompile(`[0-9]+`)
+		version, err := strconv.Atoi(versionRe.FindString(secretName))
 
 		if err != nil {
 			panic(err)
 		}
-		if version > latest_version {
-			latest_secret = secret
-			latest_version = version
+		if version > latestVersion {
+			latestSecret = secret
+			latestVersion = version
 		}
 	}
 
-	date, err := time.Parse(time.RFC3339, latest_secret["timestamp"].(string))
+	date, err := time.Parse(time.RFC3339, latestSecret["timestamp"].(string))
 	if err != nil {
 		panic(err)
 	}
 
-	return latest_secret["map"].(map[string]any), latest_secret["status"].(string), time.Since(date).Round(time.Second).String(), int32(latest_version)
+	return latestSecret["map"].(map[string]any), latestSecret["status"].(string), time.Since(date).Round(time.Second).String(), int32(latestVersion)
 }
 
-func (connection *K8SConnection) PrettyName(resource map[string]any, stack_metadata map[string]any) string {
-	return "Kubernetes::" + stack_metadata["namespace"].(string) + "::" + resource["kind"].(string) + "::" + resource["metadata"].(map[string]any)["name"].(string)
+func (connection *K8SConnection) PrettyName(resource map[string]any, stackMetadata map[string]any) string {
+	return "Kubernetes::" + stackMetadata["namespace"].(string) + "::" + resource["kind"].(string) + "::" + resource["metadata"].(map[string]any)["name"].(string)
 }
+
+const (
+	APIS_APP_V1 = "/apis/apps/v1/namespaces/"
+	API_V1      = "/api/v1/namespaces/"
+)
 
 var (
 	locationMap map[string]map[string]string = map[string]map[string]string{
@@ -206,10 +212,10 @@ var (
 	}
 )
 
-func (connection *K8SConnection) Delete(delete_metadata map[string]any) {
-	kind := delete_metadata["kind"].(string)
-	namespace := delete_metadata["namespace"].(string)
-	name := delete_metadata["name"].(string)
+func (connection *K8SConnection) Delete(deleteMetadata map[string]any) {
+	kind := deleteMetadata["kind"].(string)
+	namespace := deleteMetadata["namespace"].(string)
+	name := deleteMetadata["name"].(string)
 	body, resp := connection.MakeRequest("DELETE", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 0)))
 	if resp.StatusCode != http.StatusOK {
 		fmt.Println(resp)
@@ -218,20 +224,20 @@ func (connection *K8SConnection) Delete(delete_metadata map[string]any) {
 	}
 }
 
-func (connection *K8SConnection) CleanHistory(stack_name string, oldest int, stack_metadata map[string]any) {
+func (connection *K8SConnection) CleanHistory(stackName string, oldest int, stackMetadata map[string]any) {
 	if oldest < 1 {
 		return
 	}
 
 	result := connection.GetRevisions()
 
-	namespace := stack_metadata["namespace"].(string)
+	namespace := stackMetadata["namespace"].(string)
 
-	for secret_name, _ := range result {
-		re := regexp.MustCompile(stack_name + `-[0-9]+`)
-		if re.FindString(secret_name) != "" {
-			version_re := regexp.MustCompile(`[0-9]+`)
-			version, err := strconv.Atoi(version_re.FindString(secret_name))
+	for secretName, _ := range result {
+		re := regexp.MustCompile(stackName + `-[0-9]+`)
+		if re.FindString(secretName) != "" {
+			versionRe := regexp.MustCompile(`[0-9]+`)
+			version, err := strconv.Atoi(versionRe.FindString(secretName))
 			if err != nil {
 				panic(err)
 			}
@@ -239,31 +245,31 @@ func (connection *K8SConnection) CleanHistory(stack_name string, oldest int, sta
 				connection.Delete(map[string]any{
 					"kind":      "Secret",
 					"namespace": namespace,
-					"name":      secret_name,
+					"name":      secretName,
 				})
 			}
 		}
 	}
 }
 
-func (connection *K8SConnection) CreateRevision(stack_name string, stack_metadata map[string]any, newDag *dag.DAG, marshalled []byte) {
-	_, _, _, version := connection.GetLatestRevision(stack_name)
+func (connection *K8SConnection) CreateRevision(stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte) {
+	_, _, _, version := connection.GetLatestRevision(stackName)
 	secret := Secret{
-		Name: stack_name + "-" + strconv.Itoa(int(version+1)),
+		Name: stackName + "-" + strconv.Itoa(int(version+1)),
 		Type: "v1.flint.io",
 		Data: make([]*SecretData, 3),
 	}
 
-	obj_map_data := SecretData{
+	objMapData := SecretData{
 		Key:   "obj_map",
 		Value: string(marshalled),
 	}
 
-	marshalled_dag, _ := json.Marshal(newDag)
+	marshalledDag, _ := json.Marshal(newDag)
 
-	dag_data := SecretData{
+	dagData := SecretData{
 		Key:   "dag",
-		Value: string(marshalled_dag),
+		Value: string(marshalledDag),
 	}
 
 	status := SecretData{
@@ -271,17 +277,12 @@ func (connection *K8SConnection) CreateRevision(stack_name string, stack_metadat
 		Value: "success",
 	}
 
-	secret.Data[0] = &obj_map_data
-	secret.Data[1] = &dag_data
+	secret.Data[0] = &objMapData
+	secret.Data[1] = &dagData
 	secret.Data[2] = &status
 
-	secret.Apply(stack_metadata, nil, connection)
+	secret.Apply(stackMetadata, nil, connection)
 }
-
-const (
-	APIS_APP_V1 = "/apis/apps/v1/namespaces/"
-	API_V1      = "/api/v1/namespaces/"
-)
 
 func (connection *K8SConnection) PrintOutputs() {
 	for i := range len(outputBufferMap) {
