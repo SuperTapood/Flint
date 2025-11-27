@@ -276,11 +276,15 @@ func (connection *K8SConnection) CreateRevision(stack_name string, stack_metadat
 	secret.Data[2] = &status
 
 	secret.Apply(stack_metadata, nil, connection)
-
-	fmt.Println(buffer.String())
 }
 
 const (
 	APIS_APP_V1 = "/apis/apps/v1/namespaces/"
 	API_V1      = "/api/v1/namespaces/"
 )
+
+func (connection *K8SConnection) PrintOutputs() {
+	for i := range len(outputBufferMap) {
+		fmt.Println(outputBufferMap[int32(i)].String())
+	}
+}

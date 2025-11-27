@@ -305,6 +305,7 @@ type K8SOutput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Types         []*K8SOutputTypes      `protobuf:"bytes,1,rep,name=types,proto3" json:"types,omitempty"`
 	ID            string                 `protobuf:"bytes,2,opt,name=ID,proto3" json:"ID,omitempty"`
+	Index         int32                  `protobuf:"varint,3,opt,name=index,proto3" json:"index,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -351,6 +352,13 @@ func (x *K8SOutput) GetID() string {
 		return x.ID
 	}
 	return ""
+}
+
+func (x *K8SOutput) GetIndex() int32 {
+	if x != nil {
+		return x.Index
+	}
+	return 0
 }
 
 type K8SStack struct {
@@ -429,10 +437,11 @@ const file_k8s_k8s_stack_proto_rawDesc = "" +
 	"\tk8slookup\x18\x01 \x01(\v2\n" +
 	".K8SLookupH\x00R\tk8slookup\x12\x18\n" +
 	"\x06string\x18\x02 \x01(\tH\x00R\x06stringB\x06\n" +
-	"\x04type\"B\n" +
+	"\x04type\"X\n" +
 	"\tK8SOutput\x12%\n" +
 	"\x05types\x18\x01 \x03(\v2\x0f.K8SOutputTypesR\x05types\x12\x0e\n" +
-	"\x02ID\x18\x02 \x01(\tR\x02ID\"M\n" +
+	"\x02ID\x18\x02 \x01(\tR\x02ID\x12\x14\n" +
+	"\x05index\x18\x03 \x01(\x05R\x05index\"M\n" +
 	"\bK8SStack\x12#\n" +
 	"\aobjects\x18\x01 \x03(\v2\t.K8STypesR\aobjects\x12\x1c\n" +
 	"\tnamespace\x18\x02 \x01(\tR\tnamespaceBBB\rK8sStackProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"

@@ -13,12 +13,13 @@ from betterproto2 import Message
 
 # K8SLookup.getitem = lambda self, item: [self.keys.append(item), self][1]
 
-i = 0
+output_index = 0
 
 if sys.version_info >= (3, 14):
     from string.templatelib import Template
 
     def K8STemplateOutput(template: Template):
+        global output_index
         lookups = []
         i = 0
         strings = [string for string in template.strings]
@@ -39,7 +40,8 @@ if sys.version_info >= (3, 14):
                     )
                 )
 
-        o = _output(types=lookups, id=uuid.uuid8().__str__())
+        o = _output(types=lookups, id=uuid.uuid8().__str__(), index=output_index)
+        output_index += 1
         return o
 else:
 
@@ -50,6 +52,7 @@ else:
 
 
 def K8SOutput(*values):
+    global output_index
     types = []
     for val in values:
         if type(val) == str:
@@ -57,5 +60,6 @@ def K8SOutput(*values):
         else:
             types.append(K8SOutputTypes(k8slookup=val))
 
-    o = _output(types=types, id=uuid.uuid1().__str__())
+    o = _output(types=types, id=uuid.uuid1().__str__(), index=output_index)
+    output_index += 1
     return o

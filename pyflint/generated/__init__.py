@@ -106,6 +106,8 @@ class K8SOutput(betterproto2.Message):
 
     id: "str" = betterproto2.field(2, betterproto2.TYPE_STRING)
 
+    index: "int" = betterproto2.field(3, betterproto2.TYPE_INT32)
+
 
 default_message_pool.register_message("", "K8SOutput", K8SOutput)
 

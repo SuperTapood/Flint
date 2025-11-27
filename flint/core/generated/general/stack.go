@@ -47,6 +47,7 @@ type ConnectionType interface {
 	GetLatestRevision(stackName string) (map[string]any, string, string, int32)
 	GetDeployments() []string
 	Delete(delete_metadata map[string]any)
+	PrintOutputs()
 	// Deploy(dag *dag.DAG, resources map[string]base.ResourceType, stackName string, stackMetadata map[string]any, max_revisions int)
 	// Destroy(stackName string, stackMetadata map[string]any)
 	// Rollback(stackName string, targetRevision int, stackMetadata map[string]any)
@@ -168,6 +169,8 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 			}
 		}
 	}
+
+	connType.GetActual().PrintOutputs()
 
 	if !createRevision {
 		return

@@ -11,7 +11,7 @@ import (
 )
 
 var outputMu sync.Mutex
-var buffer bytes.Buffer
+var outputBufferMap map[int32]*bytes.Buffer
 
 func (lookup *K8SLookup) resolve() string {
 	obj := lookup.GetObject()
@@ -55,9 +55,9 @@ func (output *K8SOutput) Synth(stack_metadata map[string]any) map[string]any {
 }
 
 func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
-	outputMu.Lock()
-	defer outputMu.Unlock()
 	types := output.GetTypes()
+	buffer := bytes.Buffer{}
+
 	for _, t := range types {
 		if s := t.GetString_(); s != "" {
 			fmt.Fprint(&buffer, s)
@@ -92,7 +92,12 @@ func (output *K8SOutput) Apply(stack_metadata map[string]any, resources map[stri
 		}
 	}
 
-	fmt.Fprintln(&buffer)
+	outputMu.Lock()
+	defer outputMu.Unlock()
+	if outputBufferMap == nil {
+		outputBufferMap = make(map[int32]*bytes.Buffer)
+	}
+	outputBufferMap[output.GetIndex()] = &buffer
 }
 
 func (output *K8SOutput) AddToDag(dag *dag.DAG) {

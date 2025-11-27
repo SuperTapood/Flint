@@ -32,6 +32,7 @@ message K8SOutputTypes {
 message K8SOutput {
     repeated K8SOutputTypes types = 1;
     string ID = 2; 
+    int32 index = 3;
 }
 
 message K8SStack {
