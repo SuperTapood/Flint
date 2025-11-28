@@ -71,6 +71,7 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 	if err := command.Start(); err != nil {
 		panic(err)
 	}
+	command.Wait()
 
 	conn, err := listener.Accept()
 	if err != nil {
