@@ -2,15 +2,14 @@ package general
 
 import (
 	"encoding/json"
-	"io"
 	"math"
-	"net/http"
 	"slices"
 	"strings"
 	"sync"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/google/uuid"
 	"github.com/heimdalr/dag"
 )
@@ -41,7 +40,8 @@ type ConnectionType interface {
 	// Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any)
 	CleanHistory(stackName string, oldest int, stackMetadata map[string]any)
 	Apply(applyMetadata map[string]any, resource map[string]any)
-	MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
+	// MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
+	GetClient() *util.HttpClient
 	CreateRevision(stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte)
 	GetRevisions() map[string]map[string]any
 	GetLatestRevision(stackName string) (map[string]any, string, string, int32)

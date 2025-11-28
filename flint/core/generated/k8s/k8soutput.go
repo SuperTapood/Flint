@@ -55,9 +55,9 @@ func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[strin
 			kind := target["kind"].(string)
 			namespace := target["metadata"].(map[string]any)["namespace"].(string)
 			name := target["metadata"].(map[string]any)["name"].(string)
-			body, _ := client.MakeRequest("GET", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 1)))
+			response := client.GetClient().Get(locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, nil)
 			var currentMap map[string]any
-			err := json.Unmarshal(body, &currentMap)
+			err := json.Unmarshal(response.Body, &currentMap)
 			if err != nil {
 				panic(err)
 			}

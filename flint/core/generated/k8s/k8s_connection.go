@@ -2,12 +2,9 @@ package k8s
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"regexp"
 	"slices"
@@ -15,34 +12,16 @@ import (
 	"time"
 
 	"github.com/SuperTapood/Flint/core/generated/common"
+	"github.com/SuperTapood/Flint/core/util"
+
 	"github.com/heimdalr/dag"
 )
 
-func (connection *K8SConnection) MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response) {
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	req, err := http.NewRequest(method, connection.Api+location, reader)
-
-	if err != nil {
-		panic(err)
-	}
-
-	req.Header.Add("Authorization", "Bearer "+connection.Token)
-	req.Header.Add("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println("Error on response.\n[ERROR] -", err)
-	}
-	defer resp.Body.Close()
-
-	body, er := io.ReadAll(resp.Body)
-	if er != nil {
-		log.Println("Error while reading the response bytes:", err)
-	}
-
-	// fmt.Println(string(body))
-
-	return body, resp
+func (connection *K8SConnection) GetClient() *util.HttpClient {
+	return util.NewHttpClient(map[string]string{
+		"Authorization": "Bearer " + connection.Token,
+		"Content-Type":  "application/json",
+	}, connection.Api)
 }
 
 func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any) {
@@ -54,36 +33,27 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 		panic(err)
 	}
 
-	var resp *http.Response
-	var body []byte
+	client := connection.GetClient()
 
-	body, resp = connection.MakeRequest("POST", location, bytes.NewReader(data))
+	response := client.Post(location, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusConflict})
 
-	if resp.StatusCode == http.StatusConflict {
-		body, resp = connection.MakeRequest("PUT", location+name, bytes.NewReader(data))
-		if resp.StatusCode == http.StatusUnprocessableEntity {
-			body, resp = connection.MakeRequest("DELETE", location+name, bytes.NewReader(make([]byte, 0)))
-			if resp.StatusCode == http.StatusOK {
+	if response.StatusCode == http.StatusConflict {
+		response = client.Put(location+name, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusUnprocessableEntity})
+		if response.StatusCode == http.StatusUnprocessableEntity {
+			response = client.Delete(location+name, nil)
+			if response.StatusCode == http.StatusOK {
 				time.Sleep(2 * time.Second)
-				body, resp = connection.MakeRequest("POST", location, bytes.NewReader(data))
+				response = client.Post(location, bytes.NewReader(data), nil)
 			}
 		}
 	}
-
-	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-		fmt.Println(resp)
-		fmt.Println(string(body))
-		fmt.Println(location)
-		panic("FUCK")
-	}
-
 }
 
 func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
-	var body, _ = connection.MakeRequest("GET", "/api/v1/secrets", bytes.NewReader(make([]byte, 1)))
+	client := connection.GetClient()
+	var response = client.Get("/api/v1/secrets", nil)
 	var result map[string]interface{}
-	if err := json.Unmarshal(body, &result); err != nil {
+	if err := json.Unmarshal(response.Body, &result); err != nil {
 		panic(err)
 	}
 	output := make(map[string]map[string]any, 0)
@@ -100,7 +70,7 @@ func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 			}
 
 			b64Status := secret.(map[string]any)["data"].(map[string]any)["status"].(string)
-			status, err := base64.RawStdEncoding.DecodeString(b64Status)
+			status, err := base64.StdEncoding.DecodeString(b64Status)
 			if err != nil {
 				panic(err)
 			}
@@ -113,7 +83,7 @@ func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 
 			output[secretName] = map[string]any{
 				"map":       currentMap,
-				"status":    status,
+				"status":    string(status),
 				"timestamp": secret.(map[string]any)["metadata"].(map[string]any)["creationTimestamp"].(string),
 			}
 		}
@@ -216,12 +186,8 @@ func (connection *K8SConnection) Delete(deleteMetadata map[string]any) {
 	kind := deleteMetadata["kind"].(string)
 	namespace := deleteMetadata["namespace"].(string)
 	name := deleteMetadata["name"].(string)
-	body, resp := connection.MakeRequest("DELETE", locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, bytes.NewReader(make([]byte, 0)))
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println(resp)
-		fmt.Println(string(body))
-		panic("couldn't delete")
-	}
+	client := connection.GetClient()
+	client.Delete(locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, nil)
 }
 
 func (connection *K8SConnection) CleanHistory(stackName string, oldest int, stackMetadata map[string]any) {
@@ -233,7 +199,7 @@ func (connection *K8SConnection) CleanHistory(stackName string, oldest int, stac
 
 	namespace := stackMetadata["namespace"].(string)
 
-	for secretName, _ := range result {
+	for secretName := range result {
 		re := regexp.MustCompile(stackName + `-[0-9]+`)
 		if re.FindString(secretName) != "" {
 			versionRe := regexp.MustCompile(`[0-9]+`)
