@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"os/exec"
@@ -72,6 +73,11 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 		panic(err)
 	}
 	command.Wait()
+
+	if command.ProcessState.ExitCode() != 0 {
+		fmt.Printf("running '%v' failed with exit code %v\n\n", app, command.ProcessState.ExitCode())
+		os.Exit(1)
+	}
 
 	conn, err := listener.Accept()
 	if err != nil {
