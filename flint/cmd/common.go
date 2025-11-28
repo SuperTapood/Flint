@@ -69,10 +69,9 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 	command.Stderr = os.Stderr
 	command.Stdout = os.Stdout
 
-	if err := command.Start(); err != nil {
+	if err := command.Run(); err != nil {
 		panic(err)
 	}
-	command.Wait()
 
 	if command.ProcessState.ExitCode() != 0 {
 		fmt.Printf("running '%v' failed with exit code %v\n\n", app, command.ProcessState.ExitCode())
