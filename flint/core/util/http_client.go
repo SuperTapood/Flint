@@ -32,7 +32,7 @@ func NewHttpClient(headers map[string]string, baseUrl string) *HttpClient {
 }
 
 func (httpClient *HttpClient) Request(method string, url string, reader io.Reader, acceptedStatusCodes []int) *HttpResponse {
-	req, err := http.NewRequest(method, httpClient.BaseUrl+url, reader)
+	req, err := http.NewRequest(method, url, reader)
 
 	if err != nil {
 		panic(err)
