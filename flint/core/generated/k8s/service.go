@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
@@ -17,7 +19,10 @@ func (service *Service) GetLabelName() string {
 	} else if pod := service.GetTarget().GetDeployment().GetPod(); pod != nil {
 		return pod.GetID()
 	}
-	panic("got bad service target for label")
+	fmt.Println("got bad service target")
+	os.Exit(2)
+
+	return ""
 }
 
 func (service *Service) GetTargetID() string {
@@ -26,7 +31,10 @@ func (service *Service) GetTargetID() string {
 	} else if deployment := service.GetTarget().GetDeployment(); deployment != nil {
 		return deployment.GetID()
 	}
-	panic("got bad service target")
+	fmt.Println("got bad service target")
+	os.Exit(2)
+
+	return ""
 }
 
 func (service *Service) GetPrettyName(stackMetadata map[string]any) string {
@@ -35,7 +43,8 @@ func (service *Service) GetPrettyName(stackMetadata map[string]any) string {
 
 func (service *Service) Synth(stackMetadata map[string]any) map[string]any {
 	if strings.Contains(service.GetName(), "::") {
-		panic("invalid name " + service.Name)
+		fmt.Println("invalid name " + service.Name)
+		os.Exit(1)
 	}
 	namespace := stackMetadata["namespace"].(string)
 	objMap := map[string]any{
@@ -73,11 +82,13 @@ func (service *Service) AddToDag(_dag *dag.DAG) {
 	if _dag != nil {
 		err := _dag.AddVertexByID(service.GetID(), service.GetID())
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			os.Exit(2)
 		}
 		err = _dag.AddEdge(service.GetID(), service.GetTargetID())
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			os.Exit(2)
 		}
 	}
 }
@@ -88,8 +99,4 @@ func (service *Service) Apply(stackMetadata map[string]any, resources map[string
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/services/"
 
 	client.Apply(applyMetadata, service.Synth(stackMetadata))
-}
-
-func (service *Service) Lookup() map[string]any {
-	panic("fuck")
 }

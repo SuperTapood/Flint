@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	sync "sync"
 
 	"github.com/SuperTapood/Flint/core/base"
@@ -13,23 +14,16 @@ import (
 var outputMu sync.Mutex
 var outputBufferMap map[int32]*bytes.Buffer
 
-func (lookup *K8SLookup) resolve() string {
-	obj := lookup.GetObject()
-	result := obj.ActualType().Lookup()
-	fmt.Println("AAAAAAAAAAA", result)
-	return ""
-}
-
 func (lookup *K8SLookup) GetID() string {
 	return lookup.Object.ActualType().GetID()
 }
 
 func (lookup *K8SLookup) Synth(stackMetadata map[string]any) map[string]any {
-	panic("WOW")
-}
+	fmt.Println("k8slookup is not synthable")
+	fmt.Println("you shouldn't be able to see this error")
+	os.Exit(2)
 
-func (lookup *K8SLookup) Lookup() map[string]any {
-	panic("can't lookup a lookup what the fuck are you even trying to do?")
+	return nil
 }
 
 func (lookup *K8SLookup) AddToDag(dag *dag.DAG) {}
@@ -59,18 +53,22 @@ func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[strin
 			var currentMap map[string]any
 			err := json.Unmarshal(response.Body, &currentMap)
 			if err != nil {
-				panic(err)
+				fmt.Println("could not unmarshal the current secret to a map")
+				fmt.Println(err)
+				os.Exit(2)
 			}
 			var current any = currentMap
 			for _, k := range lookup.GetKeys() {
 				// must be a map to go deeper
 				mmap, ok := current.(map[string]any)
 				if !ok {
-					panic("badbad")
+					fmt.Println("first not ok")
+					os.Exit(-1)
 				}
 				v, ok := mmap[k]
 				if !ok {
-					panic("badbad")
+					fmt.Println("second not ok")
+					os.Exit(-1)
 				}
 				current = v
 			}
@@ -94,8 +92,4 @@ func (output *K8SOutput) AddToDag(_dag *dag.DAG) {
 		}
 		_dag.AddEdge(output.GetID(), lookup.GetK8Slookup().GetID())
 	}
-}
-
-func (output *K8SOutput) Lookup() map[string]any {
-	panic("can't lookup an output what the fuck are you even trying to do?")
 }

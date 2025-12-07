@@ -1,6 +1,8 @@
 package base
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/heimdalr/dag"
@@ -29,7 +31,8 @@ func (unresource *Unresource) Synth(stackMetadata map[string]any) map[string]any
 }
 
 func (unresource *Unresource) AddToDag(dag *dag.DAG) {
-	panic("what the fuck are you doing")
+	fmt.Println("Unresource cannot be added to a dag like this")
+	os.Exit(2)
 }
 
 func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) {
@@ -46,5 +49,6 @@ func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[
 }
 
 func (unresource *Unresource) Lookup() map[string]any {
-	panic("what the fuck are you doing")
+	fmt.Println("Unresource cannot be looked up")
+	os.Exit(2)
 }

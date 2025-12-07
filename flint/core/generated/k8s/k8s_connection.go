@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"slices"
 	"strconv"
@@ -30,7 +31,9 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 
 	data, err := json.Marshal(resource)
 	if err != nil {
-		panic(err)
+		fmt.Println("couldn't unmarshal the resource to deploy")
+		fmt.Println(err)
+		os.Exit(2)
 	}
 
 	client := connection.GetClient()
@@ -54,7 +57,9 @@ func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 	var response = client.Get("/api/v1/secrets", nil)
 	var result map[string]interface{}
 	if err := json.Unmarshal(response.Body, &result); err != nil {
-		panic(err)
+		fmt.Println("couldn't unmarshal response from server")
+		fmt.Println(err)
+		os.Exit(2)
 	}
 	output := make(map[string]map[string]any, 0)
 
@@ -66,19 +71,25 @@ func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 			current, err := base64.StdEncoding.DecodeString(b64Secret)
 
 			if err != nil {
-				panic(err)
+				fmt.Println("failed to decode current secret")
+				fmt.Println(err)
+				os.Exit(-1)
 			}
 
 			b64Status := secret.(map[string]any)["data"].(map[string]any)["status"].(string)
 			status, err := base64.StdEncoding.DecodeString(b64Status)
 			if err != nil {
-				panic(err)
+				fmt.Println("failed to decode current secret status")
+				fmt.Println(err)
+				os.Exit(-1)
 			}
 
 			var currentMap map[string]any
 			err = json.Unmarshal(current, &currentMap)
 			if err != nil {
-				panic(err)
+				fmt.Println("couldn't unmarshal the current map to get revisions")
+				fmt.Println(err)
+				os.Exit(2)
 			}
 
 			output[secretName] = map[string]any{
@@ -133,11 +144,8 @@ func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string
 
 	for secretName, secret := range result {
 		versionRe := regexp.MustCompile(`[0-9]+`)
-		version, err := strconv.Atoi(versionRe.FindString(secretName))
+		version, _ := strconv.Atoi(versionRe.FindString(secretName))
 
-		if err != nil {
-			panic(err)
-		}
 		if version > latestVersion {
 			latestSecret = secret
 			latestVersion = version
@@ -146,7 +154,9 @@ func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string
 
 	date, err := time.Parse(time.RFC3339, latestSecret["timestamp"].(string))
 	if err != nil {
-		panic(err)
+		fmt.Println("could not parse the timestamp")
+		fmt.Println(err)
+		os.Exit(2)
 	}
 
 	return latestSecret["map"].(map[string]any), latestSecret["status"].(string), time.Since(date).Round(time.Second).String(), int32(latestVersion)
@@ -203,10 +213,7 @@ func (connection *K8SConnection) CleanHistory(stackName string, oldest int, stac
 		re := regexp.MustCompile(stackName + `-[0-9]+`)
 		if re.FindString(secretName) != "" {
 			versionRe := regexp.MustCompile(`[0-9]+`)
-			version, err := strconv.Atoi(versionRe.FindString(secretName))
-			if err != nil {
-				panic(err)
-			}
+			version, _ := strconv.Atoi(versionRe.FindString(secretName))
 			if version < oldest {
 				connection.Delete(map[string]any{
 					"kind":      "Secret",

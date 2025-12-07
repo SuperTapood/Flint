@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
@@ -55,7 +57,8 @@ func (pod *Pod) Synth(stackMetadata map[string]any) map[string]any {
 
 func (pod *Pod) AddToDag(_dag *dag.DAG) {
 	if strings.Contains(pod.GetName(), "::") {
-		panic("invalid name " + pod.Name)
+		fmt.Println("invalid name " + pod.Name)
+		os.Exit(1)
 	}
 	if _dag != nil {
 		_dag.AddVertexByID(pod.GetID(), pod.GetID())
@@ -68,8 +71,4 @@ func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.Re
 	applyMetadata["location"] = "/apis/v1/namespaces/" + stackMetadata["namespace"].(string) + "/pods/"
 
 	client.Apply(applyMetadata, pod.Synth(stackMetadata))
-}
-
-func (pod *Pod) Lookup() map[string]any {
-	panic("can't lookup a pod")
 }

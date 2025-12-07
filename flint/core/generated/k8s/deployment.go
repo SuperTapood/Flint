@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
@@ -11,9 +13,16 @@ func (deployment *Deployment) GetID() string {
 	return deployment.GetName()
 }
 
+type STRING string
+
+func (str STRING) enforce() string {
+	return string(str)
+}
+
 func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any {
 	if strings.Contains(deployment.GetName(), "::") {
-		panic("invalid name " + deployment.Name)
+		fmt.Println("invalid name " + STRING(deployment.Name).enforce())
+		os.Exit(1)
 	}
 	namespace := stackMetadata["namespace"].(string)
 	objMap := map[string]any{
@@ -49,10 +58,6 @@ func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any
 }
 
 func (deployment *Deployment) AddToDag(_dag *dag.DAG) {
-	if strings.Contains(deployment.GetName(), "::") {
-		panic("invalid name " + deployment.Name)
-	}
-
 	if _dag != nil {
 		_dag.AddVertexByID(deployment.GetID(), deployment.GetID())
 	}
@@ -64,8 +69,4 @@ func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/deployments/"
 
 	client.Apply(applyMetadata, deployment.Synth(stackMetadata))
-}
-
-func (deployment *Deployment) Lookup() map[string]any {
-	panic("can't lookup a deployment")
 }

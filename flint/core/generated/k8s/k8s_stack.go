@@ -1,6 +1,9 @@
 package k8s
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/heimdalr/dag"
 )
@@ -15,13 +18,12 @@ func (types *K8STypes) ActualType() base.ResourceType {
 	} else if out := types.GetSecret(); out != nil {
 		return out
 	} else if out := types.GetK8Soutput(); out != nil {
-		// fmt.Println(out.GetStrings())
-		// fmt.Println(out.GetLookups())
 		return out
 	} else if out := types.GetK8Slookup(); out != nil {
 		return out
 	}
-	panic("got bad resource type")
+	fmt.Println("got bad k8s resource type")
+	os.Exit(2)
 }
 
 func (stack *K8SStack) Synth(name string) (*dag.DAG, map[string]base.ResourceType) {

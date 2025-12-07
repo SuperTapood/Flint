@@ -32,10 +32,12 @@ func NewHttpClient(headers map[string]string, baseUrl string) *HttpClient {
 }
 
 func (httpClient *HttpClient) Request(method string, url string, reader io.Reader, acceptedStatusCodes []int) *HttpResponse {
-	req, err := http.NewRequest(method, url, reader)
+	req, err := http.NewRequest(method, httpClient.BaseUrl+url, reader)
 
 	if err != nil {
-		panic(err)
+		fmt.Println("failed to create an http request")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	if httpClient.Headers != nil {

@@ -2,7 +2,9 @@ package general
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
+	"os"
 	"slices"
 	"strings"
 	"sync"
@@ -28,7 +30,10 @@ func (stackType *StackTypes) GetActual() StackType {
 		return out
 	}
 
-	panic("got bad stack type")
+	fmt.Println("got bad stack type")
+	os.Exit(2)
+
+	return nil
 }
 
 // a generic representation of a connection
@@ -58,7 +63,10 @@ func (connType *ConnectionTypes) GetActual() ConnectionType {
 		return out
 	}
 
-	panic("got bad connection type")
+	fmt.Println("got bad connection type")
+	os.Exit(2)
+
+	return nil
 }
 
 func (connType *ConnectionTypes) List() []common.FlintDeployment {
@@ -114,7 +122,9 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 			descendants, err := _dag.GetDescendants(id)
 			if err != nil {
 				mu.Unlock()
-				panic(err)
+				fmt.Println("failed to get descendants from dag")
+				fmt.Println(err)
+				os.Exit(-1)
 			}
 
 			// Check if all dependencies are completed
@@ -165,7 +175,9 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 		// Check for errors
 		for err := range errChan {
 			if err != nil {
-				panic(err)
+				fmt.Println("deploy failed with error:")
+				fmt.Println(err)
+				os.Exit(-1)
 			}
 		}
 	}
@@ -180,13 +192,17 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 
 	b, err := json.Marshal(_dag)
 	if err != nil {
-		panic(err)
+		fmt.Println("failed to marshal dag")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	var dagMap map[string]any
 	err = json.Unmarshal(b, &dagMap)
 	if err != nil {
-		panic(err)
+		fmt.Println("failed to marshal dag map")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	removeFromDag := make([]string, 0)
@@ -258,12 +274,16 @@ func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, st
 		if found {
 			bytesOld, err := json.Marshal(obj_map[foundObjKey])
 			if err != nil {
-				panic(err)
+				fmt.Println("failed to marshal found object")
+				fmt.Println(err)
+				os.Exit(-1)
 			}
 
 			bytesNew, err := json.Marshal(newObj.Synth(stackMetadata))
 			if err != nil {
-				panic(err)
+				fmt.Println("failed to marshal synthed new objet")
+				fmt.Println(err)
+				os.Exit(-1)
 			}
 			if !strings.EqualFold(string(bytesOld), string(bytesNew)) {
 				objects := make(map[string]map[string]any, 2)

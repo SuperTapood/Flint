@@ -18,8 +18,6 @@ type ResourceType interface {
 
 	*/
 	AddToDag(dag *dag.DAG)
-	// return an opinionated map of this object's important properties from the cloud provider
-	Lookup() map[string]any
 
 	Synth(stackMetadata map[string]any) map[string]any
 	Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient)

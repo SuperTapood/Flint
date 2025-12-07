@@ -40,12 +40,16 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 	if _, err := os.Stat(app); err == nil {
 		data, err := os.ReadFile(app)
 		if err != nil {
-			panic(err)
+			fmt.Println("could not read synthed app file")
+			fmt.Println(err)
+			os.Exit(-1)
 		}
 		var stack general.Stack
 		err = proto.Unmarshal(data, &stack)
 		if err != nil {
-			panic(err)
+			fmt.Println("could not unmarshal stack from synthed app file")
+			fmt.Println(err)
+			os.Exit(-1)
 		}
 		return stack.GetStack(), stack.GetConnection(), stack.GetName()
 	}
@@ -57,7 +61,9 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 
 	listener, err := net.Listen("unix", socketPath)
 	if err != nil {
-		panic(err)
+		fmt.Println("could not open socket")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 	defer listener.Close()
 	defer os.Remove(socketPath)
@@ -70,7 +76,9 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 	command.Stdout = os.Stdout
 
 	if err := command.Run(); err != nil {
-		panic(err)
+		fmt.Println("running command failed")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	if command.ProcessState.ExitCode() != 0 {
@@ -80,14 +88,18 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 
 	conn, err := listener.Accept()
 	if err != nil {
-		panic(err)
+		fmt.Println("failed to get data from the app")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 	defer conn.Close()
 
 	buf := make([]byte, 1024*1024)
 	n, err := conn.Read(buf)
 	if err != nil {
-		panic(err)
+		fmt.Println("failed to read app data")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	data := buf[:n]
@@ -95,7 +107,9 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 	var stack general.Stack
 	err = proto.Unmarshal(data, &stack)
 	if err != nil {
-		panic(err)
+		fmt.Println("failed to unmarshal stack from app")
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	return stack.GetStack(), stack.GetConnection(), stack.GetName()

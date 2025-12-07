@@ -60,26 +60,8 @@ func prettyChangeDiff(conn general.ConnectionType, stackMetadata map[string]any,
 	for _, change := range changeset {
 		newObj := change["new"]
 		name := conn.PrettyName(newObj, stackMetadata)
-		// newBytes, err := json.MarshalIndent(newObj, " ", "\t")
-		// if err != nil {
-		// 	panic(err)
-		// }
-
-		// oldObj := change["old"]
-		// oldBytes, err := json.MarshalIndent(oldObj, " ", "\t")
-		// if err != nil {
-		// 	panic(err)
-		// }
-
-		// diff := difflib.UnifiedDiff{
-		// 	A:       difflib.SplitLines(string(oldBytes)),
-		// 	B:       difflib.SplitLines(string(newBytes)),
-		// 	Context: len(difflib.SplitLines(string(newBytes))),
-		// }
 
 		printColored(colorYellow, "[~] %s\n", name)
-
-		// PrintCDKDiff(diff)
 
 		NewDiff(change["old"], change["new"])
 	}
@@ -171,11 +153,8 @@ func printDiff(v any, path []string) {
 		}
 
 	case difference:
-		// Primitive value reached
-		//fmt.Printf("%s = %v\n", strings.Join(path, "."), val)
 		printColoredln(colorGreen, "[+]", strings.Repeat("    ", len(path)), `"`+toString(val.New)+`",`)
 		printColoredln(colorRed, "[-]", strings.Repeat("    ", len(path)), `"`+toString(val.Old)+`",`)
-		// flat[strings.Join(path, ".")] = val
 	}
 }
 
@@ -215,70 +194,10 @@ func walk(v any, path []string, flat map[string]any) {
 		}
 
 	case []any:
-		panic("we shouldn't be here")
+		fmt.Println("we shouldn't be here")
+		os.Exit(2)
 
 	default:
-		// Primitive value reached
-		// fmt.Printf("%s = %v\n", strings.Join(path, "."), val)
-		// slices.Reverse(path)
 		flat[strings.Join(path, ".")] = val
 	}
 }
-
-// // PrintCDKDiff formats and prints a difflib.UnifiedDiff in a style
-// // similar to 'cdk diff', complete with ANSI color codes.
-// // It writes the formatted output to the provided io.Writer.
-// func PrintCDKDiff(diff difflib.UnifiedDiff) {
-// 	// Create a matcher to compare the two string slices
-// 	m := difflib.NewMatcher(diff.A, diff.B)
-
-// 	// Use a default context if not provided (or negative)
-// 	context := diff.Context
-// 	if context < 0 {
-// 		context = 3 // A common default context
-// 	}
-
-// 	// Get the operations grouped by hunks
-// 	groups := m.GetGroupedOpCodes(context)
-
-// 	// If there are no diffs, we're done after the headers
-// 	if len(groups) == 0 {
-// 		return
-// 	}
-
-// 	// Iterate over each group (hunk) of changes
-// 	for _, group := range groups {
-
-// 		// Iterate over each operation within the hunk
-// 		for _, code := range group {
-// 			switch code.Tag {
-// 			case 'e': // 'equal' - context line
-// 				// Lines from A[code.I1:code.I2] are the same in B
-// 				for _, line := range diff.A[code.I1:code.I2] {
-// 					// fmt.Fprintf(w, "%s  %s%s", unchagedColor, line, colorReset) // Indent context lines
-// 					printColored(unchagedColor, " %s", line)
-// 				}
-// 			case 'd': // 'delete' - line removed from 'A'
-// 				for _, line := range diff.A[code.I1:code.I2] {
-// 					//fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
-// 					printColored(colorRed, "[-] %s", line)
-// 				}
-// 			case 'i': // 'insert' - line added to 'B'
-// 				for _, line := range diff.B[code.J1:code.J2] {
-// 					//fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
-// 					printColored(colorGreen, "[+] %s", line)
-// 				}
-// 			case 'r': // 'replace' - lines from 'A' replaced by lines in 'B'
-// 				// Show as a deletion followed by an insertion
-// 				for _, line := range diff.A[code.I1:code.I2] {
-// 					//fmt.Fprintf(w, "%s[-] %s%s", colorRed, line, colorReset)
-// 					printColored(colorRed, "[-] %s", line)
-// 				}
-// 				for _, line := range diff.B[code.J1:code.J2] {
-// 					//fmt.Fprintf(w, "%s[+] %s%s", colorGreen, line, colorReset)
-// 					printColored(colorGreen, "[+] %s", line)
-// 				}
-// 			}
-// 		}
-// 	}
-// }

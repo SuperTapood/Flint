@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/binary"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -19,14 +20,18 @@ var synthCmd = &cobra.Command{
 
 		file, err := os.Create(filename)
 		if err != nil {
-			panic(err)
+			fmt.Println("couldn't create the file to synth to")
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
 		defer file.Close()
 
 		err = binary.Write(file, binary.LittleEndian, binarySynthed)
 		if err != nil {
-			panic(err)
+			fmt.Println("couldn't write to the file when synthing")
+			fmt.Println(err)
+			os.Exit(1)
 		}
 	},
 }

@@ -2,6 +2,8 @@ package k8s
 
 import (
 	"encoding/base64"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
@@ -14,7 +16,8 @@ func (secret *Secret) GetID() string {
 
 func (secret *Secret) Synth(stackMetadata map[string]any) map[string]any {
 	if strings.Contains(secret.GetName(), "::") {
-		panic("invalid name " + secret.Name)
+		fmt.Println("invalid name " + secret.Name)
+		os.Exit(1)
 	}
 	namespace := stackMetadata["namespace"].(string)
 	objMap := map[string]any{
@@ -52,8 +55,4 @@ func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]b
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/secrets/"
 
 	client.Apply(applyMetadata, secret.Synth(stackMetadata))
-}
-
-func (secret *Secret) Lookup() map[string]any {
-	panic("can't lookup a secret")
 }
