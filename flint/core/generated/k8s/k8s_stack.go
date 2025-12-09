@@ -24,6 +24,8 @@ func (types *K8STypes) ActualType() base.ResourceType {
 	}
 	fmt.Println("got bad k8s resource type")
 	os.Exit(2)
+
+	return nil
 }
 
 func (stack *K8SStack) Synth(name string) (*dag.DAG, map[string]base.ResourceType) {

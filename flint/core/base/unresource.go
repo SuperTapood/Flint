@@ -51,4 +51,5 @@ func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[
 func (unresource *Unresource) Lookup() map[string]any {
 	fmt.Println("Unresource cannot be looked up")
 	os.Exit(2)
+	return nil
 }

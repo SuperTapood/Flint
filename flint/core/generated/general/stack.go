@@ -105,6 +105,21 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 	// Get all vertices
 	vertices := _dag.GetVertices()
 
+	current := 1
+	total := len(_dag.GetVertices())
+
+	prettys := make([]string, 0)
+
+	for id, res := range resources {
+		if resources[id].Synth(stackMetadata) == nil {
+			total -= 1
+			continue
+		}
+		prettys = append(prettys, connType.GetActual().PrettyName(res.Synth(stackMetadata), stackMetadata))
+	}
+
+	deployPrint := util.CreateDeployPrint(stackName, prettys, stackMetadata)
+
 	completed := make(map[string]bool)
 	var mu sync.Mutex
 
@@ -152,7 +167,7 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 
 		for _, id := range ready {
 			wg.Add(1)
-			go func(nodeID string) {
+			go func(nodeID string, idx int) {
 				defer wg.Done()
 
 				vertex, err := _dag.GetVertex(nodeID)
@@ -161,12 +176,25 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 					return
 				}
 
-				resources[vertex.(string)].Apply(stackMetadata, resources, connType.GetActual())
+				res := resources[vertex.(string)]
+				synthed := res.Synth(stackMetadata)
+
+				if synthed != nil {
+					deployPrint.PrettyPrint(stackName, idx, total, "CREATING", connType.GetActual().PrettyName(synthed, stackMetadata))
+				}
+
+				res.Apply(stackMetadata, resources, connType.GetActual())
+				if synthed != nil {
+					deployPrint.PrettyPrint(stackName, idx, total, "CREATED", connType.GetActual().PrettyName(synthed, stackMetadata))
+				}
 
 				mu.Lock()
 				completed[nodeID] = true
 				mu.Unlock()
-			}(id)
+			}(id, current)
+			if resources[id].Synth(stackMetadata) != nil {
+				current += 1
+			}
 		}
 
 		wg.Wait()

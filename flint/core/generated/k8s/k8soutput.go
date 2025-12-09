@@ -19,9 +19,9 @@ func (lookup *K8SLookup) GetID() string {
 }
 
 func (lookup *K8SLookup) Synth(stackMetadata map[string]any) map[string]any {
-	fmt.Println("k8slookup is not synthable")
-	fmt.Println("you shouldn't be able to see this error")
-	os.Exit(2)
+	// fmt.Println("k8slookup is not synthable")
+	// fmt.Println("you shouldn't be able to see this error")
+	// os.Exit(2)
 
 	return nil
 }
