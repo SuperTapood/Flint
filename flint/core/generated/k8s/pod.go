@@ -13,6 +13,23 @@ func (pod *Pod) GetID() string {
 	return pod.GetName()
 }
 
+func (container *Container) Synth(stackMetadata map[string]any) map[string]any {
+	objMap := map[string]any{
+		"name":  container.GetName(),
+		"image": container.GetImage(),
+		"ports": []any{}, // start empty
+	}
+
+	for _, p := range container.GetPorts() {
+		portMap := map[string]any{
+			"containerPort": p,
+		}
+		objMap["ports"] = append(objMap["ports"].([]any), portMap)
+	}
+
+	return objMap
+}
+
 func (pod *Pod) Synth(stackMetadata map[string]any) map[string]any {
 
 	namespace := stackMetadata["namespace"].(string)
@@ -29,27 +46,16 @@ func (pod *Pod) Synth(stackMetadata map[string]any) map[string]any {
 			"namespace": namespace,
 		},
 		"spec": map[string]any{
-			"containers": []any{
-				map[string]any{
-					"name":  pod.GetName(),
-					"image": pod.GetImage(),
-					"ports": []any{}, // start empty
-				},
-			},
+			"containers":    []any{},
+			"restartPolicy": pod.GetRestartPolicy(),
 		},
 	}
 
 	// Navigate to the container map
 	spec := objMap["spec"].(map[string]any)
-	containers := spec["containers"].([]any)
-	container := containers[0].(map[string]any)
 
-	// Add ports dynamically
-	for _, p := range pod.GetPorts() {
-		port_map := map[string]any{
-			"containerPort": p,
-		}
-		container["ports"] = append(container["ports"].([]any), port_map)
+	for _, c := range pod.GetContainers() {
+		spec["containers"] = append(spec["containers"].([]any), c.Synth(stackMetadata))
 	}
 
 	return objMap

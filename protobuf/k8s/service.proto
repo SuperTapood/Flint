@@ -16,5 +16,6 @@ message Service {
     string name = 1;
     // the pod to bind the service to
     ServiceTarget target = 2;
-    repeated Port ports = 3;
+    string type = 3;
+    repeated Port ports = 4;
 }

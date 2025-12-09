@@ -21,19 +21,78 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type Container struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Image         string                 `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
+	Ports         []int32                `protobuf:"varint,3,rep,packed,name=ports,proto3" json:"ports,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Container) Reset() {
+	*x = Container{}
+	mi := &file_k8s_pod_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Container) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Container) ProtoMessage() {}
+
+func (x *Container) ProtoReflect() protoreflect.Message {
+	mi := &file_k8s_pod_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Container.ProtoReflect.Descriptor instead.
+func (*Container) Descriptor() ([]byte, []int) {
+	return file_k8s_pod_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *Container) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Container) GetImage() string {
+	if x != nil {
+		return x.Image
+	}
+	return ""
+}
+
+func (x *Container) GetPorts() []int32 {
+	if x != nil {
+		return x.Ports
+	}
+	return nil
+}
+
 type Pod struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// todo add repeated container
-	Image         string  `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`
-	Ports         []int32 `protobuf:"varint,3,rep,packed,name=ports,proto3" json:"ports,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Containers    []*Container           `protobuf:"bytes,2,rep,name=containers,proto3" json:"containers,omitempty"`
+	RestartPolicy string                 `protobuf:"bytes,3,opt,name=restart_policy,json=restartPolicy,proto3" json:"restart_policy,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Pod) Reset() {
 	*x = Pod{}
-	mi := &file_k8s_pod_proto_msgTypes[0]
+	mi := &file_k8s_pod_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +104,7 @@ func (x *Pod) String() string {
 func (*Pod) ProtoMessage() {}
 
 func (x *Pod) ProtoReflect() protoreflect.Message {
-	mi := &file_k8s_pod_proto_msgTypes[0]
+	mi := &file_k8s_pod_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +117,7 @@ func (x *Pod) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pod.ProtoReflect.Descriptor instead.
 func (*Pod) Descriptor() ([]byte, []int) {
-	return file_k8s_pod_proto_rawDescGZIP(), []int{0}
+	return file_k8s_pod_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Pod) GetName() string {
@@ -68,29 +127,36 @@ func (x *Pod) GetName() string {
 	return ""
 }
 
-func (x *Pod) GetImage() string {
+func (x *Pod) GetContainers() []*Container {
 	if x != nil {
-		return x.Image
-	}
-	return ""
-}
-
-func (x *Pod) GetPorts() []int32 {
-	if x != nil {
-		return x.Ports
+		return x.Containers
 	}
 	return nil
+}
+
+func (x *Pod) GetRestartPolicy() string {
+	if x != nil {
+		return x.RestartPolicy
+	}
+	return ""
 }
 
 var File_k8s_pod_proto protoreflect.FileDescriptor
 
 const file_k8s_pod_proto_rawDesc = "" +
 	"\n" +
-	"\rk8s/pod.proto\"E\n" +
-	"\x03Pod\x12\x12\n" +
+	"\rk8s/pod.proto\"K\n" +
+	"\tContainer\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05image\x18\x02 \x01(\tR\x05image\x12\x14\n" +
-	"\x05ports\x18\x03 \x03(\x05R\x05portsB=B\bPodProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
+	"\x05ports\x18\x03 \x03(\x05R\x05ports\"l\n" +
+	"\x03Pod\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12*\n" +
+	"\n" +
+	"containers\x18\x02 \x03(\v2\n" +
+	".ContainerR\n" +
+	"containers\x12%\n" +
+	"\x0erestart_policy\x18\x03 \x01(\tR\rrestartPolicyB=B\bPodProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
 	file_k8s_pod_proto_rawDescOnce sync.Once
@@ -104,16 +170,18 @@ func file_k8s_pod_proto_rawDescGZIP() []byte {
 	return file_k8s_pod_proto_rawDescData
 }
 
-var file_k8s_pod_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_k8s_pod_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_k8s_pod_proto_goTypes = []any{
-	(*Pod)(nil), // 0: Pod
+	(*Container)(nil), // 0: Container
+	(*Pod)(nil),       // 1: Pod
 }
 var file_k8s_pod_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: Pod.containers:type_name -> Container
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_k8s_pod_proto_init() }
@@ -127,7 +195,7 @@ func file_k8s_pod_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_k8s_pod_proto_rawDesc), len(file_k8s_pod_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

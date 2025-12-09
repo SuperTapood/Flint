@@ -291,7 +291,7 @@ func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, st
 			continue
 		}
 		var foundObjKey string
-		for name, _ := range obj_map {
+		for name := range obj_map {
 			if name == newName {
 				found = true
 				foundObjKey = name

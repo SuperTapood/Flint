@@ -5,6 +5,7 @@
 
 __all__ = (
     "ConnectionTypes",
+    "Container",
     "Deployment",
     "FlintDeployment",
     "K8SConnection",
@@ -48,6 +49,18 @@ class ConnectionTypes(betterproto2.Message):
 
 
 default_message_pool.register_message("", "ConnectionTypes", ConnectionTypes)
+
+
+@dataclass(kw_only=True, eq=False, repr=False)
+class Container(betterproto2.Message):
+    name: "str" = betterproto2.field(1, betterproto2.TYPE_STRING)
+
+    image: "str" = betterproto2.field(2, betterproto2.TYPE_STRING)
+
+    ports: "list[int]" = betterproto2.field(3, betterproto2.TYPE_INT32, repeated=True)
+
+
+default_message_pool.register_message("", "Container", Container)
 
 
 @dataclass(kw_only=True, eq=False, repr=False)
@@ -186,12 +199,11 @@ default_message_pool.register_message("", "K8STypes", K8STypes)
 class Pod(betterproto2.Message):
     name: "str" = betterproto2.field(1, betterproto2.TYPE_STRING)
 
-    image: "str" = betterproto2.field(2, betterproto2.TYPE_STRING)
-    """
-    todo add repeated container
-    """
+    containers: "list[Container]" = betterproto2.field(
+        2, betterproto2.TYPE_MESSAGE, repeated=True
+    )
 
-    ports: "list[int]" = betterproto2.field(3, betterproto2.TYPE_INT32, repeated=True)
+    restart_policy: "str" = betterproto2.field(3, betterproto2.TYPE_STRING)
 
 
 default_message_pool.register_message("", "Pod", Pod)
@@ -257,8 +269,10 @@ class Service(betterproto2.Message):
     the pod to bind the service to
     """
 
+    type: "str" = betterproto2.field(3, betterproto2.TYPE_STRING)
+
     ports: "list[Port]" = betterproto2.field(
-        3, betterproto2.TYPE_MESSAGE, repeated=True
+        4, betterproto2.TYPE_MESSAGE, repeated=True
     )
 
 

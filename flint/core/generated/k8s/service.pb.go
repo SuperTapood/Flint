@@ -109,7 +109,8 @@ type Service struct {
 	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// the pod to bind the service to
 	Target        *ServiceTarget `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
-	Ports         []*common.Port `protobuf:"bytes,3,rep,name=ports,proto3" json:"ports,omitempty"`
+	Type          string         `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Ports         []*common.Port `protobuf:"bytes,4,rep,name=ports,proto3" json:"ports,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -158,6 +159,13 @@ func (x *Service) GetTarget() *ServiceTarget {
 	return nil
 }
 
+func (x *Service) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
 func (x *Service) GetPorts() []*common.Port {
 	if x != nil {
 		return x.Ports
@@ -175,11 +183,12 @@ const file_k8s_service_proto_rawDesc = "" +
 	"\n" +
 	"deployment\x18\x02 \x01(\v2\v.DeploymentH\x00R\n" +
 	"deploymentB\x06\n" +
-	"\x04type\"b\n" +
+	"\x04type\"v\n" +
 	"\aService\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12&\n" +
-	"\x06target\x18\x02 \x01(\v2\x0e.ServiceTargetR\x06target\x12\x1b\n" +
-	"\x05ports\x18\x03 \x03(\v2\x05.PortR\x05portsBAB\fServiceProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
+	"\x06target\x18\x02 \x01(\v2\x0e.ServiceTargetR\x06target\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\tR\x04type\x12\x1b\n" +
+	"\x05ports\x18\x04 \x03(\v2\x05.PortR\x05portsBAB\fServiceProtoP\x01Z/github.com/SuperTapood/Flint/core/generated/k8sb\x06proto3"
 
 var (
 	file_k8s_service_proto_rawDescOnce sync.Once

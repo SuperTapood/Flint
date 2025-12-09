@@ -55,7 +55,7 @@ func (service *Service) Synth(stackMetadata map[string]any) map[string]any {
 			"namespace": namespace,
 		},
 		"spec": map[string]any{
-			"type": "NodePort",
+			"type": service.GetType(),
 			"selector": map[string]any{
 				"name": service.GetLabelName(),
 			},
