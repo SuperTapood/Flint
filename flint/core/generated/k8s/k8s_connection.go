@@ -152,6 +152,10 @@ func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string
 		}
 	}
 
+	if latestSecret == nil {
+		return nil, "", "", 0
+	}
+
 	date, err := time.Parse(time.RFC3339, latestSecret["timestamp"].(string))
 	if err != nil {
 		fmt.Println("could not parse the timestamp")
@@ -163,6 +167,7 @@ func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string
 }
 
 func (connection *K8SConnection) PrettyName(resource map[string]any, stackMetadata map[string]any) string {
+	fmt.Println(resource)
 	return "Kubernetes::" + stackMetadata["namespace"].(string) + "::" + resource["kind"].(string) + "::" + resource["metadata"].(map[string]any)["name"].(string)
 }
 

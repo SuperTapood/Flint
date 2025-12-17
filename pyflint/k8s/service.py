@@ -5,7 +5,7 @@ from ..generated import Service as Service_, Port, ServiceTarget
 
 
 @typechecked
-def Service(*, name: str, service_type: str, target, ports: Union[Port, List[Port]]) -> Service_:
+def Service(*, name: str, target, ports: Union[Port, List[Port]], service_type: str = "NodePort") -> Service_:
     if type(ports) != list:
         ports = [
             ports,

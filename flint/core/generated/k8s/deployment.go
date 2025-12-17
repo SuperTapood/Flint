@@ -10,6 +10,9 @@ import (
 )
 
 func (deployment *Deployment) GetID() string {
+	if deployment.GetName() == "" {
+		deployment.Name = deployment.GetPod().GetID()
+	}
 	return deployment.GetName()
 }
 
@@ -20,7 +23,7 @@ func (str STRING) enforce() string {
 }
 
 func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any {
-	if strings.Contains(deployment.GetName(), "::") {
+	if strings.Contains(deployment.GetID(), "::") {
 		fmt.Println("invalid name " + STRING(deployment.Name).enforce())
 		os.Exit(1)
 	}
@@ -29,9 +32,9 @@ func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any
 		"apiVersion": "apps/v1",
 		"kind":       "Deployment",
 		"metadata": map[string]any{
-			"name": deployment.GetName(),
+			"name": deployment.GetID(),
 			"labels": map[string]any{
-				"name": deployment.GetName(),
+				"name": deployment.GetID(),
 			},
 			"namespace": namespace,
 		},
@@ -39,7 +42,7 @@ func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any
 			"replicas": deployment.GetReplicas(),
 			"selector": map[string]any{
 				"matchLabels": map[string]any{
-					"name": deployment.GetPod().GetName(),
+					"name": deployment.GetPod().GetID(),
 				},
 			},
 			"template": map[string]any{

@@ -180,12 +180,20 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 				synthed := res.Synth(stackMetadata)
 
 				if synthed != nil {
-					deployPrint.PrettyPrint(stackName, idx, total, "CREATING", connType.GetActual().PrettyName(synthed, stackMetadata))
+					action := "CREATING"
+					if synthed["action"] == "delete" {
+						action = "DELETING"
+					}
+					deployPrint.PrettyPrint(stackName, idx, total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
 				}
 
 				res.Apply(stackMetadata, resources, connType.GetActual())
 				if synthed != nil {
-					deployPrint.PrettyPrint(stackName, idx, total, "CREATED", connType.GetActual().PrettyName(synthed, stackMetadata))
+					action := "CREATED"
+					if synthed["action"] == "delete" {
+						action = "DELETED"
+					}
+					deployPrint.PrettyPrint(stackName, idx, total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
 				}
 
 				mu.Lock()
@@ -262,7 +270,7 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 
 	for _, resource := range resources {
 		synthed := resource.Synth(stackMetadata)
-		if synthed == nil {
+		if synthed == nil && synthed["action"] == nil {
 			continue
 		}
 		objs_map[resource.GetID()] = synthed

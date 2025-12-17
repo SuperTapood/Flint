@@ -82,12 +82,12 @@ func (service *Service) AddToDag(_dag *dag.DAG) {
 	if _dag != nil {
 		err := _dag.AddVertexByID(service.GetID(), service.GetID())
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(2)
+			fmt.Printf("can't add '%v' (service id) to the DAG\n", service.GetID())
+			os.Exit(1)
 		}
 		err = _dag.AddEdge(service.GetID(), service.GetTargetID())
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("can't add either '%v' (service id) or '%v' (target id) to the DAG\n", service.GetID(), service.GetTargetID())
 			os.Exit(2)
 		}
 	}

@@ -10,6 +10,9 @@ import (
 )
 
 func (pod *Pod) GetID() string {
+	if pod.GetName() == "" {
+		pod.Name = pod.GetContainers()[0].GetName()
+	}
 	return pod.GetName()
 }
 
@@ -31,8 +34,11 @@ func (container *Container) Synth(stackMetadata map[string]any) map[string]any {
 }
 
 func (pod *Pod) Synth(stackMetadata map[string]any) map[string]any {
-
 	namespace := stackMetadata["namespace"].(string)
+
+	if pod.GetRestartPolicy() == "" {
+		pod.RestartPolicy = "Always"
+	}
 
 	objMap := map[string]any{
 		"location":   "/api/v1/namespaces/" + namespace + "/pods",

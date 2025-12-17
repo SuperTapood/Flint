@@ -21,13 +21,19 @@ func (unresource *Unresource) GetID() string {
 	return unresource.String()
 }
 
-func (unresource *Unresource) GetPrettyName(stackMetadata map[string]any) string {
-	// return "Kubernetes::Pod::" + stackMetadata["namespace"].(string) + "::" + pod.GetName()
-	return unresource.String()
-}
-
 func (unresource *Unresource) Synth(stackMetadata map[string]any) map[string]any {
-	return nil
+	splitName := strings.Split(unresource.Name, "::")
+	namespace := splitName[1]
+	kind := splitName[2]
+	name := splitName[3]
+	return map[string]any{
+		"action":    "delete",
+		"kind":      kind,
+		"namespace": namespace,
+		"metadata": map[string]any{
+			"name": name,
+		},
+	}
 }
 
 func (unresource *Unresource) AddToDag(dag *dag.DAG) {

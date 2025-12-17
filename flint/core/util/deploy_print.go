@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 var printLock sync.Mutex
@@ -45,11 +46,12 @@ func (self *DeployPrint) PrettyPrint(stackName string, current int, total int, s
 	printLock.Lock()
 	defer printLock.Unlock()
 
-	const maxStatusLength = 10
+	const maxStatusLength = 8
+	const maxTimeLength = 8
 
 	lastInd := strings.LastIndex(resourceName, "::")
 	objType := resourceName[:lastInd]
 	objName := resourceName[lastInd+2:]
 
-	fmt.Printf("%v | %v/%v | %v | %v | %v\n", stackName, strconv.Itoa(current), strconv.Itoa(total), padRight(maxStatusLength, status), padRight(self.ObjectTypeLength, objType), objName)
+	fmt.Printf("%v | %v/%v | %v | %v | %v | %v\n", stackName, strconv.Itoa(current), strconv.Itoa(total), padRight(maxTimeLength, time.Now().Format(time.TimeOnly)), padRight(maxStatusLength, status), padRight(self.ObjectTypeLength, objType), objName)
 }

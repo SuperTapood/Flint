@@ -63,7 +63,10 @@ func (httpClient *HttpClient) Request(method string, url string, reader io.Reade
 	}
 
 	if !slices.Contains(acceptedStatusCodes, resp.StatusCode) {
-		fmt.Printf("%v request to %v resulted in an unacceptable status code %v (acceptable status codes are %v)\n\n", method, httpClient.BaseUrl+url, resp.StatusCode, acceptedStatusCodes)
+		fmt.Printf("%v request to %v resulted in an unacceptable status code %v (acceptable status codes are %v)\n\n", method, httpClient.BaseUrl+url, resp.Status, acceptedStatusCodes)
+		if resp.StatusCode == 422 {
+			panic("try reviewing your manifest")
+		}
 		os.Exit(1)
 	}
 
