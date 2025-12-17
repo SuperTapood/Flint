@@ -285,11 +285,19 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any) {
 	obj_map, _, _, version := connType.GetActual().GetLatestRevision(stackName)
 
+	added := make([]string, 0)
+
 	if version == 0 {
-		return make([]string, 1), make([]string, 1), make([]map[string]map[string]any, 1)
+		for _, res := range resources {
+			synthed := res.Synth(stackMetadata)
+			if len(synthed) == 0 {
+				continue
+			}
+			added = append(added, connType.GetActual().PrettyName(synthed, stackMetadata))
+		}
+		return added, make([]string, 0), make([]map[string]map[string]any, 0)
 	}
 
-	added := make([]string, 0)
 	removed := make([]string, 0)
 	changed := make([]map[string]map[string]any, 0)
 

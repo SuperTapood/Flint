@@ -28,15 +28,7 @@ const (
 	unchagedColor = "\033[38;5;181m"
 )
 
-/*
-Load stack from either a runnable program or a synthed file.
-
-Returns:
-  - StackTypes* - The abstract protobuf stack (needs to be `GetActual()`-ed to get a the actual useable `StackType`)
-  - ConnectionTypes* - The abstract protobuf connection (needs to be `GetActual()`-ed to get a the actual useable `ConnectionType`)
-  - string - The name of the stack. This value is inaccessible later on.
-*/
-func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) {
+func BinaryStackFromApp() []byte {
 	if _, err := os.Stat(app); err == nil {
 		data, err := os.ReadFile(app)
 		if err != nil {
@@ -44,14 +36,7 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 			fmt.Println(err)
 			os.Exit(-1)
 		}
-		var stack general.Stack
-		err = proto.Unmarshal(data, &stack)
-		if err != nil {
-			fmt.Println("could not unmarshal stack from synthed app file")
-			fmt.Println(err)
-			os.Exit(-1)
-		}
-		return stack.GetStack(), stack.GetConnection(), stack.GetName()
+		return data
 	}
 
 	tmpDir := os.TempDir()
@@ -102,10 +87,22 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 		os.Exit(-1)
 	}
 
-	data := buf[:n]
+	return buf[:n]
+}
+
+/*
+Load stack from either a runnable program or a synthed file.
+
+Returns:
+  - StackTypes* - The abstract protobuf stack (needs to be `GetActual()`-ed to get a the actual useable `StackType`)
+  - ConnectionTypes* - The abstract protobuf connection (needs to be `GetActual()`-ed to get a the actual useable `ConnectionType`)
+  - string - The name of the stack. This value is inaccessible later on.
+*/
+func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) {
+	data := BinaryStackFromApp()
 
 	var stack general.Stack
-	err = proto.Unmarshal(data, &stack)
+	err := proto.Unmarshal(data, &stack)
 	if err != nil {
 		fmt.Println("failed to unmarshal stack from app")
 		fmt.Println(err)

@@ -42,6 +42,11 @@ var diffCmd = &cobra.Command{
 		for _, rem := range removed {
 			printColored(colorRed, "[-] %s\n", rem)
 		}
+
+		if len(changed) == 0 {
+			return
+		}
+
 		prettyChangeDiff(conn.GetActual(), stack.GetActual().GetMetadata(), changed)
 	},
 }
