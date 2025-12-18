@@ -28,6 +28,7 @@ func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any
 		os.Exit(1)
 	}
 	namespace := stackMetadata["namespace"].(string)
+	podMap := deployment.GetPod().Synth(stackMetadata)
 	objMap := map[string]any{
 		"apiVersion": "apps/v1",
 		"kind":       "Deployment",
@@ -46,16 +47,11 @@ func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any
 				},
 			},
 			"template": map[string]any{
-				"metadata": map[string]any{},
-				"spec":     map[string]any{},
+				"metadata": podMap["metadata"],
+				"spec":     podMap["spec"],
 			},
 		},
 	}
-
-	template := objMap["spec"].(map[string]any)["template"].(map[string]any)
-	podMap := deployment.GetPod().Synth(stackMetadata)
-	template["metadata"] = podMap["metadata"]
-	template["spec"] = podMap["spec"]
 
 	return objMap
 }

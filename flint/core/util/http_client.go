@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -59,14 +60,20 @@ func (httpClient *HttpClient) Request(method string, url string, reader io.Reade
 	}
 
 	if acceptedStatusCodes == nil {
-		acceptedStatusCodes = []int{http.StatusOK}
+		acceptedStatusCodes = []int{http.StatusOK, http.StatusCreated}
 	}
 
 	if !slices.Contains(acceptedStatusCodes, resp.StatusCode) {
-		fmt.Printf("%v request to %v resulted in an unacceptable status code %v (acceptable status codes are %v)\n\n", method, httpClient.BaseUrl+url, resp.Status, acceptedStatusCodes)
+		fmt.Printf("%v request to %v resulted in an unacceptable status code %v (acceptable status codes are %v)\n", method, httpClient.BaseUrl+url, resp.Status, acceptedStatusCodes)
 		if resp.StatusCode == 422 {
 			panic("try reviewing your manifest")
 		}
+		var respJson map[string]any
+		err := json.Unmarshal(body, &respJson)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(respJson["message"].(string) + "\n")
 		os.Exit(1)
 	}
 

@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package = "github.com/SuperTapood/Flint/k8s";
+
+enum AccessMode {
+    ReadWriteOnce = 0;
+    ReadOnlyMany = 1;
+    ReadWriteMany = 2;
+    ReadWriteOncePod = 3;
+}
+
+message VolumeClaimTemplate {
+    string name = 1;
+    repeated AccessMode access_modes = 2; 
+    string storage_class_name = 3;
+    string storage = 4;
+}

@@ -21,6 +21,8 @@ func (types *K8STypes) ActualType() base.ResourceType {
 		return out
 	} else if out := types.GetK8Slookup(); out != nil {
 		return out
+	} else if out := types.GetStatefulset(); out != nil {
+		return out
 	}
 	fmt.Println("got bad k8s resource type")
 	os.Exit(2)

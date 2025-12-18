@@ -1,0 +1,12 @@
+syntax = "proto3";
+option go_package = "github.com/SuperTapood/Flint/k8s";
+
+import "k8s/pod.proto";
+import "k8s/pvc.proto";
+
+message StatefulSet {
+    string name = 1;
+    int32 replicas = 2;
+    Pod pod = 3;
+    repeated VolumeClaimTemplate volume_claim_templates = 4;
+}

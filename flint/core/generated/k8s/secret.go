@@ -20,6 +20,11 @@ func (secret *Secret) Synth(stackMetadata map[string]any) map[string]any {
 		os.Exit(1)
 	}
 	namespace := stackMetadata["namespace"].(string)
+	data := map[string]string{}
+
+	for _, d := range secret.GetData() {
+		data[d.Key] = base64.StdEncoding.EncodeToString([]byte(d.Value))
+	}
 	objMap := map[string]any{
 		"apiVersion": "v1",
 		"kind":       "Secret",
@@ -30,14 +35,8 @@ func (secret *Secret) Synth(stackMetadata map[string]any) map[string]any {
 				"name": secret.GetName(),
 			},
 		},
-		"data": map[string]string{},
+		"data": data,
 		"type": secret.GetType(),
-	}
-
-	data := objMap["data"].(map[string]string)
-
-	for _, d := range secret.GetData() {
-		data[d.Key] = base64.StdEncoding.EncodeToString([]byte(d.Value))
 	}
 
 	return objMap
