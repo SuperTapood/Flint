@@ -7,8 +7,14 @@ message Container {
     repeated int32 ports = 3;
 }
 
+message VolumeMount {
+    string name = 1;
+    string mount_path = 2;
+}
+
 message Pod {
     string name = 1;
     repeated Container containers = 2;
-    string restart_policy = 3;
+    repeated VolumeMount mounts = 3;
+    string restart_policy = 4;
 }

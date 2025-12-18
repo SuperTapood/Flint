@@ -30,16 +30,16 @@ class K8SStack(BaseStack):
         self.objects = []
 
     def add_objects(self, *objects):
-        supported = [
-            Secret,
-            Deployment,
-            Service,
-            Pod,
-            _k8soutput,
-        ]
+        # supported = [
+        #     Secret,
+        #     Deployment,
+        #     Service,
+        #     Pod,
+        #     _k8soutput,
+        # ]
         for obj in objects:
-            if type(obj) not in supported:
-                continue
+            # if type(obj) not in supported:
+            #     continue
             class_name = obj.__class__.__name__.lower()
             self.objects.append(K8STypes(**{class_name: obj}))
 
