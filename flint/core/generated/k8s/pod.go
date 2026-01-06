@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
 )
 
@@ -77,10 +78,20 @@ func (pod *Pod) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = pod.GetName()
-	applyMetadata["location"] = "/apis/v1/namespaces/" + stackMetadata["namespace"].(string) + "/pods/"
+	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/pods/"
 
-	client.Apply(applyMetadata, pod.Synth(stackMetadata))
+	return client.Apply(applyMetadata, pod.Synth(stackMetadata))
+}
+
+func (pod *Pod) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/"+pod.GetName(), []int{200}, true)
+	containerStatuses := response.Body["status"].(map[string]any)["containerStatuses"].([]any)
+	for _, containerStatus := range containerStatuses {
+		return containerStatus.(map[string]any)["state"].(map[string]any)["waiting"].(map[string]any)["message"].(string)
+	}
+
+	return "Pod failed to succeed"
 }

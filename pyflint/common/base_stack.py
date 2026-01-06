@@ -5,15 +5,19 @@ import sys
 
 
 class BaseStack:
-    def __init__(self):
-        self._prev_post_init = None
-        self._prev_getitem = None
+    def __init__(self, stack_type, ):
+
         def getitem(obj, key):
             if key == "":
                 key = None
             return self.lookup(obj, key)
-        
+
         Message.__getitem__ = getitem
+
+        self.objects = []
+        self.attrs = set(self.__dict__)
+        self._stack_type = stack_type
+        
 
     # def __enter__(self):
     #     # self._prev_post_init = Message.__post_init__
@@ -29,7 +33,7 @@ class BaseStack:
     #         if key == "":
     #             key = None
     #         return self.lookup(obj, key)
-        
+
     #     Message.__getitem__ = getitem
 
     # def __exit__(self, exc_type, exc, tb: traceback):
@@ -47,6 +51,16 @@ class BaseStack:
     #         # return False  → re-raise
     #         return False  # ← change to True if you want to swallow errors
 
+    def prepare_objects(self):
+        objects = []
+        for name in set(self.__dict__).difference(self.attrs):
+            obj = self.__getattribute__(name)
+            if not isinstance(obj, Message):
+                continue
+            class_name = obj.__class__.__name__.lower()
+            objects.append(self._stack_type(**{class_name: obj}))
+        return objects
+
     def send_data(self, data):
         if len(sys.argv) < 2:
             return
@@ -56,7 +70,6 @@ class BaseStack:
         sock.connect(socket_path)
         sock.sendall(data)
         sock.close()
-    
+
     def lookup(self, obj, key):
         raise NotImplementedError()
-

@@ -1,6 +1,9 @@
 package base
 
-import "github.com/heimdalr/dag"
+import (
+	"github.com/SuperTapood/Flint/core/util"
+	"github.com/heimdalr/dag"
+)
 
 // a general representation of a synthable resource
 type ResourceType interface {
@@ -20,5 +23,6 @@ type ResourceType interface {
 	AddToDag(_dag *dag.DAG)
 
 	Synth(stackMetadata map[string]any) map[string]any
-	Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient)
+	Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) error
+	ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string
 }

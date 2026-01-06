@@ -2,12 +2,12 @@ package k8s
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"os"
 	sync "sync"
 
 	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
 )
 
@@ -27,14 +27,20 @@ func (lookup *K8SLookup) Synth(stackMetadata map[string]any) map[string]any {
 }
 
 func (lookup *K8SLookup) AddToDag(dag *dag.DAG) {}
-func (lookup *K8SLookup) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (lookup *K8SLookup) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+	return nil
+}
+func (lookup *K8SLookup) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	fmt.Println("lookup cannot be failed")
+	os.Exit(2)
+	return ""
 }
 
 func (output *K8SOutput) Synth(stackMetadata map[string]any) map[string]any {
 	return nil
 }
 
-func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
 	types := output.GetTypes()
 	buffer := bytes.Buffer{}
 
@@ -49,14 +55,14 @@ func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[strin
 			kind := target["kind"].(string)
 			namespace := target["metadata"].(map[string]any)["namespace"].(string)
 			name := target["metadata"].(map[string]any)["name"].(string)
-			response := client.GetClient().Get(locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, nil)
-			var currentMap map[string]any
-			err := json.Unmarshal(response.Body, &currentMap)
-			if err != nil {
-				fmt.Println("could not unmarshal the current secret to a map")
-				fmt.Println(err)
-				os.Exit(2)
-			}
+			response, _ := client.GetClient().Get(locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, nil, true)
+			var currentMap = response.Body
+			// err := json.Unmarshal(response.Body, &currentMap)
+			// if err != nil {
+			// 	fmt.Println("could not unmarshal the current secret to a map")
+			// 	fmt.Println(err)
+			// 	os.Exit(2)
+			// }
 			var current any = currentMap
 			for _, k := range lookup.GetKeys() {
 				// must be a map to go deeper
@@ -82,6 +88,9 @@ func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[strin
 		outputBufferMap = make(map[int32]*bytes.Buffer)
 	}
 	outputBufferMap[output.GetIndex()] = &buffer
+
+	os.Exit(-1)
+	return nil
 }
 
 func (output *K8SOutput) AddToDag(_dag *dag.DAG) {
@@ -92,4 +101,10 @@ func (output *K8SOutput) AddToDag(_dag *dag.DAG) {
 		}
 		_dag.AddEdge(output.GetID(), lookup.GetK8Slookup().GetID())
 	}
+}
+
+func (output *K8SOutput) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	fmt.Println("output cannot be failed")
+	os.Exit(2)
+	return ""
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
 )
 
@@ -48,10 +49,16 @@ func (secret *Secret) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = secret.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/secrets/"
 
-	client.Apply(applyMetadata, secret.Synth(stackMetadata))
+	return client.Apply(applyMetadata, secret.Synth(stackMetadata))
+}
+
+func (secret *Secret) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	// response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/secrets/"+secret.GetName(), []int{200}, true)
+	// return fmt.Sprintf("%v", response.Body)
+	return "Secret failed to succeed"
 }

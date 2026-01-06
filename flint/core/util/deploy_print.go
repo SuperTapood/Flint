@@ -33,6 +33,12 @@ func CreateDeployPrint(stackName string, prettyNames []string, stackMetadata map
 	}
 }
 
+func (self *DeployPrint) SafePrint(format string, a ...any) {
+	printLock.Lock()
+	defer printLock.Unlock()
+	fmt.Printf(format, a...)
+}
+
 func padRight(length int, str string) string {
 	if len(str) >= length {
 		return str
@@ -43,15 +49,12 @@ func padRight(length int, str string) string {
 }
 
 func (self *DeployPrint) PrettyPrint(stackName string, current int, total int, status string, resourceName string) {
-	printLock.Lock()
-	defer printLock.Unlock()
-
-	const maxStatusLength = 8
+	const maxStatusLength = 15
 	const maxTimeLength = 8
 
 	lastInd := strings.LastIndex(resourceName, "::")
 	objType := resourceName[:lastInd]
 	objName := resourceName[lastInd+2:]
 
-	fmt.Printf("%v | %v/%v | %v | %v | %v | %v\n", stackName, strconv.Itoa(current), strconv.Itoa(total), padRight(maxTimeLength, time.Now().Format(time.TimeOnly)), padRight(maxStatusLength, status), padRight(self.ObjectTypeLength, objType), objName)
+	self.SafePrint("%v | %v/%v | %v | %v | %v | %v\n", stackName, strconv.Itoa(current), strconv.Itoa(total), padRight(maxTimeLength, time.Now().Format(time.TimeOnly)), padRight(maxStatusLength, status), padRight(self.ObjectTypeLength, objType), objName)
 }

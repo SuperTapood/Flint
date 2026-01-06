@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
 )
 
@@ -41,7 +42,7 @@ func (unresource *Unresource) AddToDag(dag *dag.DAG) {
 	os.Exit(2)
 }
 
-func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) {
+func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) error {
 	splitName := strings.Split(unresource.Name, "::")
 	namespace := splitName[1]
 	kind := splitName[2]
@@ -52,10 +53,18 @@ func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[
 		"namespace": namespace,
 		"name":      name,
 	})
+
+	return nil
 }
 
 func (unresource *Unresource) Lookup() map[string]any {
 	fmt.Println("Unresource cannot be looked up")
 	os.Exit(2)
 	return nil
+}
+
+func (unresource *Unresource) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	fmt.Println("Unresource cannot be failed")
+	os.Exit(2)
+	return ""
 }

@@ -18,6 +18,12 @@ import (
 	"github.com/heimdalr/dag"
 )
 
+type KubeError struct{}
+
+func (kubeError *KubeError) Error() string {
+	return fmt.Sprintf("kube failed :(")
+}
+
 func (connection *K8SConnection) GetClient() *util.HttpClient {
 	return util.NewHttpClient(map[string]string{
 		"Authorization": "Bearer " + connection.Token,
@@ -25,7 +31,7 @@ func (connection *K8SConnection) GetClient() *util.HttpClient {
 	}, connection.Api)
 }
 
-func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any) {
+func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any) error {
 	name := applyMetadata["name"].(string)
 	location := applyMetadata["location"].(string)
 
@@ -38,29 +44,66 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 
 	client := connection.GetClient()
 
-	response := client.Post(location, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusConflict})
+	response, err := client.Post(location, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusConflict}, false)
 
 	if response.StatusCode == http.StatusConflict {
-		response = client.Put(location+name, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusUnprocessableEntity})
+		response, err = client.Put(location+name, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusUnprocessableEntity}, false)
 		if response.StatusCode == http.StatusUnprocessableEntity {
-			response = client.Delete(location+name, nil)
+			response, err = client.Delete(location+name, nil, false)
 			if response.StatusCode == http.StatusOK {
 				time.Sleep(2 * time.Second)
-				response = client.Post(location, bytes.NewReader(data), nil)
+				response, err = client.Post(location, bytes.NewReader(data), nil, false)
 			}
 		}
 	}
+
+	if err != nil {
+		return err
+	}
+
+	start := time.Now()
+
+	var status map[string]any
+
+	for {
+		response, err = client.Get(location+name, []int{http.StatusOK}, false) // make sure resource exists
+		var ok bool
+		status, ok = response.Body["status"].(map[string]any)
+
+		if !ok {
+			return nil
+		}
+		if len(status) != 0 {
+			available, ok := status["availableReplicas"]
+			replicas := status["replicas"]
+
+			if ok && available == replicas {
+				break
+			}
+		}
+
+		if time.Since(start) > 1*time.Millisecond {
+			uid := response.Body["metadata"].(map[string]any)["uid"].(string)
+			response, err = client.Get("/api/v1/namespaces/default/events?fieldSelector=involvedObject.uid="+uid, []int{http.StatusOK}, false)
+			if err != nil {
+				panic(err)
+			}
+			return &KubeError{}
+		}
+		// time.Sleep(100 * time.Millisecond)
+	}
+	return err
 }
 
 func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 	client := connection.GetClient()
-	var response = client.Get("/api/v1/secrets", nil)
-	var result map[string]interface{}
-	if err := json.Unmarshal(response.Body, &result); err != nil {
-		fmt.Println("couldn't unmarshal response from server")
-		fmt.Println(err)
-		os.Exit(2)
-	}
+	var response, _ = client.Get("/api/v1/secrets", nil, true)
+	var result = response.Body
+	// if err := json.Unmarshal(response.Body, &result); err != nil {
+	// 	fmt.Println("couldn't unmarshal response from server")
+	// 	fmt.Println(err)
+	// 	os.Exit(2)
+	// }
 	output := make(map[string]map[string]any, 0)
 
 	for _, secret := range result["items"].([]any) {
@@ -201,7 +244,7 @@ func (connection *K8SConnection) Delete(deleteMetadata map[string]any) {
 	namespace := deleteMetadata["namespace"].(string)
 	name := deleteMetadata["name"].(string)
 	client := connection.GetClient()
-	client.Delete(locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, nil)
+	client.Delete(locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, nil, true)
 }
 
 func (connection *K8SConnection) CleanHistory(stackName string, oldest int, stackMetadata map[string]any) {

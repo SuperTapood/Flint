@@ -6,8 +6,10 @@ import (
 	"math"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/generated/common"
@@ -44,7 +46,7 @@ type ConnectionType interface {
 	PrettyName(resource map[string]any, stackMetadata map[string]any) string
 	// Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any)
 	CleanHistory(stackName string, oldest int, stackMetadata map[string]any)
-	Apply(applyMetadata map[string]any, resource map[string]any)
+	Apply(applyMetadata map[string]any, resource map[string]any) error
 	// MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
 	GetClient() *util.HttpClient
 	CreateRevision(stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte)
@@ -122,10 +124,12 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 
 	completed := make(map[string]bool)
 	var mu sync.Mutex
+	failed := false
 
 	for len(completed) < len(vertices) {
 		// Find nodes ready to process (all dependencies completed)
 		var ready []string
+		var done atomic.Uint32
 		for id := range vertices {
 			mu.Lock()
 			if completed[id] {
@@ -169,6 +173,13 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 			wg.Add(1)
 			go func(nodeID string, idx int) {
 				defer wg.Done()
+				if failed {
+					mu.Lock()
+					completed[nodeID] = true
+					mu.Unlock()
+					done.Add(1)
+					return
+				}
 
 				vertex, err := _dag.GetVertex(nodeID)
 				if err != nil {
@@ -184,16 +195,27 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 					if synthed["action"] == "delete" {
 						action = "DELETING"
 					}
-					deployPrint.PrettyPrint(stackName, idx, total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
+					deployPrint.PrettyPrint(stackName, int(done.Load()), total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
 				}
 
-				res.Apply(stackMetadata, resources, connType.GetActual())
+				err = res.Apply(stackMetadata, resources, connType.GetActual())
+				if err != nil {
+					deployPrint.PrettyPrint(stackName, int(done.Load()), total, "CREATION FAILED", connType.GetActual().PrettyName(synthed, stackMetadata))
+					deployPrint.SafePrint("%v creation failed: %v\n", connType.GetActual().PrettyName(synthed, stackMetadata), res.ExplainFailure(connType.GetActual().GetClient(), stackMetadata))
+					failed = true
+					mu.Lock()
+					completed[nodeID] = true
+					mu.Unlock()
+					done.Add(1)
+					return
+				}
+				done.Add(1)
 				if synthed != nil {
 					action := "CREATED"
 					if synthed["action"] == "delete" {
 						action = "DELETED"
 					}
-					deployPrint.PrettyPrint(stackName, idx, total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
+					deployPrint.PrettyPrint(stackName, int(done.Load()), total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
 				}
 
 				mu.Lock()
@@ -218,68 +240,70 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 		}
 	}
 
+	if createRevision && !failed {
+		newDag := dag.NewDAG()
+
+		b, err := json.Marshal(_dag)
+		if err != nil {
+			fmt.Println("failed to marshal dag")
+			fmt.Println(err)
+			os.Exit(-1)
+		}
+
+		var dagMap map[string]any
+		err = json.Unmarshal(b, &dagMap)
+		if err != nil {
+			fmt.Println("failed to marshal dag map")
+			fmt.Println(err)
+			os.Exit(-1)
+		}
+
+		removeFromDag := make([]string, 0)
+		for name, obj := range resources {
+			if obj.Synth(stackMetadata)["kind"] == "" {
+				// delete(obj_map, name)
+				removeFromDag = append(removeFromDag, name)
+			}
+		}
+
+		for _, value := range dagMap["vs"].([]any) {
+			i := value.(map[string]any)["i"].(string)
+			v := value.(map[string]any)["v"].(string)
+			if slices.Contains(removeFromDag, i) || slices.Contains(removeFromDag, v) {
+				continue
+			}
+			newDag.AddVertexByID(v, i)
+		}
+
+		for _, value := range dagMap["es"].([]any) {
+			d := value.(map[string]any)["d"].(string)
+			s := value.(map[string]any)["s"].(string)
+			if slices.Contains(removeFromDag, d) || slices.Contains(removeFromDag, s) {
+				continue
+			}
+			newDag.AddEdge(s, d)
+		}
+		objs_map := make(map[string]map[string]any, 0)
+
+		for _, resource := range resources {
+			synthed := resource.Synth(stackMetadata)
+			if synthed == nil && synthed["action"] == nil {
+				continue
+			}
+			objs_map[resource.GetID()] = synthed
+		}
+
+		marshalled, _ := json.Marshal(objs_map)
+
+		deployPrint.PrettyPrint(stackName, total-1, total, "CREATING", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)))
+
+		connType.GetActual().CreateRevision(stackName, stackMetadata, newDag, marshalled)
+
+		deployPrint.PrettyPrint(stackName, total, total, "CREATED", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)-1))
+
+	}
+
 	connType.GetActual().PrintOutputs()
-
-	if !createRevision {
-		return
-	}
-
-	newDag := dag.NewDAG()
-
-	b, err := json.Marshal(_dag)
-	if err != nil {
-		fmt.Println("failed to marshal dag")
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-
-	var dagMap map[string]any
-	err = json.Unmarshal(b, &dagMap)
-	if err != nil {
-		fmt.Println("failed to marshal dag map")
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-
-	removeFromDag := make([]string, 0)
-	for name, obj := range resources {
-		if obj.Synth(stackMetadata)["kind"] == "" {
-			// delete(obj_map, name)
-			removeFromDag = append(removeFromDag, name)
-		}
-	}
-
-	for _, value := range dagMap["vs"].([]any) {
-		i := value.(map[string]any)["i"].(string)
-		v := value.(map[string]any)["v"].(string)
-		if slices.Contains(removeFromDag, i) || slices.Contains(removeFromDag, v) {
-			continue
-		}
-		newDag.AddVertexByID(v, i)
-	}
-
-	for _, value := range dagMap["es"].([]any) {
-		d := value.(map[string]any)["d"].(string)
-		s := value.(map[string]any)["s"].(string)
-		if slices.Contains(removeFromDag, d) || slices.Contains(removeFromDag, s) {
-			continue
-		}
-		newDag.AddEdge(s, d)
-	}
-	objs_map := make(map[string]map[string]any, 0)
-
-	for _, resource := range resources {
-		synthed := resource.Synth(stackMetadata)
-		if synthed == nil && synthed["action"] == nil {
-			continue
-		}
-		objs_map[resource.GetID()] = synthed
-	}
-
-	marshalled, _ := json.Marshal(objs_map)
-
-	connType.GetActual().CreateRevision(stackName, stackMetadata, newDag, marshalled)
-
 }
 
 func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any) {

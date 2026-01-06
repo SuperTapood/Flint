@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
 )
 
@@ -62,10 +63,44 @@ func (deployment *Deployment) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = deployment.GetName()
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/deployments/"
 
-	client.Apply(applyMetadata, deployment.Synth(stackMetadata))
+	return client.Apply(applyMetadata, deployment.Synth(stackMetadata))
+}
+
+func (deployment *Deployment) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	response, _ := client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/deployments/"+deployment.GetName(), []int{200}, true)
+	uid := response.Body["metadata"].(map[string]any)["uid"].(string)
+	response, _ = client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/replicasets/", []int{200}, true)
+	replicaUid := ""
+	for _, item := range response.Body["items"].([]any) {
+		refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
+		for _, ref := range refs {
+			if ref.(map[string]any)["uid"] == uid {
+				replicaUid = item.(map[string]any)["metadata"].(map[string]any)["uid"].(string)
+				break
+			}
+		}
+		if replicaUid != "" {
+			break
+		}
+	}
+
+	response, _ = client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/", []int{200}, true)
+	for _, item := range response.Body["items"].([]any) {
+		refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
+		for _, ref := range refs {
+			if ref.(map[string]any)["uid"] == replicaUid {
+				containerStatuses := item.(map[string]any)["status"].(map[string]any)["containerStatuses"].([]any)
+				for _, containerStatus := range containerStatuses {
+					return containerStatus.(map[string]any)["state"].(map[string]any)["waiting"].(map[string]any)["message"].(string)
+				}
+			}
+		}
+	}
+
+	return "Deployment failed to succeed"
 }

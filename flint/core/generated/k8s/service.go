@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
 )
 
@@ -25,16 +26,20 @@ func (service *Service) GetLabelName() string {
 	return ""
 }
 
-func (service *Service) GetTargetID() string {
+func (service *Service) GetActualTarget() base.ResourceType {
 	if pod := service.GetTarget().GetPod(); pod != nil {
-		return pod.GetID()
+		return pod
 	} else if deployment := service.GetTarget().GetDeployment(); deployment != nil {
-		return deployment.GetID()
+		return deployment
 	}
 	fmt.Println("got bad service target")
 	os.Exit(2)
 
-	return ""
+	return nil
+}
+
+func (service *Service) GetTargetID() string {
+	return service.GetActualTarget().GetID()
 }
 
 func (service *Service) GetPrettyName(stackMetadata map[string]any) string {
@@ -80,23 +85,31 @@ func (service *Service) Synth(stackMetadata map[string]any) map[string]any {
 
 func (service *Service) AddToDag(_dag *dag.DAG) {
 	if _dag != nil {
-		err := _dag.AddVertexByID(service.GetID(), service.GetID())
+		_dag.AddVertexByID(service.GetID(), service.GetID())
+		err := _dag.AddEdge(service.GetID(), service.GetTargetID())
 		if err != nil {
-			fmt.Printf("can't add '%v' (service id) to the DAG\n", service.GetID())
-			os.Exit(1)
-		}
-		err = _dag.AddEdge(service.GetID(), service.GetTargetID())
-		if err != nil {
-			fmt.Printf("can't add either '%v' (service id) or '%v' (target id) to the DAG\n", service.GetID(), service.GetTargetID())
-			os.Exit(2)
+			service.GetActualTarget().AddToDag(_dag)
+			err = _dag.AddEdge(service.GetID(), service.GetTargetID())
+			if err != nil {
+				fmt.Printf("can't add either '%v' (service id) or '%v' (target id) to the DAG\n", service.GetID(), service.GetTargetID())
+				fmt.Println(err)
+				fmt.Println(_dag)
+				os.Exit(2)
+			}
 		}
 	}
 }
 
-func (service *Service) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (service *Service) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = service.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/services/"
 
-	client.Apply(applyMetadata, service.Synth(stackMetadata))
+	return client.Apply(applyMetadata, service.Synth(stackMetadata))
+}
+
+func (service *Service) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	// response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/services/"+service.GetName(), []int{200}, true)
+	// return fmt.Sprintf("%v", response.Body)
+	return "Service failed to succeed"
 }

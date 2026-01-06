@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"github.com/SuperTapood/Flint/core/base"
+	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
 )
 
@@ -76,10 +77,29 @@ func (statefulSet *StatefulSet) Synth(stackMetadata map[string]any) map[string]a
 	return objMap
 }
 
-func (statefulSet *StatefulSet) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) {
+func (statefulSet *StatefulSet) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = statefulSet.GetName()
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/statefulsets/"
 
-	client.Apply(applyMetadata, statefulSet.Synth(stackMetadata))
+	return client.Apply(applyMetadata, statefulSet.Synth(stackMetadata))
+}
+
+func (statefulSet *StatefulSet) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
+	response, _ := client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/statefulsets/"+statefulSet.GetName(), []int{200}, true)
+	uid := response.Body["metadata"].(map[string]any)["uid"].(string)
+	response, _ = client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/", []int{200}, true)
+	for _, item := range response.Body["items"].([]any) {
+		refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
+		for _, ref := range refs {
+			if ref.(map[string]any)["uid"] == uid {
+				containerStatuses := item.(map[string]any)["status"].(map[string]any)["containerStatuses"].([]any)
+				for _, containerStatus := range containerStatuses {
+					return containerStatus.(map[string]any)["state"].(map[string]any)["waiting"].(map[string]any)["message"].(string)
+				}
+			}
+		}
+	}
+
+	return "StatefulSet failed to succeed"
 }

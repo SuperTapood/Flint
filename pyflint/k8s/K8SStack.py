@@ -22,29 +22,32 @@ class K8SStack(BaseStack):
         :param api: the api url for the kubernetes environment
         :param token: the token to use to authenticate against kubernetes
         """
-        super().__init__()
+        super().__init__(K8STypes)
         self.api = api
         self.token = token
         self.name = name
         self.namespace = namespace
-        self.objects = []
 
-    def add_objects(self, *objects):
-        # supported = [
-        #     Secret,
-        #     Deployment,
-        #     Service,
-        #     Pod,
-        #     _k8soutput,
-        # ]
-        for obj in objects:
-            # if type(obj) not in supported:
-            #     continue
-            class_name = obj.__class__.__name__.lower()
-            self.objects.append(K8STypes(**{class_name: obj}))
+        self.attrs = set(self.__dict__)
+        # print(self.attrs)
+
+    # def add_objects(self, *objects):
+    #     # supported = [
+    #     #     Secret,
+    #     #     Deployment,
+    #     #     Service,
+    #     #     Pod,
+    #     #     _k8soutput,
+    #     # ]
+    #     for obj in objects:
+    #         # if type(obj) not in supported:
+    #         #     continue
+    #         class_name = obj.__class__.__name__.lower()
+    #         self.objects.append(K8STypes(**{class_name: obj}))
 
     def synth(self):
-        k_stack = K8SStack_(objects=self.objects, namespace=self.namespace)
+        objects = self.prepare_objects()
+        k_stack = K8SStack_(objects=objects, namespace=self.namespace)
         k_conn = K8SConnection(api=self.api, token=self.token)
         stack = Stack(
             name=self.name,
@@ -58,10 +61,10 @@ class K8SStack(BaseStack):
             from string.templatelib import Template
 
             if type(args[0]) == Template:
-                self.add_objects(K8STemplateOutput(args[0]))
+                # self.add_objects(K8STemplateOutput(args[0]))
                 return
-        self.add_objects(K8SOutput(*args))
-    
+        # self.add_objects(K8SOutput(*args))
+
     def lookup(self, obj, key):
         if type(obj) == K8SLookup:
             obj.keys.append(key)
@@ -70,5 +73,7 @@ class K8SStack(BaseStack):
             object=K8STypes(**{obj.__class__.__name__.lower(): obj}),
             keys=[
                 key,
-            ] if key else None,
+            ]
+            if key
+            else None,
         )
