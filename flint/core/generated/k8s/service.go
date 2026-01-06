@@ -111,5 +111,6 @@ func (service *Service) Apply(stackMetadata map[string]any, resources map[string
 func (service *Service) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
 	// response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/services/"+service.GetName(), []int{200}, true)
 	// return fmt.Sprintf("%v", response.Body)
+	panic("adwa")
 	return "Service failed to succeed"
 }

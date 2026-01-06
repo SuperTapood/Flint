@@ -21,7 +21,7 @@ import (
 type KubeError struct{}
 
 func (kubeError *KubeError) Error() string {
-	return fmt.Sprintf("kube failed :(")
+	return "kube failed :("
 }
 
 func (connection *K8SConnection) GetClient() *util.HttpClient {
@@ -75,22 +75,22 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 		}
 		if len(status) != 0 {
 			available, ok := status["availableReplicas"]
-			replicas := status["replicas"]
+			replicas, rok := status["replicas"]
+
+			if !rok {
+				break
+			}
 
 			if ok && available == replicas {
 				break
 			}
 		}
 
-		if time.Since(start) > 1*time.Millisecond {
-			uid := response.Body["metadata"].(map[string]any)["uid"].(string)
-			response, err = client.Get("/api/v1/namespaces/default/events?fieldSelector=involvedObject.uid="+uid, []int{http.StatusOK}, false)
-			if err != nil {
-				panic(err)
-			}
+		if time.Since(start) > 5*time.Second {
+			fmt.Println(response)
 			return &KubeError{}
 		}
-		// time.Sleep(100 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 	return err
 }
