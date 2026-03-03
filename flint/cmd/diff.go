@@ -13,7 +13,7 @@ import (
 
 func printColored(color string, format string, a ...any) {
 	if !noColor {
-		fmt.Printf(color)
+		fmt.Print(color)
 		defer fmt.Printf(colorReset)
 	}
 
@@ -127,7 +127,7 @@ func NewDiff(old, new map[string]any) {
 
 func printColoredln(color string, a ...any) {
 	if !noColor {
-		fmt.Printf(color)
+		fmt.Print(color)
 		defer fmt.Printf(colorReset)
 	}
 

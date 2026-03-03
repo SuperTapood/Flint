@@ -307,9 +307,19 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 }
 
 func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any) {
-	obj_map, _, _, version := connType.GetActual().GetLatestRevision(stackName)
+	objMap, _, _, version := connType.GetActual().GetLatestRevision(stackName)
 
 	added := make([]string, 0)
+
+	for _, obj := range resources {
+		_, err := obj.Get(connType.GetActual().GetClient(), stackMetadata, []int{200}, false)
+		if err == nil {
+			continue
+		}
+		// fmt.Println(err)
+		synthed := obj.Synth(stackMetadata)
+		added = append(added, connType.GetActual().PrettyName(synthed, stackMetadata))
+	}
 
 	if version == 0 {
 		for _, res := range resources {
@@ -331,7 +341,7 @@ func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, st
 			continue
 		}
 		var foundObjKey string
-		for name := range obj_map {
+		for name := range objMap {
 			if name == newName {
 				found = true
 				foundObjKey = name
@@ -340,7 +350,7 @@ func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, st
 		}
 
 		if found {
-			bytesOld, err := json.Marshal(obj_map[foundObjKey])
+			bytesOld, err := json.Marshal(objMap[foundObjKey])
 			if err != nil {
 				fmt.Println("failed to marshal found object")
 				fmt.Println(err)
@@ -356,17 +366,17 @@ func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, st
 			if !strings.EqualFold(string(bytesOld), string(bytesNew)) {
 				objects := make(map[string]map[string]any, 2)
 				objects["new"] = newObj.Synth(stackMetadata)
-				objects["old"] = obj_map[foundObjKey].(map[string]any)
+				objects["old"] = objMap[foundObjKey].(map[string]any)
 				changed = append(changed, objects)
 			}
 
-			delete(obj_map, foundObjKey)
+			delete(objMap, foundObjKey)
 		} else {
 			added = append(added, connType.GetActual().PrettyName(newObj.Synth(stackMetadata), stackMetadata))
 		}
 	}
 
-	for _, obj := range obj_map {
+	for _, obj := range objMap {
 		removed = append(removed, connType.GetActual().PrettyName(obj.(map[string]any), stackMetadata))
 	}
 

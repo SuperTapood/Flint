@@ -71,8 +71,12 @@ func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[
 	return client.Apply(applyMetadata, deployment.Synth(stackMetadata))
 }
 
+func (deployment *Deployment) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+	return client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/deployments/"+deployment.GetName(), acceptedStatusCodes, autohandleErrors)
+}
+
 func (deployment *Deployment) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
-	response, _ := client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/deployments/"+deployment.GetName(), []int{200}, true)
+	response, _ := deployment.Get(client, stackMetadata, []int{200}, true)
 	uid := response.Body["metadata"].(map[string]any)["uid"].(string)
 	response, _ = client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/replicasets/", []int{200}, true)
 	replicaUid := ""

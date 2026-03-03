@@ -63,6 +63,12 @@ func (unresource *Unresource) Lookup() map[string]any {
 	return nil
 }
 
+func (unresource *Unresource) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+	fmt.Println("Unresource cannot be Get-ed")
+	os.Exit(2)
+	return nil, nil
+}
+
 func (unresource *Unresource) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
 	fmt.Println("Unresource cannot be failed")
 	os.Exit(2)

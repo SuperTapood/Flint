@@ -86,8 +86,12 @@ func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.Re
 	return client.Apply(applyMetadata, pod.Synth(stackMetadata))
 }
 
+func (pod *Pod) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/"+pod.GetName(), acceptedStatusCodes, autohandleErrors)
+}
+
 func (pod *Pod) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
-	response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/"+pod.GetName(), []int{200}, true)
+	response, _ := pod.Get(client, stackMetadata, []int{200}, true)
 	containerStatuses := response.Body["status"].(map[string]any)["containerStatuses"].([]any)
 	for _, containerStatus := range containerStatuses {
 		return containerStatus.(map[string]any)["state"].(map[string]any)["waiting"].(map[string]any)["message"].(string)

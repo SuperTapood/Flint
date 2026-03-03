@@ -30,6 +30,13 @@ func (lookup *K8SLookup) AddToDag(dag *dag.DAG) {}
 func (lookup *K8SLookup) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
 	return nil
 }
+
+func (lookup *K8SLookup) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+	fmt.Println("lookup cannot be Get-ed")
+	os.Exit(2)
+	return nil, nil
+}
+
 func (lookup *K8SLookup) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
 	fmt.Println("lookup cannot be failed")
 	os.Exit(2)
@@ -101,6 +108,12 @@ func (output *K8SOutput) AddToDag(_dag *dag.DAG) {
 		}
 		_dag.AddEdge(output.GetID(), lookup.GetK8Slookup().GetID())
 	}
+}
+
+func (output *K8SOutput) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+	fmt.Println("output cannot be Get-ed")
+	os.Exit(2)
+	return nil, nil
 }
 
 func (output *K8SOutput) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
