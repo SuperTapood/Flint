@@ -24,6 +24,7 @@ type StackType interface {
 	Synth(string) (*dag.DAG, map[string]base.ResourceType)
 	// get the useful metadata of this stack
 	GetMetadata() map[string]any
+	// RecostructResource(map[string]any) base.ResourceType
 }
 
 // resolve a StackTypes object to a StackType
@@ -49,9 +50,9 @@ type ConnectionType interface {
 	Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) error
 	// MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
 	GetClient() *util.HttpClient
-	CreateRevision(stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte)
+	CreateRevision(marshalledStack []byte, stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte)
 	GetRevisions() map[string]map[string]any
-	GetLatestRevision(stackName string) (map[string]any, string, string, int32)
+	GetLatestRevision(stackName string) ([]byte, map[string]any, string, string, int32)
 	GetDeployments() []string
 	Delete(delete_metadata map[string]any)
 	PrintOutputs()
@@ -80,7 +81,7 @@ func (connType *ConnectionTypes) List() []common.FlintDeployment {
 			continue
 		}
 
-		_, status, age, version := connType.GetActual().GetLatestRevision(name)
+		_, _, status, age, version := connType.GetActual().GetLatestRevision(name)
 		deployments = append(deployments, common.FlintDeployment{
 			Name:     name,
 			Age:      age,
@@ -94,11 +95,22 @@ func (connType *ConnectionTypes) List() []common.FlintDeployment {
 }
 
 func (connType *ConnectionTypes) GetCurrentRevision(stackName string) int {
-	_, _, _, version := connType.GetActual().GetLatestRevision(stackName)
+	_, _, _, _, version := connType.GetActual().GetLatestRevision(stackName)
 	return int(version)
 }
 
-func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base.ResourceType, stackName string, stackMetadata map[string]any, max_revisions int, createRevision bool) {
+func (connType *ConnectionTypes) Rollback(stackName string, revision int) {
+	if revision < 0 {
+		latest := connType.GetCurrentRevision(stackName)
+		connType.Rollback(stackName, latest-int(math.Abs(float64(revision))))
+		return
+	}
+
+	fmt.Println(revision)
+	panic("adw")
+}
+
+func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, resources map[string]base.ResourceType, stackName string, stackMetadata map[string]any, max_revisions int, createRevision bool) error {
 	install_number := connType.GetCurrentRevision(stackName) + 1
 	lowest_revision := max(install_number-max_revisions, 0) + 1
 
@@ -124,7 +136,7 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 
 	completed := make(map[string]bool)
 	var mu sync.Mutex
-	failed := false
+	var fail_error error
 
 	for len(completed) < len(vertices) {
 		// Find nodes ready to process (all dependencies completed)
@@ -173,7 +185,7 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 			wg.Add(1)
 			go func(nodeID string, idx int) {
 				defer wg.Done()
-				if failed {
+				if fail_error != nil {
 					mu.Lock()
 					completed[nodeID] = true
 					mu.Unlock()
@@ -198,11 +210,10 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 					deployPrint.PrettyPrint(stackName, int(done.Load()), total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
 				}
 
-				err = res.Apply(stackMetadata, resources, connType.GetActual())
-				if err != nil {
-					deployPrint.PrettyPrint(stackName, int(done.Load()), total, "CREATION FAILED", connType.GetActual().PrettyName(synthed, stackMetadata))
-					deployPrint.SafePrint("%v creation failed: %v\n", connType.GetActual().PrettyName(synthed, stackMetadata), res.ExplainFailure(connType.GetActual().GetClient(), stackMetadata))
-					failed = true
+				fail_error = res.Apply(stackMetadata, resources, connType.GetActual())
+				if fail_error != nil {
+					reason := fmt.Sprintf("%v creation failed: %v", connType.GetActual().PrettyName(synthed, stackMetadata), res.ExplainFailure(connType.GetK8Sconnection().GetClient(), stackMetadata))
+					deployPrint.PrettyPrint(stackName, int(done.Load()), total, "CREATION FAILED", reason)
 					mu.Lock()
 					completed[nodeID] = true
 					mu.Unlock()
@@ -240,9 +251,8 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 		}
 	}
 
-	if failed {
-		fmt.Println("creation failed rolling back")
-		return
+	if fail_error != nil {
+		return fail_error
 	}
 
 	if createRevision {
@@ -295,24 +305,28 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 			if synthed == nil && synthed["action"] == nil {
 				continue
 			}
+			if synthed["action"] == "delete" {
+				continue
+			}
 			objs_map[resource.GetID()] = synthed
 		}
 
 		marshalled, _ := json.Marshal(objs_map)
 
-		deployPrint.PrettyPrint(stackName, total-1, total, "CREATING", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)))
+		deployPrint.PrettyPrint(stackName, total-1, total, "CREATING", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)+1))
 
-		connType.GetActual().CreateRevision(stackName, stackMetadata, newDag, marshalled)
+		connType.GetActual().CreateRevision(marshalledStack, stackName, stackMetadata, newDag, marshalled)
 
-		deployPrint.PrettyPrint(stackName, total, total, "CREATED", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)-1))
+		deployPrint.PrettyPrint(stackName, total, total, "CREATED", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)))
 
 	}
 
 	connType.GetActual().PrintOutputs()
+	return nil
 }
 
 func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any) {
-	objMap, _, _, version := connType.GetActual().GetLatestRevision(stackName)
+	_, objMap, _, _, version := connType.GetActual().GetLatestRevision(stackName)
 
 	added := make([]string, 0)
 
@@ -389,7 +403,7 @@ func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, st
 }
 
 func (connType *ConnectionTypes) Destroy(stackName string, stackMetadata map[string]any) {
-	obj_map, _, _, version := connType.GetActual().GetLatestRevision(stackName)
+	_, obj_map, _, _, version := connType.GetActual().GetLatestRevision(stackName)
 
 	if version == 0 {
 		return
@@ -407,5 +421,5 @@ func (connType *ConnectionTypes) Destroy(stackName string, stackMetadata map[str
 		obj_dag.AddVertexByID(unresource.GetID(), unresource.GetID())
 	}
 
-	connType.Deploy(obj_dag, removes, stackName, stackMetadata, math.MaxInt, false)
+	connType.Deploy(nil, obj_dag, removes, stackName, stackMetadata, math.MaxInt, false)
 }

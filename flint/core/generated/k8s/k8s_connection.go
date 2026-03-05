@@ -67,6 +67,7 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 	var status map[string]any
 
 	for {
+		time.Sleep(100 * time.Millisecond)
 		response, err = client.Get(location+name, []int{http.StatusOK}, false) // make sure resource exists
 		var ok bool
 		status, ok = response.Body["status"].(map[string]any)
@@ -79,21 +80,19 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 			replicas, rok := status["replicas"]
 
 			if !rok {
-				fmt.Printf("%f available %f replicas %s \n", available, replicas, name)
+				//fmt.Printf("%f available %f replicas %s \n", available, replicas, name)
 				break
 			}
 
 			if ok && available == replicas {
-				fmt.Printf("%f available %f replicas %s \n", available, replicas, name)
+				//fmt.Printf("%f available %f replicas %s \n", available, replicas, name)
 				break
 			}
 		}
 
 		if time.Since(start) > 5*time.Second {
-			fmt.Println(obj.ExplainFailure(connection.GetClient(), stackMetadata))
 			return &KubeError{}
 		}
-		time.Sleep(100 * time.Millisecond)
 	}
 	return err
 }
@@ -138,7 +137,11 @@ func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 				os.Exit(2)
 			}
 
+			b64Stack := secret.(map[string]any)["data"].(map[string]any)["stack"].(string)
+			decodedStack, err := base64.StdEncoding.DecodeString(b64Stack)
+
 			output[secretName] = map[string]any{
+				"stack":     decodedStack,
 				"map":       currentMap,
 				"status":    string(status),
 				"timestamp": secret.(map[string]any)["metadata"].(map[string]any)["creationTimestamp"].(string),
@@ -170,7 +173,7 @@ func (connection *K8SConnection) List() []common.FlintDeployment {
 	deployments := []common.FlintDeployment{}
 	visited := []string{}
 	for _, deploymentName := range secrets {
-		_, status, age, version := connection.GetLatestRevision(deploymentName)
+		_, _, status, age, version := connection.GetLatestRevision(deploymentName)
 		deployments = append(deployments, common.FlintDeployment{
 			Name:     deploymentName,
 			Age:      age,
@@ -183,7 +186,7 @@ func (connection *K8SConnection) List() []common.FlintDeployment {
 	return deployments
 }
 
-func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string]any, string, string, int32) {
+func (connection *K8SConnection) GetLatestRevision(stackName string) ([]byte, map[string]any, string, string, int32) {
 	result := connection.GetRevisions()
 	latestVersion := 0
 	var latestSecret map[string]any
@@ -199,7 +202,7 @@ func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string
 	}
 
 	if latestSecret == nil {
-		return nil, "", "", 0
+		return nil, nil, "", "", 0
 	}
 
 	date, err := time.Parse(time.RFC3339, latestSecret["timestamp"].(string))
@@ -209,7 +212,7 @@ func (connection *K8SConnection) GetLatestRevision(stackName string) (map[string
 		os.Exit(2)
 	}
 
-	return latestSecret["map"].(map[string]any), latestSecret["status"].(string), time.Since(date).Round(time.Second).String(), int32(latestVersion)
+	return latestSecret["stack"].([]byte), latestSecret["map"].(map[string]any), latestSecret["status"].(string), time.Since(date).Round(time.Second).String(), int32(latestVersion)
 }
 
 func (connection *K8SConnection) PrettyName(resource map[string]any, stackMetadata map[string]any) string {
@@ -239,6 +242,10 @@ var (
 			"before_namespace": API_V1,
 			"after_namespace":  "/pods/",
 		},
+		"StatefulSet": {
+			"before_namespace": APIS_APP_V1,
+			"after_namespace":  "/statefulsets/",
+		},
 	}
 )
 
@@ -247,6 +254,10 @@ func (connection *K8SConnection) Delete(deleteMetadata map[string]any) {
 	namespace := deleteMetadata["namespace"].(string)
 	name := deleteMetadata["name"].(string)
 	client := connection.GetClient()
+	if len(locationMap[kind]) == 0 {
+		fmt.Printf("%v is not a type that was defined in the location map\n", kind)
+		os.Exit(-1)
+	}
 	client.Delete(locationMap[kind]["before_namespace"]+namespace+locationMap[kind]["after_namespace"]+name, nil, true)
 }
 
@@ -275,12 +286,17 @@ func (connection *K8SConnection) CleanHistory(stackName string, oldest int, stac
 	}
 }
 
-func (connection *K8SConnection) CreateRevision(stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte) {
-	_, _, _, version := connection.GetLatestRevision(stackName)
+func (connection *K8SConnection) CreateRevision(marshalledStack []byte, stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte) {
+	_, _, _, _, version := connection.GetLatestRevision(stackName)
 	secret := Secret{
 		Name: stackName + "-" + strconv.Itoa(int(version+1)),
 		Type: "v1.flint.io",
-		Data: make([]*SecretData, 3),
+		Data: make([]*SecretData, 4),
+	}
+
+	stackData := SecretData{
+		Key:   "stack",
+		Value: string(marshalledStack),
 	}
 
 	objMapData := SecretData{
@@ -303,6 +319,7 @@ func (connection *K8SConnection) CreateRevision(stackName string, stackMetadata 
 	secret.Data[0] = &objMapData
 	secret.Data[1] = &dagData
 	secret.Data[2] = &status
+	secret.Data[3] = &stackData
 
 	secret.Apply(stackMetadata, nil, connection)
 }

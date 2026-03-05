@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/util"
@@ -100,7 +101,16 @@ func (deployment *Deployment) ExplainFailure(client *util.HttpClient, stackMetad
 			if ref.(map[string]any)["uid"] == replicaUid {
 				containerStatuses := item.(map[string]any)["status"].(map[string]any)["containerStatuses"].([]any)
 				for _, containerStatus := range containerStatuses {
-					return containerStatus.(map[string]any)["state"].(map[string]any)["waiting"].(map[string]any)["message"].(string)
+					cs := containerStatus.(map[string]any)
+					state := cs["state"].(map[string]any)
+					waiting := state["waiting"].(map[string]any)
+					reason := waiting["reason"].(string)
+					if reason == "ContainerCreating" {
+						// too early
+						time.Sleep(50 * time.Millisecond)
+						return deployment.ExplainFailure(client, stackMetadata)
+					}
+					return waiting["message"].(string)
 				}
 			}
 		}

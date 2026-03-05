@@ -47,6 +47,10 @@ func (stack *K8SStack) GetMetadata() map[string]any {
 	}
 }
 
+// func (stack *K8SStack) RecostructResource(resource map[string]any) base.ResourceType {
+
+// }
+
 func (stack *K8SStack) FetchObjects() []base.ResourceType {
 	objs := stack.GetObjects()
 	out := make([]base.ResourceType, len(objs))
