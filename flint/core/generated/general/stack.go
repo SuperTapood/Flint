@@ -240,7 +240,12 @@ func (connType *ConnectionTypes) Deploy(_dag *dag.DAG, resources map[string]base
 		}
 	}
 
-	if createRevision && !failed {
+	if failed {
+		fmt.Println("creation failed rolling back")
+		return
+	}
+
+	if createRevision {
 		newDag := dag.NewDAG()
 
 		b, err := json.Marshal(_dag)
