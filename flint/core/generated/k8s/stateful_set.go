@@ -82,7 +82,7 @@ func (statefulSet *StatefulSet) Apply(stackMetadata map[string]any, resources ma
 	applyMetadata["name"] = statefulSet.GetName()
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/statefulsets/"
 
-	return client.Apply(applyMetadata, statefulSet.Synth(stackMetadata))
+	return client.Apply(applyMetadata, statefulSet.Synth(stackMetadata), statefulSet, stackMetadata)
 }
 
 func (statefulSet *StatefulSet) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
@@ -92,7 +92,7 @@ func (statefulSet *StatefulSet) Get(client *util.HttpClient, stackMetadata map[s
 func (statefulSet *StatefulSet) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
 	response, _ := statefulSet.Get(client, stackMetadata, []int{200}, true)
 	uid := response.Body["metadata"].(map[string]any)["uid"].(string)
-	response, _ = statefulSet.Get(client, stackMetadata, []int{200}, true)
+	response, _ = client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/", []int{200}, true)
 	for _, item := range response.Body["items"].([]any) {
 		refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
 		for _, ref := range refs {

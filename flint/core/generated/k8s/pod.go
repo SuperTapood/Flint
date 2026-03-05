@@ -83,7 +83,7 @@ func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.Re
 	applyMetadata["name"] = pod.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/pods/"
 
-	return client.Apply(applyMetadata, pod.Synth(stackMetadata))
+	return client.Apply(applyMetadata, pod.Synth(stackMetadata), pod, stackMetadata)
 }
 
 func (pod *Pod) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {

@@ -68,7 +68,7 @@ func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[
 	applyMetadata["name"] = deployment.GetName()
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/deployments/"
 
-	return client.Apply(applyMetadata, deployment.Synth(stackMetadata))
+	return client.Apply(applyMetadata, deployment.Synth(stackMetadata), deployment, stackMetadata)
 }
 
 func (deployment *Deployment) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/generated/common"
 	"github.com/SuperTapood/Flint/core/util"
 
@@ -31,7 +32,7 @@ func (connection *K8SConnection) GetClient() *util.HttpClient {
 	}, connection.Api)
 }
 
-func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any) error {
+func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) error {
 	name := applyMetadata["name"].(string)
 	location := applyMetadata["location"].(string)
 
@@ -78,16 +79,18 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 			replicas, rok := status["replicas"]
 
 			if !rok {
+				fmt.Printf("%f available %f replicas %s \n", available, replicas, name)
 				break
 			}
 
 			if ok && available == replicas {
+				fmt.Printf("%f available %f replicas %s \n", available, replicas, name)
 				break
 			}
 		}
 
 		if time.Since(start) > 5*time.Second {
-			fmt.Println(response)
+			fmt.Println(obj.ExplainFailure(connection.GetClient(), stackMetadata))
 			return &KubeError{}
 		}
 		time.Sleep(100 * time.Millisecond)

@@ -46,7 +46,7 @@ type ConnectionType interface {
 	PrettyName(resource map[string]any, stackMetadata map[string]any) string
 	// Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any)
 	CleanHistory(stackName string, oldest int, stackMetadata map[string]any)
-	Apply(applyMetadata map[string]any, resource map[string]any) error
+	Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) error
 	// MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
 	GetClient() *util.HttpClient
 	CreateRevision(stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte)

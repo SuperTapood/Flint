@@ -54,7 +54,7 @@ func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]b
 	applyMetadata["name"] = secret.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/secrets/"
 
-	return client.Apply(applyMetadata, secret.Synth(stackMetadata))
+	return client.Apply(applyMetadata, secret.Synth(stackMetadata), secret, stackMetadata)
 }
 
 func (secret *Secret) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {

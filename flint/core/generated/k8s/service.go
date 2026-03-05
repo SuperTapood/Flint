@@ -105,7 +105,7 @@ func (service *Service) Apply(stackMetadata map[string]any, resources map[string
 	applyMetadata["name"] = service.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/services/"
 
-	return client.Apply(applyMetadata, service.Synth(stackMetadata))
+	return client.Apply(applyMetadata, service.Synth(stackMetadata), service, stackMetadata)
 }
 
 func (service *Service) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
