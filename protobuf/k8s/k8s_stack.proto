@@ -6,6 +6,7 @@ import "k8s/service.proto";
 import "k8s/deployment.proto";
 import "k8s/secret.proto";
 import "k8s/stateful_set.proto";
+import "k8s/daemon_set.proto";
 
 message K8STypes {
     oneof type {
@@ -16,6 +17,7 @@ message K8STypes {
         K8SLookup k8slookup = 5;
         K8SOutput k8soutput = 6;
         StatefulSet statefulset = 7;
+        DaemonSet daemonset = 8;
     }
 }
 

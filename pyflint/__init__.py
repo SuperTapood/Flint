@@ -10,4 +10,5 @@ from .generated import (
     StatefulSet,
     AccessMode,
     VolumeClaimTemplate,
+    DaemonSet,
 )

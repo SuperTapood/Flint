@@ -32,6 +32,7 @@ type K8STypes struct {
 	//	*K8STypes_K8Slookup
 	//	*K8STypes_K8Soutput
 	//	*K8STypes_Statefulset
+	//	*K8STypes_Daemonset
 	Type          isK8STypes_Type `protobuf_oneof:"type"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -137,6 +138,15 @@ func (x *K8STypes) GetStatefulset() *StatefulSet {
 	return nil
 }
 
+func (x *K8STypes) GetDaemonset() *DaemonSet {
+	if x != nil {
+		if x, ok := x.Type.(*K8STypes_Daemonset); ok {
+			return x.Daemonset
+		}
+	}
+	return nil
+}
+
 type isK8STypes_Type interface {
 	isK8STypes_Type()
 }
@@ -169,6 +179,10 @@ type K8STypes_Statefulset struct {
 	Statefulset *StatefulSet `protobuf:"bytes,7,opt,name=statefulset,proto3,oneof"`
 }
 
+type K8STypes_Daemonset struct {
+	Daemonset *DaemonSet `protobuf:"bytes,8,opt,name=daemonset,proto3,oneof"`
+}
+
 func (*K8STypes_Pod) isK8STypes_Type() {}
 
 func (*K8STypes_Service) isK8STypes_Type() {}
@@ -182,6 +196,8 @@ func (*K8STypes_K8Slookup) isK8STypes_Type() {}
 func (*K8STypes_K8Soutput) isK8STypes_Type() {}
 
 func (*K8STypes_Statefulset) isK8STypes_Type() {}
+
+func (*K8STypes_Daemonset) isK8STypes_Type() {}
 
 type K8SLookup struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -433,7 +449,7 @@ var File_k8s_k8s_stack_proto protoreflect.FileDescriptor
 
 const file_k8s_k8s_stack_proto_rawDesc = "" +
 	"\n" +
-	"\x13k8s/k8s_stack.proto\x1a\rk8s/pod.proto\x1a\x11k8s/service.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\x1a\x16k8s/stateful_set.proto\"\xae\x02\n" +
+	"\x13k8s/k8s_stack.proto\x1a\rk8s/pod.proto\x1a\x11k8s/service.proto\x1a\x14k8s/deployment.proto\x1a\x10k8s/secret.proto\x1a\x16k8s/stateful_set.proto\x1a\x14k8s/daemon_set.proto\"\xda\x02\n" +
 	"\bK8STypes\x12\x18\n" +
 	"\x03pod\x18\x01 \x01(\v2\x04.PodH\x00R\x03pod\x12$\n" +
 	"\aservice\x18\x02 \x01(\v2\b.ServiceH\x00R\aservice\x12-\n" +
@@ -445,7 +461,9 @@ const file_k8s_k8s_stack_proto_rawDesc = "" +
 	".K8SLookupH\x00R\tk8slookup\x12*\n" +
 	"\tk8soutput\x18\x06 \x01(\v2\n" +
 	".K8SOutputH\x00R\tk8soutput\x120\n" +
-	"\vstatefulset\x18\a \x01(\v2\f.StatefulSetH\x00R\vstatefulsetB\x06\n" +
+	"\vstatefulset\x18\a \x01(\v2\f.StatefulSetH\x00R\vstatefulset\x12*\n" +
+	"\tdaemonset\x18\b \x01(\v2\n" +
+	".DaemonSetH\x00R\tdaemonsetB\x06\n" +
 	"\x04type\"B\n" +
 	"\tK8SLookup\x12!\n" +
 	"\x06object\x18\x01 \x01(\v2\t.K8STypesR\x06object\x12\x12\n" +
@@ -487,6 +505,7 @@ var file_k8s_k8s_stack_proto_goTypes = []any{
 	(*Deployment)(nil),     // 7: Deployment
 	(*Secret)(nil),         // 8: Secret
 	(*StatefulSet)(nil),    // 9: StatefulSet
+	(*DaemonSet)(nil),      // 10: DaemonSet
 }
 var file_k8s_k8s_stack_proto_depIdxs = []int32{
 	5,  // 0: K8STypes.pod:type_name -> Pod
@@ -496,15 +515,16 @@ var file_k8s_k8s_stack_proto_depIdxs = []int32{
 	1,  // 4: K8STypes.k8slookup:type_name -> K8SLookup
 	3,  // 5: K8STypes.k8soutput:type_name -> K8SOutput
 	9,  // 6: K8STypes.statefulset:type_name -> StatefulSet
-	0,  // 7: K8SLookup.object:type_name -> K8STypes
-	1,  // 8: K8SOutputTypes.k8slookup:type_name -> K8SLookup
-	2,  // 9: K8SOutput.types:type_name -> K8SOutputTypes
-	0,  // 10: K8SStack.objects:type_name -> K8STypes
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	10, // 7: K8STypes.daemonset:type_name -> DaemonSet
+	0,  // 8: K8SLookup.object:type_name -> K8STypes
+	1,  // 9: K8SOutputTypes.k8slookup:type_name -> K8SLookup
+	2,  // 10: K8SOutput.types:type_name -> K8SOutputTypes
+	0,  // 11: K8SStack.objects:type_name -> K8STypes
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_k8s_k8s_stack_proto_init() }
@@ -517,6 +537,7 @@ func file_k8s_k8s_stack_proto_init() {
 	file_k8s_deployment_proto_init()
 	file_k8s_secret_proto_init()
 	file_k8s_stateful_set_proto_init()
+	file_k8s_daemon_set_proto_init()
 	file_k8s_k8s_stack_proto_msgTypes[0].OneofWrappers = []any{
 		(*K8STypes_Pod)(nil),
 		(*K8STypes_Service)(nil),
@@ -525,6 +546,7 @@ func file_k8s_k8s_stack_proto_init() {
 		(*K8STypes_K8Slookup)(nil),
 		(*K8STypes_K8Soutput)(nil),
 		(*K8STypes_Statefulset)(nil),
+		(*K8STypes_Daemonset)(nil),
 	}
 	file_k8s_k8s_stack_proto_msgTypes[2].OneofWrappers = []any{
 		(*K8SOutputTypes_K8Slookup)(nil),
