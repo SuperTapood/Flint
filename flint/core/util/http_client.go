@@ -44,7 +44,7 @@ func NewHttpClient(headers map[string]string, baseUrl string) *HttpClient {
 func (httpClient *HttpClient) Request(method string, url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
 	req, err := http.NewRequest(method, httpClient.BaseUrl+url, reader)
 
-	// fmt.Println(url)
+	fmt.Println(url)
 
 	if err != nil {
 		if !autohandleErrors {
