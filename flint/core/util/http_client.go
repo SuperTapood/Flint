@@ -33,7 +33,6 @@ type HttpClient struct {
 }
 
 func NewHttpClient(headers map[string]string, baseUrl string) *HttpClient {
-	fmt.Println(baseUrl)
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	return &HttpClient{
 		Headers: headers,
