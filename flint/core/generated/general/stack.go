@@ -338,17 +338,16 @@ func (connType *ConnectionTypes) Diff(resources map[string]base.ResourceType, st
 		// fmt.Println(err)
 		synthed := obj.Synth(stackMetadata)
 		added = append(added, connType.GetActual().PrettyName(synthed, stackMetadata))
-		fmt.Println(added)
 	}
 
 	if version == 0 {
-		// for _, res := range resources {
-		// 	synthed := res.Synth(stackMetadata)
-		// 	if len(synthed) == 0 {
-		// 		continue
-		// 	}
-		// 	added = append(added, connType.GetActual().PrettyName(synthed, stackMetadata))
-		// }
+		for _, res := range resources {
+			synthed := res.Synth(stackMetadata)
+			if len(synthed) == 0 {
+				continue
+			}
+			added = append(added, connType.GetActual().PrettyName(synthed, stackMetadata))
+		}
 		return added, make([]string, 0), make([]map[string]map[string]any, 0)
 	}
 

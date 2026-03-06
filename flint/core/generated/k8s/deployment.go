@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/util"
@@ -77,43 +76,44 @@ func (deployment *Deployment) Get(client *util.HttpClient, stackMetadata map[str
 }
 
 func (deployment *Deployment) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
-	response, _ := deployment.Get(client, stackMetadata, []int{200}, true)
-	uid := response.Body["metadata"].(map[string]any)["uid"].(string)
-	response, _ = client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/replicasets/", []int{200}, true)
-	replicaUid := ""
-	for _, item := range response.Body["items"].([]any) {
-		refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
-		for _, ref := range refs {
-			if ref.(map[string]any)["uid"] == uid {
-				replicaUid = item.(map[string]any)["metadata"].(map[string]any)["uid"].(string)
+	for {
+		response, _ := deployment.Get(client, stackMetadata, []int{200}, true)
+		uid := response.Body["metadata"].(map[string]any)["uid"].(string)
+		response, _ = client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/replicasets/", []int{200}, true)
+		replicaUid := ""
+		for _, item := range response.Body["items"].([]any) {
+			refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
+			for _, ref := range refs {
+				if ref.(map[string]any)["uid"] == uid {
+					replicaUid = item.(map[string]any)["metadata"].(map[string]any)["uid"].(string)
+					break
+				}
+			}
+			if replicaUid != "" {
 				break
 			}
 		}
-		if replicaUid != "" {
-			break
-		}
-	}
 
-	response, _ = client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/", []int{200}, true)
-	for _, item := range response.Body["items"].([]any) {
-		refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
-		for _, ref := range refs {
-			if ref.(map[string]any)["uid"] == replicaUid {
-				containerStatuses := item.(map[string]any)["status"].(map[string]any)["containerStatuses"].([]any)
-				for _, containerStatus := range containerStatuses {
-					cs := containerStatus.(map[string]any)
-					state := cs["state"].(map[string]any)
-					waiting := state["waiting"].(map[string]any)
-					reason := waiting["reason"].(string)
-					if reason == "ContainerCreating" {
-						// too early
-						time.Sleep(50 * time.Millisecond)
-						return deployment.ExplainFailure(client, stackMetadata)
+		response, _ = client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/", []int{200}, true)
+		for _, item := range response.Body["items"].([]any) {
+			refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
+			for _, ref := range refs {
+				if ref.(map[string]any)["uid"] == replicaUid {
+					containerStatuses := item.(map[string]any)["status"].(map[string]any)["containerStatuses"].([]any)
+					for _, containerStatus := range containerStatuses {
+						cs := containerStatus.(map[string]any)
+						state := cs["state"].(map[string]any)
+						waiting := state["waiting"].(map[string]any)
+						reason := waiting["reason"].(string)
+						if reason == "ContainerCreating" {
+							continue
+						}
+						return waiting["message"].(string)
 					}
-					return waiting["message"].(string)
 				}
 			}
 		}
+
 	}
 
 	return "Deployment failed to succeed"

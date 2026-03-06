@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/SuperTapood/Flint/core/base"
@@ -192,8 +193,11 @@ func (connection *K8SConnection) GetLatestRevision(stackName string) ([]byte, ma
 	var latestSecret map[string]any
 
 	for secretName, secret := range result {
-		versionRe := regexp.MustCompile(`[0-9]+`)
-		version, _ := strconv.Atoi(versionRe.FindString(secretName))
+		versionRe := regexp.MustCompile(stackName + `-[0-9]+`)
+		if !versionRe.Match([]byte(secretName)) {
+			continue
+		}
+		version, _ := strconv.Atoi(strings.Split(versionRe.FindString(secretName), "-")[1])
 
 		if version > latestVersion {
 			latestSecret = secret
