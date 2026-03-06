@@ -26,11 +26,16 @@ func (kubeError *KubeError) Error() string {
 	return "kube failed :("
 }
 
+var client *util.HttpClient = nil
+
 func (connection *K8SConnection) GetClient() *util.HttpClient {
-	return util.NewHttpClient(map[string]string{
-		"Authorization": "Bearer " + connection.Token,
-		"Content-Type":  "application/json",
-	}, connection.Api)
+	if client == nil {
+		client = util.NewHttpClient(map[string]string{
+			"Authorization": "Bearer " + connection.Token,
+			"Content-Type":  "application/json",
+		}, connection.Api)
+	}
+	return client
 }
 
 func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) error {
