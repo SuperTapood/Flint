@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"time"
 )
 
 type HttpError struct {
@@ -24,6 +25,16 @@ func (httpError *HttpError) Error() string {
 type HttpResponse struct {
 	StatusCode int
 	Body       map[string]interface{}
+}
+
+type HttpCacheEntry struct {
+	CreationDate float64
+	TTL          float64
+	Response     HttpResponse
+}
+
+type HttpCache struct {
+	Entries map[string]HttpCacheEntry
 }
 
 type HttpClient struct {
@@ -41,7 +52,16 @@ func NewHttpClient(headers map[string]string, baseUrl string) *HttpClient {
 	}
 }
 
-func (httpClient *HttpClient) Request(method string, url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
+var cache HttpCache = HttpCache{
+	Entries: make(map[string]HttpCacheEntry),
+}
+
+func (httpCache *HttpCache) Request(httpClient HttpClient, method string, url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
+	cacheResponse, cacheHit := httpCache.Entries[url]
+	fmt.Println("hit", cacheHit)
+	if cacheHit && time.Now().Unix()-int64(cacheResponse.CreationDate) >= int64(cacheResponse.TTL) {
+		return &cacheResponse.Response, nil
+	}
 	req, err := http.NewRequest(method, httpClient.BaseUrl+url, reader)
 
 	fmt.Println(url)
@@ -112,24 +132,32 @@ func (httpClient *HttpClient) Request(method string, url string, reader io.Reade
 		panic(err)
 	}
 
-	return &HttpResponse{
+	httpResponse := HttpResponse{
 		StatusCode: resp.StatusCode,
 		Body:       mapBody,
-	}, nil
+	}
+
+	httpCache.Entries[url] = HttpCacheEntry{
+		Response:     httpResponse,
+		CreationDate: float64(time.Now().Unix()),
+		TTL:          10,
+	}
+
+	return &httpResponse, nil
 }
 
 func (httpClient *HttpClient) Post(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return httpClient.Request("POST", url, reader, acceptedStatusCodes, autohandleErrors)
+	return cache.Request(*httpClient, "POST", url, reader, acceptedStatusCodes, autohandleErrors)
 }
 
 func (httpClient *HttpClient) Put(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return httpClient.Request("PUT", url, reader, acceptedStatusCodes, autohandleErrors)
+	return cache.Request(*httpClient, "PUT", url, reader, acceptedStatusCodes, autohandleErrors)
 }
 
 func (httpClient *HttpClient) Delete(url string, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return httpClient.Request("DELETE", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
+	return cache.Request(*httpClient, "DELETE", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
 }
 
 func (httpClient *HttpClient) Get(url string, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return httpClient.Request("GET", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
+	return cache.Request(*httpClient, "GET", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
 }
