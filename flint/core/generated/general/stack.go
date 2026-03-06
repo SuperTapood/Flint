@@ -317,7 +317,7 @@ func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, r
 
 		connType.GetActual().CreateRevision(marshalledStack, stackName, stackMetadata, newDag, marshalled)
 
-		deployPrint.PrettyPrint(stackName, total, total, "CREATED", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)))
+		deployPrint.PrettyPrint(stackName, total, total, "CREATED", "Flint::Revision::"+stackName+strconv.Itoa(connType.GetCurrentRevision(stackName)+1))
 
 	}
 

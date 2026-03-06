@@ -74,7 +74,7 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 
 	for {
 		time.Sleep(100 * time.Millisecond)
-		response, err = client.Get(location+name, []int{http.StatusOK}, false) // make sure resource exists
+		response, err = client.Get(location+name, []int{http.StatusOK}, false, 0) // make sure resource exists
 		var ok bool
 		status, ok = response.Body["status"].(map[string]any)
 
@@ -105,7 +105,7 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 
 func (connection *K8SConnection) GetRevisions() map[string]map[string]any {
 	client := connection.GetClient()
-	var response, _ = client.Get("/api/v1/secrets", nil, true)
+	var response, _ = client.Get("/api/v1/secrets", nil, true, 1000)
 	var result = response.Body
 	// if err := json.Unmarshal(response.Body, &result); err != nil {
 	// 	fmt.Println("couldn't unmarshal response from server")

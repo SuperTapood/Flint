@@ -58,7 +58,7 @@ func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]b
 }
 
 func (secret *Secret) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
-	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/secrets/"+secret.GetName(), acceptedStatusCodes, autohandleErrors)
+	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/secrets/"+secret.GetName(), acceptedStatusCodes, autohandleErrors, 0)
 }
 
 func (secret *Secret) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {

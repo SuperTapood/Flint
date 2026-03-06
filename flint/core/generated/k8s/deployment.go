@@ -72,14 +72,14 @@ func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[
 }
 
 func (deployment *Deployment) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
-	return client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/deployments/"+deployment.GetName(), acceptedStatusCodes, autohandleErrors)
+	return client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/deployments/"+deployment.GetName(), acceptedStatusCodes, autohandleErrors, 0)
 }
 
 func (deployment *Deployment) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
 	for {
 		response, _ := deployment.Get(client, stackMetadata, []int{200}, true)
 		uid := response.Body["metadata"].(map[string]any)["uid"].(string)
-		response, _ = client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/replicasets/", []int{200}, true)
+		response, _ = client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/replicasets/", []int{200}, true, 1000)
 		replicaUid := ""
 		for _, item := range response.Body["items"].([]any) {
 			refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
@@ -94,7 +94,7 @@ func (deployment *Deployment) ExplainFailure(client *util.HttpClient, stackMetad
 			}
 		}
 
-		response, _ = client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/", []int{200}, true)
+		response, _ = client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/", []int{200}, true, 1000)
 		for _, item := range response.Body["items"].([]any) {
 			refs := item.(map[string]any)["metadata"].(map[string]any)["ownerReferences"].([]any)
 			for _, ref := range refs {

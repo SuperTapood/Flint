@@ -109,7 +109,7 @@ func (service *Service) Apply(stackMetadata map[string]any, resources map[string
 }
 
 func (service *Service) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
-	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/services/"+service.GetName(), acceptedStatusCodes, autohandleErrors)
+	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/services/"+service.GetName(), acceptedStatusCodes, autohandleErrors, 100)
 }
 
 func (service *Service) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {

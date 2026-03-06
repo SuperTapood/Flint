@@ -28,8 +28,8 @@ type HttpResponse struct {
 }
 
 type HttpCacheEntry struct {
-	CreationDate float64
-	TTL          float64
+	CreationDate int64
+	TTL          int64
 	Response     HttpResponse
 }
 
@@ -56,15 +56,8 @@ var cache HttpCache = HttpCache{
 	Entries: make(map[string]HttpCacheEntry),
 }
 
-func (httpCache *HttpCache) Request(httpClient HttpClient, method string, url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	cacheResponse, cacheHit := httpCache.Entries[url]
-	fmt.Println("hit", cacheHit)
-	if cacheHit && time.Now().Unix()-int64(cacheResponse.CreationDate) >= int64(cacheResponse.TTL) {
-		return &cacheResponse.Response, nil
-	}
+func (httpClient *HttpClient) Request(method string, url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
 	req, err := http.NewRequest(method, httpClient.BaseUrl+url, reader)
-
-	fmt.Println(url)
 
 	if err != nil {
 		if !autohandleErrors {
@@ -132,32 +125,41 @@ func (httpCache *HttpCache) Request(httpClient HttpClient, method string, url st
 		panic(err)
 	}
 
-	httpResponse := HttpResponse{
+	return &HttpResponse{
 		StatusCode: resp.StatusCode,
 		Body:       mapBody,
-	}
-
-	httpCache.Entries[url] = HttpCacheEntry{
-		Response:     httpResponse,
-		CreationDate: float64(time.Now().Unix()),
-		TTL:          10,
-	}
-
-	return &httpResponse, nil
+	}, nil
 }
 
 func (httpClient *HttpClient) Post(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return cache.Request(*httpClient, "POST", url, reader, acceptedStatusCodes, autohandleErrors)
+	return httpClient.Request("POST", url, reader, acceptedStatusCodes, autohandleErrors)
 }
 
 func (httpClient *HttpClient) Put(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return cache.Request(*httpClient, "PUT", url, reader, acceptedStatusCodes, autohandleErrors)
+	return httpClient.Request("PUT", url, reader, acceptedStatusCodes, autohandleErrors)
 }
 
 func (httpClient *HttpClient) Delete(url string, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return cache.Request(*httpClient, "DELETE", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
+	return httpClient.Request("DELETE", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
 }
 
-func (httpClient *HttpClient) Get(url string, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
-	return cache.Request(*httpClient, "GET", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
+func (httpClient *HttpClient) Get(url string, acceptedStatusCodes []int, autohandleErrors bool, ttl int64) (*HttpResponse, error) {
+	cacheResponse, cacheHit := cache.Entries[url]
+	if cacheHit {
+		//fmt.Println(time.Now().UnixMilli() - cacheResponse.CreationDate)
+		if ttl < cacheResponse.TTL {
+			cacheResponse.TTL = ttl
+		}
+		if time.Now().UnixMilli()-cacheResponse.CreationDate <= cacheResponse.TTL {
+			return &cacheResponse.Response, nil
+		}
+	}
+	// fmt.Println(url)
+	response, err := httpClient.Request("GET", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
+	cache.Entries[url] = HttpCacheEntry{
+		Response:     *response,
+		CreationDate: time.Now().UnixMilli(),
+		TTL:          ttl,
+	}
+	return response, err
 }
