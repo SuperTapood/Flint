@@ -1,6 +1,3 @@
-syntax = "proto3";
-option go_package = "github.com/SuperTapood/Flint/core/generated/common";
-
 message Port {
     string name = 1;
     string protocol = 2;

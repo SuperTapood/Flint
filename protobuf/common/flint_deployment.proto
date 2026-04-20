@@ -1,6 +1,3 @@
-syntax = "proto3";
-option go_package = "github.com/SuperTapood/Flint/core/generated/common";
-
 message FlintDeployment {
     string name = 1;
     string age = 2;

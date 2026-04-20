@@ -244,7 +244,6 @@ class Pod(betterproto2.Message):
 
     restart_policy: "str" = betterproto2.field(4, betterproto2.TYPE_STRING)
 
-
 default_message_pool.register_message("", "Pod", Pod)
 
 
