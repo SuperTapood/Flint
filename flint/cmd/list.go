@@ -82,8 +82,8 @@ func listK8s(cmd *cobra.Command, args []string) {
 	}
 
 	types := general.ConnectionTypes{
-		Type: &general.ConnectionTypes_K8Sconnection{
-			K8Sconnection: &conn,
+		Type: &general.ConnectionTypes_K8SConnection{
+			K8SConnection: &conn,
 		},
 	}
 

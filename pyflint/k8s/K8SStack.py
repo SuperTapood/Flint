@@ -54,6 +54,7 @@ class K8SStack(BaseStack):
             stack=StackTypes(k8sstack=k_stack),
             connection=ConnectionTypes(k8sconnection=k_conn),
         )
+        print(stack.SerializeToString())
         self.send_data(stack.SerializeToString())
 
     def output(self, *args):

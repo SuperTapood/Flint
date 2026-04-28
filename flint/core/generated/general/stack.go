@@ -29,7 +29,7 @@ type StackType interface {
 
 // resolve a StackTypes object to a StackType
 func (stackType *StackTypes) GetActual() StackType {
-	if out := stackType.GetK8Sstack(); out != nil {
+	if out := stackType.GetK8SStack(); out != nil {
 		return out
 	}
 
@@ -62,7 +62,7 @@ type ConnectionType interface {
 }
 
 func (connType *ConnectionTypes) GetActual() ConnectionType {
-	if out := connType.GetK8Sconnection(); out != nil {
+	if out := connType.GetK8SConnection(); out != nil {
 		return out
 	}
 
@@ -212,7 +212,7 @@ func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, r
 
 				fail_error = res.Apply(stackMetadata, resources, connType.GetActual())
 				if fail_error != nil {
-					reason := fmt.Sprintf("%v creation failed: %v", connType.GetActual().PrettyName(synthed, stackMetadata), res.ExplainFailure(connType.GetK8Sconnection().GetClient(), stackMetadata))
+					reason := fmt.Sprintf("%v creation failed: %v", connType.GetActual().PrettyName(synthed, stackMetadata), res.ExplainFailure(connType.GetK8SConnection().GetClient(), stackMetadata))
 					deployPrint.PrettyPrint(stackName, int(done.Load()), total, "CREATION FAILED", reason)
 					mu.Lock()
 					completed[nodeID] = true

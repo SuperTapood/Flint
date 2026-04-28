@@ -11,10 +11,10 @@ message K8STypes {
         Service service = 2;
         Deployment deployment = 3;
         Secret secret = 4;
-        K8SLookup k8slookup = 5;
-        K8SOutput k8soutput = 6;
-        StatefulSet statefulset = 7;
-        DaemonSet daemonset = 8;
+        K8SLookup K8S_lookup = 5;
+        K8SOutput K8S_output = 6;
+        StatefulSet stateful_set = 7;
+        DaemonSet daemon_set = 8;
     }
 }
 
@@ -25,7 +25,7 @@ message K8SLookup {
 
 message K8SOutputTypes {
     oneof type {
-        K8SLookup k8slookup = 1;
+        K8SLookup K8S_lookup = 1;
         string string = 2;
     }
 }

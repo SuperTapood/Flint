@@ -3,13 +3,13 @@ import "k8s/k8s_connection.proto";
 
 message StackTypes {
     oneof type {
-        K8SStack k8sstack = 1;
+        K8SStack K8S_stack = 1;
     }
 }
 
 message ConnectionTypes {
     oneof type {
-        K8SConnection k8sconnection = 1;
+        K8SConnection K8S_connection = 1;
     }
 }
 

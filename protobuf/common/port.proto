@@ -2,7 +2,7 @@ message Port {
     string name = 1;
     string protocol = 2;
     oneof port {
-        string id = 3;
+        string ID = 3;
         int32 number = 4;
     }
 }
