@@ -154,8 +154,10 @@ func (httpClient *HttpClient) Get(url string, acceptedStatusCodes []int, autohan
 			return &cacheResponse.Response, nil
 		}
 	}
-	// fmt.Println(url)
 	response, err := httpClient.Request("GET", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
+	if err != nil {
+		return nil, err
+	}
 	cache.Entries[url] = HttpCacheEntry{
 		Response:     *response,
 		CreationDate: time.Now().UnixMilli(),

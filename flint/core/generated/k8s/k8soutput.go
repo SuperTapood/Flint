@@ -52,10 +52,10 @@ func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[strin
 	buffer := bytes.Buffer{}
 
 	for _, t := range types {
-		if s := t.GetString(); s != "" {
+		if s := t.GetString_(); s != "" {
 			fmt.Fprint(&buffer, s)
 		}
-		if l := t.GetK8SLookup(); l != nil {
+		if l := t.GetK8Slookup(); l != nil {
 			lookup := l
 			var lookupId = lookup.GetObject().ActualType().GetID()
 			target := resources[lookupId].Synth(stackMetadata)
@@ -103,10 +103,10 @@ func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[strin
 func (output *K8SOutput) AddToDag(_dag *dag.DAG) {
 	_dag.AddVertexByID(output.GetID(), output.GetID())
 	for _, lookup := range output.GetTypes() {
-		if l := lookup.GetK8SLookup(); l == nil {
+		if l := lookup.GetK8Slookup(); l == nil {
 			continue
 		}
-		_dag.AddEdge(output.GetID(), lookup.GetK8SLookup().GetID())
+		_dag.AddEdge(output.GetID(), lookup.GetK8Slookup().GetID())
 	}
 }
 
