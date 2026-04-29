@@ -17,13 +17,13 @@ func (types *K8STypes) ActualType() base.ResourceType {
 		return out
 	} else if out := types.GetSecret(); out != nil {
 		return out
-	} else if out := types.GetK8Soutput(); out != nil {
+	} else if out := types.GetK8SOutput(); out != nil {
 		return out
-	} else if out := types.GetK8Slookup(); out != nil {
+	} else if out := types.GetK8SLookup(); out != nil {
 		return out
-	} else if out := types.GetStatefulset(); out != nil {
+	} else if out := types.GetStatefulSet(); out != nil {
 		return out
-	} else if out := types.GetDaemonset(); out != nil {
+	} else if out := types.GetDaemonSet(); out != nil {
 		return out
 	}
 	fmt.Println("got bad k8s resource type")

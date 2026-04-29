@@ -115,13 +115,13 @@ var File_common_port_proto protoreflect.FileDescriptor
 
 const file_common_port_proto_rawDesc = "" +
     "\n" + 
-    "\x13./common/port.proto\"j\n" + 
+    "\x11common/port.proto\"j\n" + 
     "\x04Port\x12\x12\n" + 
     "\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" + 
     "\bprotocol\x18\x02 \x01(\tR\bprotocol\x12\x10\n" + 
     "\x02ID\x18\x03 \x01(\tH\x00R\x02ID\x12\x18\n" + 
     "\x06number\x18\x04 \x01(\x05H\x00R\x06numberB\x06\n" + 
-    "\x04portBEB\tPortProtoP\x01Z6github.com/SuperTapood/Flint/core/generated/k8s/commonb\x06proto3"
+    "\x04portBAB\tPortProtoP\x01Z2github.com/SuperTapood/Flint/core/generated/commonb\x06proto3"
 
 var (
     file_common_port_proto_rawDescOnce sync.Once
@@ -169,7 +169,6 @@ func file_common_port_proto_init() {
 		GoTypes:           file_common_port_proto_goTypes,
 		DependencyIndexes: file_common_port_proto_depIdxs,
 		MessageInfos:      file_common_port_proto_msgTypes,
-        EnumInfos:         nil,
 	}.Build()
 	File_common_port_proto = out.File
 	file_common_port_proto_goTypes = nil

@@ -14,6 +14,7 @@ from ..generated import (
 from ..common import BaseStack
 import sys
 from .K8SOutput import K8SOutput, K8STemplateOutput, K8SLookup
+import re
 
 
 class K8SStack(BaseStack):
@@ -51,8 +52,8 @@ class K8SStack(BaseStack):
         k_conn = K8SConnection(api=self.api, token=self.token)
         stack = Stack(
             name=self.name,
-            stack=StackTypes(k8sstack=k_stack),
-            connection=ConnectionTypes(k8sconnection=k_conn),
+            stack=StackTypes(K8S_stack=k_stack),
+            connection=ConnectionTypes(K8S_connection=k_conn),
         )
         self.send_data(stack.SerializeToString())
 

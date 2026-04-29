@@ -105,6 +105,7 @@ func StackConnFromApp() (*general.StackTypes, *general.ConnectionTypes, string) 
 	err := proto.Unmarshal(data, &stack)
 	if err != nil {
 		fmt.Println("failed to unmarshal stack from app")
+		panic(err)
 		fmt.Println(err)
 		os.Exit(-1)
 	}

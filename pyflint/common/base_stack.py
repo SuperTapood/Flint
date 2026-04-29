@@ -2,6 +2,7 @@ from betterproto2 import Message
 import traceback
 import socket
 import sys
+import re
 
 
 class BaseStack:
@@ -57,7 +58,14 @@ class BaseStack:
             obj = self.__getattribute__(name)
             if not isinstance(obj, Message):
                 continue
-            class_name = obj.__class__.__name__.lower()
+            def pascal_to_snake(text):
+                # Handle transitions from lowercase/digit to uppercase
+                # e.g., "My3Code" -> "my3_code"
+                s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', text)
+                # Handle transitions from uppercase to uppercase/lowercase (acronyms)
+                # e.g., "HTTPRequest" -> "http_request"
+                return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+            class_name = pascal_to_snake(obj.__class__.__name__)
             objects.append(self._stack_type(**{class_name: obj}))
         return objects
 
