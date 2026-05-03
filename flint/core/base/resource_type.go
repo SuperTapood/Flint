@@ -22,7 +22,7 @@ type ResourceType interface {
 	*/
 	AddToDag(_dag *dag.DAG)
 	Synth(stackMetadata map[string]any) map[string]any
-	Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) error
+	Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) *util.HttpError
 	ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string
-	Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error)
+	Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError)
 }

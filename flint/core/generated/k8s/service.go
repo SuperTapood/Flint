@@ -100,7 +100,7 @@ func (service *Service) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (service *Service) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (service *Service) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = service.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/services/"
@@ -108,13 +108,13 @@ func (service *Service) Apply(stackMetadata map[string]any, resources map[string
 	return client.Apply(applyMetadata, service.Synth(stackMetadata), service, stackMetadata)
 }
 
-func (service *Service) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (service *Service) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/services/"+service.GetName(), acceptedStatusCodes, autohandleErrors, 100)
 }
 
 func (service *Service) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
-	// response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/services/"+service.GetName(), []int{200}, true)
-	// return fmt.Sprintf("%v", response.Body)
+	// response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/services/"+service.GetName(), []int{200}, true, 1000)
+	// fmt.Printf("body %v\n", response.Body)
 	panic("Service failed to succeed")
 	return "Service failed to succeed"
 }

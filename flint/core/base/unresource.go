@@ -42,7 +42,7 @@ func (unresource *Unresource) AddToDag(dag *dag.DAG) {
 	os.Exit(2)
 }
 
-func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) error {
+func (unresource *Unresource) Apply(stackMetadata map[string]any, resources map[string]ResourceType, client CloudClient) *util.HttpError {
 	splitName := strings.Split(unresource.Name, "::")
 	namespace := splitName[1]
 	kind := splitName[2]
@@ -63,7 +63,7 @@ func (unresource *Unresource) Lookup() map[string]any {
 	return nil
 }
 
-func (unresource *Unresource) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (unresource *Unresource) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	fmt.Println("Unresource cannot be Get-ed")
 	os.Exit(2)
 	return nil, nil

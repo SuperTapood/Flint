@@ -34,6 +34,7 @@ var deployCmd = &cobra.Command{
 			}
 			err = Deploy(&oldStack, conn, stackName)
 			if err != nil {
+				fmt.Println(err)
 				fmt.Println("ROLLBACK FAILED.")
 				os.Exit(1)
 			}

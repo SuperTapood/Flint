@@ -27,11 +27,11 @@ func (lookup *K8SLookup) Synth(stackMetadata map[string]any) map[string]any {
 }
 
 func (lookup *K8SLookup) AddToDag(dag *dag.DAG) {}
-func (lookup *K8SLookup) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (lookup *K8SLookup) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	return nil
 }
 
-func (lookup *K8SLookup) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (lookup *K8SLookup) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	fmt.Println("lookup cannot be Get-ed")
 	os.Exit(2)
 	return nil, nil
@@ -47,7 +47,7 @@ func (output *K8SOutput) Synth(stackMetadata map[string]any) map[string]any {
 	return nil
 }
 
-func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (output *K8SOutput) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	types := output.GetTypes()
 	buffer := bytes.Buffer{}
 
@@ -110,7 +110,7 @@ func (output *K8SOutput) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (output *K8SOutput) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (output *K8SOutput) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	fmt.Println("output cannot be Get-ed")
 	os.Exit(2)
 	return nil, nil

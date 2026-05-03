@@ -38,20 +38,24 @@ func (connection *K8SConnection) GetClient() *util.HttpClient {
 	return client
 }
 
-func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) error {
+func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) *util.HttpError {
 	name := applyMetadata["name"].(string)
 	location := applyMetadata["location"].(string)
 
-	data, err := json.Marshal(resource)
-	if err != nil {
+	data, er := json.Marshal(resource)
+	if er != nil {
 		fmt.Println("couldn't unmarshal the resource to deploy")
-		fmt.Println(err)
+		fmt.Println(er)
 		os.Exit(2)
 	}
 
 	client := connection.GetClient()
 
 	response, err := client.Post(location, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusConflict}, false)
+
+	if response == nil {
+		return err
+	}
 
 	if response.StatusCode == http.StatusConflict {
 		response, err = client.Put(location+name, bytes.NewReader(data), []int{http.StatusOK, http.StatusCreated, http.StatusUnprocessableEntity}, false)
@@ -65,6 +69,7 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 	}
 
 	if err != nil {
+		fmt.Println(err.Code)
 		return err
 	}
 
@@ -97,7 +102,7 @@ func (connection *K8SConnection) Apply(applyMetadata map[string]any, resource ma
 		}
 
 		if time.Since(start) > 5*time.Second {
-			return &KubeError{}
+			return err
 		}
 	}
 	return err

@@ -58,7 +58,7 @@ func (daemonSet *DaemonSet) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (daemonSet *DaemonSet) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (daemonSet *DaemonSet) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = daemonSet.GetName()
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/daemonsets/"
@@ -66,7 +66,7 @@ func (daemonSet *DaemonSet) Apply(stackMetadata map[string]any, resources map[st
 	return client.Apply(applyMetadata, daemonSet.Synth(stackMetadata), daemonSet, stackMetadata)
 }
 
-func (daemonSet *DaemonSet) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (daemonSet *DaemonSet) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	return client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/daemonsets/"+daemonSet.GetName(), acceptedStatusCodes, autohandleErrors, 0)
 }
 

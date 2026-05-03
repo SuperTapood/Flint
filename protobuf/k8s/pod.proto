@@ -1,7 +1,7 @@
 message Container {
     string name = 1;
     string image = 2;
-    repeated int32 ports = 3;
+    optional repeated int32 ports = 3;
 }
 
 message VolumeMount {
@@ -10,8 +10,8 @@ message VolumeMount {
 }
 
 message Pod {
-    string name = 1;
+    optional string name = 1;
     repeated Container containers = 2;
-    repeated VolumeMount mounts = 3;
+    optional repeated VolumeMount mounts = 3;
     string restart_policy default "Always" = 4;
 }

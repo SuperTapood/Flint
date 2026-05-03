@@ -47,7 +47,7 @@ type ConnectionType interface {
 	PrettyName(resource map[string]any, stackMetadata map[string]any) string
 	// Diff(resources map[string]base.ResourceType, stackMetadata map[string]any, stackName string) ([]string, []string, []map[string]map[string]any)
 	CleanHistory(stackName string, oldest int, stackMetadata map[string]any)
-	Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) error
+	Apply(applyMetadata map[string]any, resource map[string]any, obj base.ResourceType, stackMetadata map[string]any) *util.HttpError
 	// MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
 	GetClient() *util.HttpClient
 	CreateRevision(marshalledStack []byte, stackName string, stackMetadata map[string]any, newDag *dag.DAG, marshalled []byte)
@@ -136,7 +136,8 @@ func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, r
 
 	completed := make(map[string]bool)
 	var mu sync.Mutex
-	var fail_error error
+	var fail_error *util.HttpError
+	var failed bool
 
 	for len(completed) < len(vertices) {
 		// Find nodes ready to process (all dependencies completed)
@@ -179,13 +180,12 @@ func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, r
 
 		// Process ready nodes in parallel
 		var wg sync.WaitGroup
-		errChan := make(chan error, len(ready))
 
 		for _, id := range ready {
 			wg.Add(1)
 			go func(nodeID string, idx int) {
 				defer wg.Done()
-				if fail_error != nil {
+				if failed {
 					mu.Lock()
 					completed[nodeID] = true
 					mu.Unlock()
@@ -195,8 +195,8 @@ func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, r
 
 				vertex, err := _dag.GetVertex(nodeID)
 				if err != nil {
-					errChan <- err
-					return
+					fmt.Println(err)
+					os.Exit(2)
 				}
 
 				res := resources[vertex.(string)]
@@ -210,10 +210,23 @@ func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, r
 					deployPrint.PrettyPrint(stackName, int(done.Load()), total, action, connType.GetActual().PrettyName(synthed, stackMetadata))
 				}
 
-				fail_error = res.Apply(stackMetadata, resources, connType.GetActual())
+				fail_error := res.Apply(stackMetadata, resources, connType.GetActual())
 				if fail_error != nil {
-					reason := fmt.Sprintf("%v creation failed: %v", connType.GetActual().PrettyName(synthed, stackMetadata), res.ExplainFailure(connType.GetK8SConnection().GetClient(), stackMetadata))
-					deployPrint.PrettyPrint(stackName, int(done.Load()), total, "CREATION FAILED", reason)
+					if fail_error.Code == 422 {
+						var msg map[string]any
+						err := json.Unmarshal([]byte(fail_error.Message), &msg)
+						if err != nil {
+							fmt.Println(err)
+							os.Exit(-1)
+						}
+						reason := fmt.Sprintf("%v creation failed: %v", connType.GetActual().PrettyName(synthed, stackMetadata), msg["message"])
+						deployPrint.PrettyPrint(stackName, int(done.Load()), total, "CREATION FAILED", reason)
+						failed = true
+					} else {
+						reason := fmt.Sprintf("%v creation failed: %v", connType.GetActual().PrettyName(synthed, stackMetadata), res.ExplainFailure(connType.GetK8SConnection().GetClient(), stackMetadata))
+						deployPrint.PrettyPrint(stackName, int(done.Load()), total, "CREATION FAILED", reason)
+						failed = true
+					}
 					mu.Lock()
 					completed[nodeID] = true
 					mu.Unlock()
@@ -239,19 +252,14 @@ func (connType *ConnectionTypes) Deploy(marshalledStack []byte, _dag *dag.DAG, r
 		}
 
 		wg.Wait()
-		close(errChan)
-
-		// Check for errors
-		for err := range errChan {
-			if err != nil {
-				fmt.Println("deploy failed with error:")
-				fmt.Println(err)
-				os.Exit(-1)
-			}
-		}
 	}
 
-	if fail_error != nil {
+	if failed {
+		_, _, _, _, rev := connType.GetActual().GetLatestRevision(stackName)
+		if rev == 0 {
+			fmt.Println("FIRST DEPLOYMENT. NOTHING TO ROLLBACK TO.")
+			os.Exit(0)
+		}
 		return fail_error
 	}
 

@@ -1,10 +1,6 @@
 package k8s
 
 import (
-	"fmt"
-	"os"
-	"strings"
-
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
@@ -14,20 +10,10 @@ func (deployment *Deployment) GetID() string {
 	if deployment.GetName() == "" {
 		deployment.Name = deployment.GetPod().GetID()
 	}
-	return deployment.GetName()
-}
-
-type STRING string
-
-func (str STRING) enforce() string {
-	return string(str)
+	return base.RFC1123(deployment.GetName())
 }
 
 func (deployment *Deployment) Synth(stackMetadata map[string]any) map[string]any {
-	if strings.Contains(deployment.GetID(), "::") {
-		fmt.Println("invalid name " + STRING(deployment.Name).enforce())
-		os.Exit(1)
-	}
 	namespace := stackMetadata["namespace"].(string)
 	podMap := deployment.GetPod().Synth(stackMetadata)
 	objMap := map[string]any{
@@ -63,7 +49,7 @@ func (deployment *Deployment) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = deployment.GetName()
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/deployments/"
@@ -71,7 +57,7 @@ func (deployment *Deployment) Apply(stackMetadata map[string]any, resources map[
 	return client.Apply(applyMetadata, deployment.Synth(stackMetadata), deployment, stackMetadata)
 }
 
-func (deployment *Deployment) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (deployment *Deployment) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	return client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/deployments/"+deployment.GetName(), acceptedStatusCodes, autohandleErrors, 0)
 }
 

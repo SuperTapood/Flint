@@ -78,7 +78,7 @@ func (pod *Pod) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = pod.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/pods/"
@@ -86,7 +86,7 @@ func (pod *Pod) Apply(stackMetadata map[string]any, resources map[string]base.Re
 	return client.Apply(applyMetadata, pod.Synth(stackMetadata), pod, stackMetadata)
 }
 
-func (pod *Pod) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (pod *Pod) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/pods/"+pod.GetName(), acceptedStatusCodes, autohandleErrors, 0)
 }
 

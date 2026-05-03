@@ -7,6 +7,6 @@ import (
 type CloudClient interface {
 	// MakeRequest(method string, location string, reader io.Reader) ([]byte, *http.Response)
 	GetClient() *util.HttpClient
-	Apply(applyMetadata map[string]any, resource map[string]any, obj ResourceType, stackMetadata map[string]any) error
+	Apply(applyMetadata map[string]any, resource map[string]any, obj ResourceType, stackMetadata map[string]any) *util.HttpError
 	Delete(DeleteMetadata map[string]any)
 }

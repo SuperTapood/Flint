@@ -56,12 +56,15 @@ var cache HttpCache = HttpCache{
 	Entries: make(map[string]HttpCacheEntry),
 }
 
-func (httpClient *HttpClient) Request(method string, url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
+func (httpClient *HttpClient) Request(method string, url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, *HttpError) {
 	req, err := http.NewRequest(method, httpClient.BaseUrl+url, reader)
 
 	if err != nil {
 		if !autohandleErrors {
-			return nil, err
+			return nil, &HttpError{
+				Code:    999,
+				Message: fmt.Sprint(err),
+			}
 		}
 		fmt.Println("failed to create an http request")
 		fmt.Println(err)
@@ -78,7 +81,10 @@ func (httpClient *HttpClient) Request(method string, url string, reader io.Reade
 	resp, err := client.Do(req)
 	if err != nil {
 		if !autohandleErrors {
-			return nil, err
+			return nil, &HttpError{
+				Code:    999,
+				Message: fmt.Sprint(err),
+			}
 		}
 		log.Println("Error on response.\n[ERROR] -", err)
 	}
@@ -87,7 +93,10 @@ func (httpClient *HttpClient) Request(method string, url string, reader io.Reade
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		if !autohandleErrors {
-			return nil, err
+			return nil, &HttpError{
+				Code:    999,
+				Message: fmt.Sprint(err),
+			}
 		}
 		log.Println("Error while reading the response bytes:", err)
 	}
@@ -131,19 +140,19 @@ func (httpClient *HttpClient) Request(method string, url string, reader io.Reade
 	}, nil
 }
 
-func (httpClient *HttpClient) Post(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
+func (httpClient *HttpClient) Post(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, *HttpError) {
 	return httpClient.Request("POST", url, reader, acceptedStatusCodes, autohandleErrors)
 }
 
-func (httpClient *HttpClient) Put(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
+func (httpClient *HttpClient) Put(url string, reader io.Reader, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, *HttpError) {
 	return httpClient.Request("PUT", url, reader, acceptedStatusCodes, autohandleErrors)
 }
 
-func (httpClient *HttpClient) Delete(url string, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, error) {
+func (httpClient *HttpClient) Delete(url string, acceptedStatusCodes []int, autohandleErrors bool) (*HttpResponse, *HttpError) {
 	return httpClient.Request("DELETE", url, bytes.NewReader(make([]byte, 0)), acceptedStatusCodes, autohandleErrors)
 }
 
-func (httpClient *HttpClient) Get(url string, acceptedStatusCodes []int, autohandleErrors bool, ttl int64) (*HttpResponse, error) {
+func (httpClient *HttpClient) Get(url string, acceptedStatusCodes []int, autohandleErrors bool, ttl int64) (*HttpResponse, *HttpError) {
 	cacheResponse, cacheHit := cache.Entries[url]
 	if cacheHit {
 		//fmt.Println(time.Now().UnixMilli() - cacheResponse.CreationDate)

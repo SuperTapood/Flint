@@ -49,7 +49,7 @@ func (secret *Secret) AddToDag(_dag *dag.DAG) {
 	}
 }
 
-func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = secret.GetName()
 	applyMetadata["location"] = "/api/v1/namespaces/" + stackMetadata["namespace"].(string) + "/secrets/"
@@ -57,12 +57,12 @@ func (secret *Secret) Apply(stackMetadata map[string]any, resources map[string]b
 	return client.Apply(applyMetadata, secret.Synth(stackMetadata), secret, stackMetadata)
 }
 
-func (secret *Secret) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (secret *Secret) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	return client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/secrets/"+secret.GetName(), acceptedStatusCodes, autohandleErrors, 0)
 }
 
 func (secret *Secret) ExplainFailure(client *util.HttpClient, stackMetadata map[string]any) string {
-	// response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/secrets/"+secret.GetName(), []int{200}, true)
+	// response, _ := client.Get("/api/v1/namespaces/"+stackMetadata["namespace"].(string)+"/secrets/"+secret.GetName(), []int{200}, true, 1000)
 	// return fmt.Sprintf("%v", response.Body)
 	panic("Secret failed to succeed")
 	return "Secret failed to succeed"

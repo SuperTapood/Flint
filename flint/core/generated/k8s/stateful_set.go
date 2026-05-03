@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"fmt"
+
 	"github.com/SuperTapood/Flint/core/base"
 	"github.com/SuperTapood/Flint/core/util"
 	"github.com/heimdalr/dag"
@@ -77,7 +79,7 @@ func (statefulSet *StatefulSet) Synth(stackMetadata map[string]any) map[string]a
 	return objMap
 }
 
-func (statefulSet *StatefulSet) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) error {
+func (statefulSet *StatefulSet) Apply(stackMetadata map[string]any, resources map[string]base.ResourceType, client base.CloudClient) *util.HttpError {
 	applyMetadata := make(map[string]any)
 	applyMetadata["name"] = statefulSet.GetName()
 	applyMetadata["location"] = "/apis/apps/v1/namespaces/" + stackMetadata["namespace"].(string) + "/statefulsets/"
@@ -85,7 +87,7 @@ func (statefulSet *StatefulSet) Apply(stackMetadata map[string]any, resources ma
 	return client.Apply(applyMetadata, statefulSet.Synth(stackMetadata), statefulSet, stackMetadata)
 }
 
-func (statefulSet *StatefulSet) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, error) {
+func (statefulSet *StatefulSet) Get(client *util.HttpClient, stackMetadata map[string]any, acceptedStatusCodes []int, autohandleErrors bool) (*util.HttpResponse, *util.HttpError) {
 	return client.Get("/apis/apps/v1/namespaces/"+stackMetadata["namespace"].(string)+"/statefulsets/"+statefulSet.GetName(), acceptedStatusCodes, autohandleErrors, 0)
 }
 
@@ -99,6 +101,7 @@ func (statefulSet *StatefulSet) ExplainFailure(client *util.HttpClient, stackMet
 			if ref.(map[string]any)["uid"] == uid {
 				containerStatuses := item.(map[string]any)["status"].(map[string]any)["containerStatuses"].([]any)
 				for _, containerStatus := range containerStatuses {
+					fmt.Println(containerStatus)
 					return containerStatus.(map[string]any)["state"].(map[string]any)["waiting"].(map[string]any)["message"].(string)
 				}
 			}

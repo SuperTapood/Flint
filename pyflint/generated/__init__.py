@@ -55,8 +55,8 @@ default_message_pool.register_message("", "FlintDeployment", FlintDeployment)
 class Port(betterproto2.Message):
     name: str = betterproto2.field(1, betterproto2.TYPE_STRING, repeated=False, optional=False)
     protocol: str = betterproto2.field(2, betterproto2.TYPE_STRING, repeated=False, optional=False)
-    ID: "str | None"= betterproto2.field(3, betterproto2.TYPE_MESSAGE, optional=True, group="port")
-    number: "int | None"= betterproto2.field(4, betterproto2.TYPE_MESSAGE, optional=True, group="port")
+    ID: "str | None"= betterproto2.field(3, betterproto2.TYPE_STRING, optional=True, group="port")
+    number: "int | None"= betterproto2.field(4, betterproto2.TYPE_INT32, optional=True, group="port")
     
     def __init__(
         self,
@@ -325,7 +325,7 @@ default_message_pool.register_message("", "K8SLookup", K8SLookup)
 )
 class K8SOutputTypes(betterproto2.Message):
     K8S_lookup: "K8SLookup | None"= betterproto2.field(1, betterproto2.TYPE_MESSAGE, optional=True, group="type")
-    string: "str | None"= betterproto2.field(2, betterproto2.TYPE_MESSAGE, optional=True, group="type")
+    string: "str | None"= betterproto2.field(2, betterproto2.TYPE_STRING, optional=True, group="type")
     
     def __init__(
         self,
@@ -410,14 +410,14 @@ default_message_pool.register_message("", "K8SStack", K8SStack)
 class Container(betterproto2.Message):
     name: str = betterproto2.field(1, betterproto2.TYPE_STRING, repeated=False, optional=False)
     image: str = betterproto2.field(2, betterproto2.TYPE_STRING, repeated=False, optional=False)
-    ports: List[int] = betterproto2.field(3, betterproto2.TYPE_INT32, repeated=True, optional=False)
+    ports: Optional[List[int]] = betterproto2.field(3, betterproto2.TYPE_INT32, repeated=True, optional=True)
 
     def __init__(
         self,
         *,
         name: str, 
         image: str, 
-        ports: List[int], 
+        ports: Optional[List[int]] = None, 
     ):
         """
         :param name: - 
@@ -466,22 +466,22 @@ default_message_pool.register_message("", "VolumeMount", VolumeMount)
     repr=False,
 )
 class Pod(betterproto2.Message):
-    name: str = betterproto2.field(1, betterproto2.TYPE_STRING, repeated=False, optional=False)
+    name: Optional[str] = betterproto2.field(1, betterproto2.TYPE_STRING, repeated=False, optional=True)
     containers: List["Container"] = betterproto2.field(2, betterproto2.TYPE_MESSAGE, repeated=True, optional=False)
-    mounts: List["VolumeMount"] = betterproto2.field(3, betterproto2.TYPE_MESSAGE, repeated=True, optional=False)
+    mounts: Optional[List["VolumeMount"]] = betterproto2.field(3, betterproto2.TYPE_MESSAGE, repeated=True, optional=True)
     restart_policy: Optional[str] = betterproto2.field(4, betterproto2.TYPE_STRING, repeated=False, optional=True)
 
     def __init__(
         self,
         *,
-        name: str, 
         containers: List["Container"], 
-        mounts: List["VolumeMount"], 
+        name: Optional[str] = None, 
+        mounts: Optional[List["VolumeMount"]] = None, 
         restart_policy: Optional[str] = "Always", 
     ):
         """
-        :param name: - 
         :param containers: - 
+        :param name: - 
         :param mounts: - 
         :param restart_policy: - 
         """
@@ -509,7 +509,7 @@ class AccessMode(betterproto2.Enum):
 )
 class VolumeClaimTemplate(betterproto2.Message):
     name: str = betterproto2.field(1, betterproto2.TYPE_STRING, repeated=False, optional=False)
-    access_modes: List["AccessMode"] = betterproto2.field(2, betterproto2.TYPE_ENUM, repeated=True, optional=False)
+    access_modes: List["AccessMode"] = betterproto2.field(2, betterproto2.TYPE_MESSAGE, repeated=True, optional=False)
     storage_class_name: str = betterproto2.field(3, betterproto2.TYPE_STRING, repeated=False, optional=False)
     storage: str = betterproto2.field(4, betterproto2.TYPE_STRING, repeated=False, optional=False)
 
